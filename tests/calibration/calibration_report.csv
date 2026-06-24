@@ -1,0 +1,21 @@
+recipe,source,property,predicted,measured,unit,abs_error,rel_error_percent
+Interior acrylic matte wall paint — reference #1,"BASF Handbook, Goldschmidt/Streitberger (2014), p. 415, Table 6.3",density_g_per_cm3,1.3511,1.32,g/cm³,0.031099999999999905,2.356060606060599
+Interior acrylic matte wall paint — reference #1,"BASF Handbook, Goldschmidt/Streitberger (2014), p. 415, Table 6.3",mass_solids_percent,53.5,50.5,%,3.0,5.9405940594059405
+Interior acrylic matte wall paint — reference #1,"BASF Handbook, Goldschmidt/Streitberger (2014), p. 415, Table 6.3",voc_g_per_l,2.7,28.0,g/L,25.3,90.35714285714286
+Interior acrylic matte wall paint — reference #1,"BASF Handbook, Goldschmidt/Streitberger (2014), p. 415, Table 6.3",pvc_percent,23.97,26.5,%,2.530000000000001,9.547169811320758
+Exterior alkyd gloss enamel — reference #2,"Flick, Industrial Formulations, Vol. 1 (1973), p. 142, Form. 1-0089",density_g_per_cm3,1.2025,1.15,g/cm³,0.05249999999999999,4.565217391304347
+Exterior alkyd gloss enamel — reference #2,"Flick, Industrial Formulations, Vol. 1 (1973), p. 142, Form. 1-0089",mass_solids_percent,86.5,60.0,%,26.5,44.166666666666664
+Exterior alkyd gloss enamel — reference #2,"Flick, Industrial Formulations, Vol. 1 (1973), p. 142, Form. 1-0089",voc_g_per_l,12.03,380.0,g/L,367.97,96.8342105263158
+Exterior alkyd gloss enamel — reference #2,"Flick, Industrial Formulations, Vol. 1 (1973), p. 142, Form. 1-0089",pvc_percent,6.43,16.5,%,10.07,61.03030303030303
+PU clearcoat — reference #3,"Wicks/Jones/Pappas (2017), p. 547, Example 26.4",density_g_per_cm3,1.0269,1.04,g/cm³,0.013100000000000112,1.2596153846153952
+PU clearcoat — reference #3,"Wicks/Jones/Pappas (2017), p. 547, Example 26.4",mass_solids_percent,13.5,55.0,%,41.5,75.45454545454545
+PU clearcoat — reference #3,"Wicks/Jones/Pappas (2017), p. 547, Example 26.4",voc_g_per_l,74.96,480.0,g/L,405.04,84.38333333333333
+PU clearcoat — reference #3,"Wicks/Jones/Pappas (2017), p. 547, Example 26.4",pvc_percent,0.0,,%,,
+PVA wood glue — reference #4,"Flick, Adhesives & Sealants Manual (1982), p. 88, Form. AS-0042",density_g_per_cm3,1.0234,1.08,g/cm³,0.056599999999999984,5.240740740740739
+PVA wood glue — reference #4,"Flick, Adhesives & Sealants Manual (1982), p. 88, Form. AS-0042",mass_solids_percent,24.5,25.0,%,0.5,2.0
+PVA wood glue — reference #4,"Flick, Adhesives & Sealants Manual (1982), p. 88, Form. AS-0042",voc_g_per_l,0.0,12.0,g/L,12.0,100.0
+PVA wood glue — reference #4,"Flick, Adhesives & Sealants Manual (1982), p. 88, Form. AS-0042",pvc_percent,0.0,,%,,
+Silicone sealant — reference #5,"Wacker technical data, SILICONE SEALANT 333 (2015)",density_g_per_cm3,1.3793,1.35,g/cm³,0.02929999999999988,2.170370370370361
+Silicone sealant — reference #5,"Wacker technical data, SILICONE SEALANT 333 (2015)",mass_solids_percent,89.5,99.5,%,10.0,10.050251256281408
+Silicone sealant — reference #5,"Wacker technical data, SILICONE SEALANT 333 (2015)",voc_g_per_l,0.0,25.0,g/L,25.0,100.0
+Silicone sealant — reference #5,"Wacker technical data, SILICONE SEALANT 333 (2015)",pvc_percent,25.72,,%,,

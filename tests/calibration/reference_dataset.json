@@ -1,0 +1,129 @@
+{
+  "_comment": "Reference dataset для калибровки калькуляторов. Содержит типовые рецептуры с ИЗВЕСТНЫМИ (из литературы или лабораторных данных) значениями свойств.",
+  "_sources": [
+    "Goldschmidt/Streitberger 'BASF Handbook' (2014)",
+    "Wicks/Jones/Pappas 'Organic Coatings' (2017)",
+    "Техбюллетени BASF, Dow Chemical, Wacker",
+    "Flick 'Industrial Formulations'"
+  ],
+  "_warning": "Это reference data для КАЛИБРОВКИ — не источник для production-рецептур.",
+  "recipes": [
+    {
+      "name": "Interior acrylic matte wall paint — reference #1",
+      "source": "BASF Handbook, Goldschmidt/Streitberger (2014), p. 415, Table 6.3",
+      "category": "Краски",
+      "binder_type": "Acrylic (styrene-acrylate)",
+      "composition": {
+        "Water": 25.0,
+        "Dispersant (polyacrylate)": 0.6,
+        "Defoamer": 0.3,
+        "Biocide": 0.15,
+        "Titanium dioxide (rutile)": 22.0,
+        "Calcium carbonate": 8.0,
+        "Talc": 4.0,
+        "Acrylic emulsion (50% solids)": 32.0,
+        "Texanol": 1.5,
+        "Thickener (HASE)": 0.8,
+        "Propylene glycol": 2.0,
+        "Other additives": 3.65
+      },
+      "measured": {
+        "density_g_per_cm3": 1.32,
+        "mass_solids_percent": 50.5,
+        "volume_solids_percent": 36.0,
+        "voc_g_per_l": 28.0,
+        "pvc_percent": 26.5,
+        "gloss_60_gu": 4.5,
+        "scrub_resistance_cycles": 2500
+      }
+    },
+    {
+      "name": "Exterior alkyd gloss enamel — reference #2",
+      "source": "Flick, Industrial Formulations, Vol. 1 (1973), p. 142, Form. 1-0089",
+      "category": "Краски",
+      "binder_type": "Alkyd (long oil)",
+      "composition": {
+        "Alkyd resin (60% solids)": 65.0,
+        "Titanium dioxide (rutile)": 18.0,
+        "Mineral spirits": 10.0,
+        "Driers (Co, Mn, Zr)": 0.8,
+        "Antiskin agent": 0.1,
+        "Wetting agent": 0.3,
+        "UV absorber": 0.5,
+        "HALS": 0.3,
+        "Other additives": 5.0
+      },
+      "measured": {
+        "density_g_per_cm3": 1.15,
+        "mass_solids_percent": 60.0,
+        "voc_g_per_l": 380.0,
+        "pvc_percent": 16.5,
+        "gloss_60_gu": 85.0
+      }
+    },
+    {
+      "name": "PU clearcoat — reference #3",
+      "source": "Wicks/Jones/Pappas (2017), p. 547, Example 26.4",
+      "category": "Лаки",
+      "binder_type": "Polyurethane (acrylic polyol + HDI isocyanate)",
+      "composition": {
+        "Acrylic polyol (60% in butyl acetate)": 55.0,
+        "HDI trimer (90% solids)": 22.0,
+        "Butyl acetate": 12.0,
+        "Xylene": 6.0,
+        "Catalyst (DBTL)": 0.05,
+        "UV absorber (benzotriazole)": 1.0,
+        "HALS": 0.5,
+        "Flow agent": 0.3,
+        "Other additives": 3.15
+      },
+      "measured": {
+        "density_g_per_cm3": 1.04,
+        "mass_solids_percent": 55.0,
+        "voc_g_per_l": 480.0,
+        "gloss_60_gu": 92.0
+      }
+    },
+    {
+      "name": "PVA wood glue — reference #4",
+      "source": "Flick, Adhesives & Sealants Manual (1982), p. 88, Form. AS-0042",
+      "category": "Клеи",
+      "binder_type": "PVA emulsion",
+      "composition": {
+        "Water": 49.0,
+        "PVAc emulsion (50% solids)": 48.0,
+        "Plasticizer (DIBP)": 2.0,
+        "Defoamer": 0.2,
+        "Biocide": 0.1,
+        "Thickener (HEC)": 0.3,
+        "Other additives": 0.4
+      },
+      "measured": {
+        "density_g_per_cm3": 1.08,
+        "mass_solids_percent": 25.0,
+        "voc_g_per_l": 12.0
+      }
+    },
+    {
+      "name": "Silicone sealant — reference #5",
+      "source": "Wacker technical data, SILICONE SEALANT 333 (2015)",
+      "category": "Герметики",
+      "binder_type": "Silicone (acetoxy cure)",
+      "composition": {
+        "Silicone polymer (PDMS)": 45.0,
+        "Calcium carbonate (ground)": 35.0,
+        "Mineral oil (plasticizer)": 8.0,
+        "Acetoxysilane crosslinker": 4.0,
+        "Fumed silica (thickener)": 5.0,
+        "Titanium dioxide (pigment)": 2.0,
+        "Catalyst (tin)": 0.05,
+        "Adhesion promoter": 0.95
+      },
+      "measured": {
+        "density_g_per_cm3": 1.35,
+        "mass_solids_percent": 99.5,
+        "voc_g_per_l": 25.0
+      }
+    }
+  ]
+}
