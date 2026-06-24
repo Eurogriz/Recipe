@@ -37,7 +37,7 @@ src/
 
 | Слой | Технология |
 |---|---|
-| Язык | Python 3.11+ |
+| Язык | Python 3.10+ |
 | GUI | PySide6 / Qt 6.6 |
 | DB | SQLite 3.45 + SQLCipher 4 (AES-256) |
 | ORM | SQLAlchemy 2.0 (async) + Alembic |
@@ -52,7 +52,7 @@ src/
 ## 📋 Требования
 
 - **OS:** Windows 10/11 (build 19041+)
-- **Python:** 3.11 или 3.12
+- **Python:** 3.10
 - **RAM:** 8 ГБ минимум, 16 ГБ рекомендуется
 - **Disk:** 500 МБ для установки + место для БД
 
