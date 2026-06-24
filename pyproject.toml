@@ -3,7 +3,7 @@ name = "formulation-workbench"
 version = "1.0.0"
 description = "Enterprise desktop application for verified formulations of paints, coatings, adhesives, sealants and construction chemicals"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = {text = "Proprietary"}
 authors = [
     {name = "Formulation Workbench Team", email = "team@formulation-workbench.local"},
@@ -16,6 +16,7 @@ classifiers = [
     "License :: Other/Proprietary License",
     "Operating System :: Microsoft :: Windows :: Windows 10",
     "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
@@ -27,7 +28,7 @@ dependencies = [
     # Data layer
     "SQLAlchemy[asyncio]>=2.0,<3.0",
     "alembic>=1.13,<2.0",
-    "sqlcipher3-binary>=0.5.4",
+    # "sqlcipher3-binary>=0.5.4",  # TODO: Re-enable when Python 3.11 wheels available
     "greenlet>=3.0",  # required for SQLAlchemy async
     # Validation & types
     "pydantic>=2.6,<3.0",
