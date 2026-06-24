@@ -1,6 +1,6 @@
 ; Inno Setup script for Formulation Workbench
-; Build with: ISCC.exe installer/inno-setup.iss
-; Result: dist/FormulationWorkbench-1.0.0-setup.exe
+; Build with:
+;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "C:\Users\eurog\Desktop\Рецепты\installer\inno-setup.iss"
 
 [Setup]
 AppName=Formulation Workbench
@@ -10,15 +10,26 @@ AppPublisherURL=https://example.com
 DefaultDirName={autopf}\FormulationWorkbench
 DefaultGroupName=Formulation Workbench
 DisableProgramGroupPage=yes
+
+; Файлы относительно папки installer
 LicenseFile=LICENSE.txt
-InfoBeforeFile=docs/00-discovery/disclaimer.txt
-OutputDir=dist
+InfoBeforeFile=..\docs\00-discovery\disclaimer.txt
+
+; Куда положить готовый setup.exe
+OutputDir=..\dist
 OutputBaseFilename=FormulationWorkbench-1.0.0-setup
+
 Compression=lzma2/ultra64
 SolidCompression=yes
-; PrivilegesRequired=lowest ; No admin required (internal distribution)
+
+; Если нужен setup-иконка, раскомментируйте после добавления файла
+; SetupIconFile=..\resources\icon.ico
+
 UninstallDisplayIcon={app}\FormulationWorkbench.exe
-SetupIconFile=resources\icon.ico
+
+; Если хотите установку без прав администратора, используйте:
+; PrivilegesRequired=lowest
+; DefaultDirName={localappdata}\Programs\FormulationWorkbench
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
@@ -26,17 +37,19 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "Create desktop shortcut"; GroupDescription: "Additional icons"
+; Quick Launch устарел, но можно оставить при необходимости
 Name: "quicklaunchicon"; Description: "Create Quick Launch icon"; GroupDescription: "Additional icons"
 
 [Files]
-; Main application
-Source: "dist\FormulationWorkbench\FormulationWorkbench.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\FormulationWorkbench\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Основное приложение
+Source: "..\dist\FormulationWorkbench\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Documentation
-Source: "docs\user-manual.pdf"; DestDir: "{app}\docs"; Flags: ignoreversion
+; Документация и служебные файлы
 Source: "LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
+
+; Пока файла нет — строку оставляем закомментированной
+; Source: "..\docs\user-manual.pdf"; DestDir: "{app}\docs"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Formulation Workbench"; Filename: "{app}\FormulationWorkbench.exe"
@@ -55,5 +68,4 @@ Type: filesandordirs; Name: "{userappdata}\FormulationWorkbench"
 function InitializeSetup(): Boolean;
 begin
   Result := True;
-  // Phase 5: Add pre-install checks (Windows version, .NET, etc.)
 end;
