@@ -1,0 +1,28 @@
+ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ / IMPORTANT DISCLAIMER
+
+=========================================================
+Formulation Workbench v1.0.0
+=========================================================
+
+RU: Данные, содержащиеся в этой программе, носят справочный характер.
+Перед промышленным применением любой рецептуры требуется:
+  1. Лабораторная валидация
+  2. Адаптация под конкретное сырьё
+  3. Проверка соответствия локальным нормативным требованиям
+  4. Тестирование готового продукта на целевой подложке
+
+Программа не заменяет консультацию квалифицированного технолога.
+
+---------------------------------------------------------
+
+EN: The data contained in this program is provided for reference
+purposes only. Before industrial use of any formulation, you must:
+  1. Perform laboratory validation
+  2. Adapt to specific raw materials
+  3. Verify compliance with local regulatory requirements
+  4. Test the finished product on the target substrate
+
+This program does not replace consultation with a qualified
+technologist.
+
+(c) 2026 Formulation Workbench Team. All rights reserved.

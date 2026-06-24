@@ -1,0 +1,922 @@
+{
+  "_category": "Лаки",
+  "_description": "Lacquers and varnishes: alkyd, polyurethane, nitrocellulose, acrylic, epoxy, UV-curable",
+  "recipes": [
+    {
+      "id": "rcp_lak_001_alkyd_floor",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "Алкидные",
+        "binder_type": "Алкидная (medium oil, soybean)",
+        "product_class": "Standard",
+        "intended_use": "Паркетный лак для деревянных полов, интерьерный",
+        "finish": "Глянцевый (блеск 60° ≥ 85 GU)",
+        "color": "Прозрачный (светлый)",
+        "tags": [
+          "interior",
+          "gloss",
+          "alkyd",
+          "wood",
+          "floor"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Industrial Coatings Formulary. Park Ridge, NJ: Noyes Publications, 1986. ISBN: 978-0-8155-1086-4.",
+          "page_or_formula": "Form. IC-0142 'Soybean Alkid Floor Varnish', pp. 88-91"
+        },
+        "cross_references": [
+          {
+            "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+            "section": "Chapter 11 'Alkyd Resins', pp. 178-205"
+          },
+          {
+            "citation": "ГОСТ 33289-2015 — Лаки для паркетных полов. Технические условия."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Растворение алкидной смолы",
+          "process": {
+            "equipment": "Реактор с мешалкой и обратным холодильником",
+            "rotational_speed_rpm": 300,
+            "temperature_c": 60,
+            "duration_min": 120
+          },
+          "components": [
+            {
+              "name": "Soybean alkyd resin (60% solids)",
+              "cas_number": "66071-80-5",
+              "function": "Связующее (плёнкообразователь)",
+              "manufacturer_reference": "Synthron, Worlée, Eastman",
+              "mass_percent": 70.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "White spirit (mineral spirits)",
+              "cas_number": "64742-88-7",
+              "function": "Растворитель",
+              "manufacturer_reference": "Various (ExxonMobil, Shell)",
+              "mass_percent": 25.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Driers (Co 6%, Mn 4%, Zr 8%)",
+              "cas_number": "136-52-7 / 13464-37-4 / 7585-41-7",
+              "function": "Катализаторы отверждения",
+              "mass_percent": 1.5,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Antiskin agent (methyl ethyl ketoxime)",
+              "cas_number": "96-29-7",
+              "function": "Антиоксидант (предотвращает образование плёнки в таре)",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "UV absorber (Tinuvin 1130)",
+              "cas_number": "104810-47-1",
+              "function": "Светостабилизатор (защита от пожелтения)",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "HALS (Tinuvin 292)",
+              "cas_number": "41556-26-7",
+              "function": "Светостабилизатор (HALS — hindered amine)",
+              "mass_percent": 0.8,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Flow agent (BYK-306)",
+              "cas_number": "63148-62-9",
+              "function": "Выравниватель поверхности",
+              "mass_percent": 0.2,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax (Carnauba wax dispersion)",
+              "cas_number": "8015-86-9",
+              "function": "Повышение стойкости к царапинам",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 43.5,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Density",
+          "value": 0.94,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.03"
+        },
+        {
+          "property": "VOC",
+          "value": 535,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±30"
+        },
+        {
+          "property": "Viscosity (Ford #4, 25°C)",
+          "value": "60-80",
+          "unit": "сек",
+          "method": "ASTM D1200",
+          "is_predicted": false,
+          "standard": "ASTM D1200"
+        },
+        {
+          "property": "Gloss 60°",
+          "value": "≥ 85",
+          "unit": "GU",
+          "method": "ISO 2813",
+          "is_predicted": true,
+          "standard": "ISO 2813 / ASTM D523"
+        }
+      ],
+      "application_conditions": {
+        "substrate_temperature_c": "15-30",
+        "ambient_temperature_c": "15-30",
+        "relative_humidity_percent_max": 75,
+        "tool": "Кисть, валик (микрофибра), краскопульт",
+        "spread_rate_m2_per_l": "12-15 (один слой)",
+        "dft_recommendation_um": "≈ 40 (3 слоя)",
+        "recoat_time_h": "16-24 (при 20°C)",
+        "full_cure_days": 7
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, избегать огня и прямых солнечных лучей, срок годности 18 мес."
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS02 (Flammable)",
+          "GHS07 (Warning)",
+          "GHS08 (Health hazard)"
+        ],
+        "h_statements": [
+          "H226 — легковоспламеняющаяся жидкость",
+          "H304 — может быть смертельно при проглатывании",
+          "H315 — вызывает раздражение кожи"
+        ],
+        "p_statements": [
+          "P210 — беречь от огня",
+          "P280 — использовать СИЗ",
+          "P301+P310 — при проглатывании немедленно обратиться за медпомощью"
+        ],
+        "ppe": "Перчатки нитриловые, респиратор при распылении, защитные очки"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source (Flick IC, pp. 88-91)"
+      }
+    },
+    {
+      "id": "rcp_lak_002_pu_clearcoat",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "Полиуретановые (2К)",
+        "binder_type": "Акриловый полиол + HDI тример",
+        "product_class": "Premium",
+        "intended_use": "Финишный лак для мебели, паркета премиум-класса",
+        "finish": "Высокоглянцевый (блеск 60° ≥ 90 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "2k",
+          "pu",
+          "premium",
+          "wood",
+          "furniture"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+          "page_or_formula": "Chapter 15 'Polyurethane Coatings', Example 15.4 '2K Clearcoat', pp. 286-288"
+        },
+        "cross_references": [
+          {
+            "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+            "section": "§7.2 'Polyurethane Coatings', pp. 472-498"
+          },
+          {
+            "citation": "Covestro technical data, Desmodur N 75 / Desmophen 670 (2020)."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Полный производственный процесс (консолидированный)",
+          "description": "Multi-stage процесс: 2 стадий. Детали по стадиям в process_notes.",
+          "components": [
+            {
+              "name": "Acrylic polyol (60% in butyl acetate, OH content ~4.5%)",
+              "cas_number": "proprietary",
+              "function": "Связующее (полиольный компонент)",
+              "manufacturer_reference": "Covestro Desmophen 670, BASF Laropal A81",
+              "mass_percent": 55.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Butyl acetate",
+              "cas_number": "123-86-4",
+              "function": "Растворитель",
+              "mass_percent": 12.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Xylene",
+              "cas_number": "1330-20-7",
+              "function": "Растворитель (для улучшения выравнивания)",
+              "mass_percent": 6.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (dibutyltin dilaurate, 1% in xylene)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор NCO/OH реакции",
+              "mass_percent": 0.05,
+              "tolerance_percent": 0.01
+            },
+            {
+              "name": "UV absorber (Tinuvin 477)",
+              "cas_number": "proprietary",
+              "function": "Защита от УФ-деструкции",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "HALS (Tinuvin 292)",
+              "cas_number": "41556-26-7",
+              "function": "HALS — стабилизатор радикалов",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Flow agent (BYK-310)",
+              "cas_number": "63148-62-9",
+              "function": "Выравниватель (силиконовый)",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "HDI trimer (90% in butyl acetate/solvent naphtha)",
+              "cas_number": "3779-63-3",
+              "function": "Отвердитель (изоцианатный компонент)",
+              "manufacturer_reference": "Covestro Desmodur N 75, BASF Basonat HI 190",
+              "mass_percent": 22.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Butyl acetate",
+              "cas_number": "123-86-4",
+              "function": "Растворитель",
+              "mass_percent": 3.15,
+              "tolerance_percent": 0.5
+            }
+          ],
+          "process": {
+            "equipment": "См. process_notes",
+            "control_points": [
+              {
+                "parameter": "Process notes",
+                "target": "Стадия 1 (Растворение акрилового полиола): оборудование — Диссольвер, T = 23°C, 600 об/мин, 30 мин; Стадия 2 (Отвердитель (смешивается перед применением)): оборудование — Ручное смешивание, T = 23°C, 5 мин",
+                "method": "Documentation"
+              }
+            ]
+          }
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 55.0,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Density",
+          "value": 1.04,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.03"
+        },
+        {
+          "property": "VOC",
+          "value": 480,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±30"
+        },
+        {
+          "property": "Pot life",
+          "value": "4-6",
+          "unit": "ч",
+          "method": "Manufacturer data",
+          "is_predicted": false
+        },
+        {
+          "property": "Gloss 60°",
+          "value": "≥ 90",
+          "unit": "GU",
+          "method": "ISO 2813",
+          "is_predicted": false,
+          "standard": "ISO 2813"
+        }
+      ],
+      "application_conditions": {
+        "substrate_temperature_c": "15-25",
+        "ambient_temperature_c": "15-25",
+        "relative_humidity_percent_max": 70,
+        "tool": "Краскопульт (HVLP, 2-3 бар)",
+        "spread_rate_m2_per_l": "10-12 (один слой)",
+        "dft_recommendation_um": "≈ 50 (3 слоя)",
+        "recoat_time_h": "4-6 (при 20°C)",
+        "full_cure_days": 7
+      },
+      "storage": {
+        "raw_materials": "Полиол — 12 мес, HDI — 6 мес (отдельно, в сухом прохладном месте)",
+        "finished_product": "После смешивания — 4-6 ч (pot life)"
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS02 (Flammable)",
+          "GHS07 (Warning)",
+          "GHS08 (Sensitizer)"
+        ],
+        "h_statements": [
+          "H226 — легковоспламеняющаяся жидкость",
+          "H317 — может вызывать аллергическую реакцию (изоцианаты)",
+          "H332 — вредно при вдыхании"
+        ],
+        "p_statements": [
+          "P210 — беречь от огня",
+          "P280 — СИЗ (перчатки, респиратор)",
+          "P304+P340 — при вдыхании — свежий воздух"
+        ],
+        "ppe": "Респиратор с угольным фильтром (для изоцианатов!), перчатки, очки. НЕ работать без вентиляции."
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source (Wicks/Jones/Pappas, pp. 286-288)"
+      },
+      "notes": [
+        "Нормализовано: 2 стадий консолидированы в 1. Параметры процесса по стадиям сохранены в control_points."
+      ]
+    },
+    {
+      "id": "rcp_lak_003_nitrocellulose",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "Нитроцеллюлозные",
+        "binder_type": "Нитроцеллюлоза + алкид",
+        "product_class": "Standard",
+        "intended_use": "Мебельный лак (стулья, столы, корпусная мебель)",
+        "finish": "Глянцевый (блеск 60° 70-85 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "nc",
+          "furniture",
+          "interior",
+          "fast-drying"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Adhesives and Sealants Manual. Park Ridge, NJ: Noyes Publications, 1982. ISBN: 978-0-8155-0905-0.",
+          "page_or_formula": "Form. AS-0234 'NC Furniture Lacquer', pp. 184-187"
+        },
+        "cross_references": [
+          {
+            "citation": "Flick, E.W. Paint and Coatings Manual. Park Ridge, NJ: Noyes Publications, 1993. ISBN: 978-0-8155-1303-2.",
+            "section": "Chapter 7 'Cellulosic Lacquers', pp. 247-280"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Растворение НЦ и алкида",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 500,
+            "temperature_c": 23,
+            "duration_min": 60
+          },
+          "components": [
+            {
+              "name": "Nitrocellulose (RS 1/2 sec, 11% N)",
+              "cas_number": "9004-70-0",
+              "function": "Плёнкообразователь (главный)",
+              "manufacturer_reference": "Hempel, Nobel Enterprises",
+              "mass_percent": 12.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Castor oil alkyd (50% solids)",
+              "cas_number": "68139-91-3",
+              "function": "Модификатор (улучшает адгезию и эластичность)",
+              "mass_percent": 8.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Butyl acetate",
+              "cas_number": "123-86-4",
+              "function": "Растворитель (главный)",
+              "mass_percent": 30.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Toluene",
+              "cas_number": "108-88-3",
+              "function": "Растворитель",
+              "mass_percent": 20.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Ethyl acetate",
+              "cas_number": "141-78-6",
+              "function": "Растворитель (быстрое высыхание)",
+              "mass_percent": 18.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Dibutyl phthalate (DBP)",
+              "cas_number": "84-74-2",
+              "function": "Пластификатор",
+              "mass_percent": 3.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.1,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Flow agent (acrylic, BYK-358)",
+              "cas_number": "proprietary",
+              "function": "Выравниватель",
+              "mass_percent": 0.4,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent (syloid silica, optional)",
+              "cas_number": "112926-00-8",
+              "function": "Матирующая добавка",
+              "mass_percent": 8.5,
+              "tolerance_percent": 0.5
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 21.5,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Density",
+          "value": 0.96,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.03"
+        },
+        {
+          "property": "VOC",
+          "value": 750,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±30"
+        },
+        {
+          "property": "Drying time (dust-free)",
+          "value": "5-10",
+          "unit": "мин",
+          "method": "ISO 1517",
+          "is_predicted": false
+        },
+        {
+          "property": "Gloss 60°",
+          "value": "70-85",
+          "unit": "GU",
+          "method": "ISO 2813",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-25",
+        "relative_humidity_percent_max": 70,
+        "tool": "Краскопульт (HVLP), кисть (мало)",
+        "spread_rate_m2_per_l": "8-10 (один слой)",
+        "recoat_time_min": "20-30",
+        "full_cure_days": 3
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS02 (Highly flammable)",
+          "GHS07 (Warning)"
+        ],
+        "h_statements": [
+          "H225 — легковоспламеняющаяся жидкость",
+          "H315 — раздражение кожи",
+          "H335 — раздражение дыхательных путей"
+        ],
+        "p_statements": [
+          "P210 — беречь от огня",
+          "P240 — заземлить контейнер",
+          "P280 — СИЗ"
+        ],
+        "ppe": "Респиратор с угольным фильтром (НЦ пары!), перчатки, взрывобезопасная вентиляция"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_lak_004_acrylic_waterbased",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "Акриловые (водно-дисперсионные)",
+        "binder_type": "Акриловая дисперсия (PUD-модифицированная)",
+        "product_class": "Premium",
+        "intended_use": "Паркетный лак на водной основе (экологичный, для жилых помещений)",
+        "finish": "Полуглянцевый (блеск 60° 50-65 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "acrylic",
+          "water-based",
+          "eco",
+          "low-voc",
+          "floor"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+          "page_or_formula": "§7.4 'Water-Based Polyurethane Dispersions', pp. 512-525, Example 7.4-A"
+        },
+        "cross_references": [
+          {
+            "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+            "section": "Chapter 22 'Latex Coatings', pp. 489-510"
+          },
+          {
+            "citation": "BASF technical bulletin, Acronal PU 311 (2019)."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Полный производственный процесс (консолидированный)",
+          "description": "Multi-stage процесс: 2 стадий. Детали по стадиям в process_notes.",
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 35.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Wetting agent (Tego Wet 270)",
+              "cas_number": "proprietary",
+              "function": "Смачиватель подложки",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Thickener (associative HEUR, Rheovis PE 1331)",
+              "cas_number": "proprietary",
+              "function": "Загуститель",
+              "mass_percent": 0.8,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Coalescent (Texanol)",
+              "cas_number": "25265-77-4",
+              "function": "Коалесцирующий растворитель",
+              "mass_percent": 3.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз + open-time extender",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Matting agent (syloid silica ED30)",
+              "cas_number": "112926-00-8",
+              "function": "Матирующая добавка",
+              "mass_percent": 3.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Wax emulsion (Carnauba, Aquacer 539)",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость к царапинам",
+              "mass_percent": 4.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "PUD-modified acrylic dispersion (Acronal PU 311, 40% solids)",
+              "cas_number": "proprietary",
+              "function": "Плёнкообразователь",
+              "manufacturer_reference": "BASF Acronal PU 311",
+              "mass_percent": 50.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.4,
+              "tolerance_percent": 0.5
+            }
+          ],
+          "process": {
+            "equipment": "См. process_notes",
+            "control_points": [
+              {
+                "parameter": "Process notes",
+                "target": "Стадия 1 (Премикс добавок): оборудование — Диссольвер, T = 23°C, 400 об/мин, 15 мин; Стадия 2 (Ввод связующего), T = 23°C, 300 об/мин, 30 мин",
+                "method": "Documentation"
+              }
+            ]
+          }
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 33.0,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Density",
+          "value": 1.05,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.03"
+        },
+        {
+          "property": "VOC",
+          "value": 65,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE (cat A/e)",
+          "is_predicted": true,
+          "tolerance": "±10"
+        },
+        {
+          "property": "Gloss 60°",
+          "value": "50-65",
+          "unit": "GU",
+          "method": "ISO 2813",
+          "is_predicted": false
+        },
+        {
+          "property": "Scrub resistance",
+          "value": "≥ 5000",
+          "unit": "cycles",
+          "method": "ISO 11998",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "relative_humidity_percent_max": 70,
+        "tool": "Кисть, валик (микрофибра 8-12 мм), краскопульт",
+        "spread_rate_m2_per_l": "10-12 (один слой)",
+        "recoat_time_h": "4-6 (при 20°C)",
+        "full_cure_days": 7
+      },
+      "safety": {
+        "ghs_pictograms": [],
+        "h_statements": [],
+        "p_statements": [],
+        "ppe": "Минимальная — перчатки при длительной работе"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      },
+      "notes": [
+        "Нормализовано: 2 стадий консолидированы в 1. Параметры процесса по стадиям сохранены в control_points."
+      ]
+    },
+    {
+      "id": "rcp_lak_005_uv_curable",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые",
+        "binder_type": "Уретан-акрилат (6 функциональный)",
+        "product_class": "Industrial",
+        "intended_use": "Промышленный лак для паркета и мебели (заводское нанесение)",
+        "finish": "Высокоглянцевый (блеск 60° ≥ 95 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "fast-cure",
+          "high-gloss"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+          "page_or_formula": "§8.3 'UV-Curable Coatings', pp. 562-580, Formulation 8.3-B"
+        },
+        "cross_references": [
+          {
+            "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+            "section": "Chapter 24 'Radiation-Curable Coatings', pp. 528-552"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Диссольвер (тёмное помещение)",
+            "rotational_speed_rpm": 300,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (6-functional, Ebecryl 1290)",
+              "cas_number": "proprietary",
+              "function": "Олигомер (сшивающий агент)",
+              "manufacturer_reference": "Allnex Ebecryl 1290, BASF Laromer UA 9002",
+              "mass_percent": 45.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Trimethylolpropane triacrylate (TMPTA)",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "manufacturer_reference": "Allnex SR 351, BASF Laromer TMPTA",
+              "mass_percent": 25.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Tripropylene glycol diacrylate (TPGDA)",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 20.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор (радикальный)",
+              "manufacturer_reference": "BASF Irgacure 184",
+              "mass_percent": 3.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор (для глубокого отверждения)",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent (BYK-UV 3500)",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель подложки",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer (BYK-1791)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent (syloid silica ED30)",
+              "cas_number": "112926-00-8",
+              "function": "Матирующая добавка (опционально)",
+              "mass_percent": 5.2,
+              "tolerance_percent": 0.5
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 100.0,
+          "unit": "%",
+          "method": "100% solids (UV-curable)",
+          "is_predicted": false
+        },
+        {
+          "property": "VOC",
+          "value": 0,
+          "unit": "г/л",
+          "method": "100% reactive system",
+          "is_predicted": false
+        },
+        {
+          "property": "Viscosity (25°C)",
+          "value": "800-1500",
+          "unit": "мПа·с",
+          "method": "ASTM D2196",
+          "is_predicted": false
+        },
+        {
+          "property": "Gloss 60°",
+          "value": "≥ 95",
+          "unit": "GU",
+          "method": "ISO 2813",
+          "is_predicted": false
+        },
+        {
+          "property": "Cure speed (Hg lamp)",
+          "value": "5-15",
+          "unit": "м/мин",
+          "method": "Лабораторное измерение",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "tool": "Вальцовый ламинатор, краскопульт, экструзионный ламинатор",
+        "spread_rate_g_per_m2": "30-50 (один слой)",
+        "lamp_type": "Hg or LED UV lamp (365 nm)",
+        "lamp_power_w_per_cm": "120-200",
+        "full_cure": "Мгновенно (< 5 сек при конвейерной скорости)"
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS07 (Warning)"
+        ],
+        "h_statements": [
+          "H315 — раздражение кожи",
+          "H317 — аллергическая реакция (акрилаты)",
+          "H319 — раздражение глаз"
+        ],
+        "p_statements": [
+          "P280 — СИЗ",
+          "P305+P351+P338 — при попадании в глаза — промыть водой"
+        ],
+        "ppe": "Защитные очки, нитриловые перчатки, НЕ подвергать воздействию UV без защиты"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}

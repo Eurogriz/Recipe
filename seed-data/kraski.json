@@ -1,0 +1,578 @@
+{
+  "_category": "Краски",
+  "_description": "Architectural and industrial paints: water-based, oil-based, alkyd, silicate, silicone, epoxy, polyurethane",
+  "recipes": [
+    {
+      "id": "rcp_kras_001_acrylic_matte_wall",
+      "metadata": {
+        "category": "Краски",
+        "subcategory": "Водно-дисперсионные интерьерные",
+        "binder_type": "Стирол-акриловая дисперсия",
+        "product_class": "Premium",
+        "intended_use": "Матовая интерьерная краска для стен и потолков в сухих помещениях",
+        "finish": "Матовый (блеск 60° ≤ 5 GU)",
+        "color": "Белый (база A, под колеровку)",
+        "tags": ["interior", "matte", "acrylic", "water-based", "low-voc", "architectural"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Water-Based Paint Formulations, Vol. 3. Park Ridge, NJ: Noyes Publications, 1995. ISBN: 978-0-8155-1377-3.",
+          "page_or_formula": "Form. 3-0042 'Premium Quality Interior Flat Latex Wall Paint', pp. 78-82"
+        },
+        "cross_references": [
+          {
+            "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+            "section": "§6.3 'Architectural Coatings — Interior Latex Paints', pp. 412-430"
+          },
+          {
+            "citation": "ГОСТ 33290-2015 — Краски водно-дисперсионные для стен и потолков."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс (водорастворимые добавки)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 400,
+            "temperature_c": 23,
+            "duration_min": 10
+          },
+          "components": [
+            {"name": "Water (deionized)", "cas_number": "7732-18-5", "function": "Непрерывная фаза", "mass_percent": 28.85, "tolerance_percent": 2.0},
+            {"name": "Dispersant (polyacrylate, Sokalan PA 30)", "cas_number": "9003-04-7", "function": "Диспергатор пигментов", "mass_percent": 0.6, "tolerance_percent": 0.1},
+            {"name": "Defoamer (Tego Foamex 1488)", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Biocide (MIT/CIT, Acticide)", "cas_number": "26172-55-4 / 2682-20-4", "function": "Биоцид (в таре)", "mass_percent": 0.15, "tolerance_percent": 0.05},
+            {"name": "Wetting agent (Tego Wet 270)", "cas_number": "proprietary", "function": "Смачиватель подложки", "mass_percent": 0.4, "tolerance_percent": 0.1}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Диспергирование пигментов",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1800,
+            "peripheral_speed_m_per_s": 18.5,
+            "temperature_c": 23,
+            "duration_min": 25,
+            "control_points": [
+              {"parameter": "Степень перетира (Hegman)", "target": "≥ 6 (≤ 25 мкм)", "method": "ASTM D1210"},
+              {"parameter": "Температура", "target": "≤ 35°C", "method": "Термопара"}
+            ]
+          },
+          "components": [
+            {"name": "Titanium dioxide (rutile, Ti-Pure R-902+)", "cas_number": "13463-67-7", "function": "Белый пигмент, укрывистость", "manufacturer_reference": "Chemours Ti-Pure R-902+, Tronox CR-826", "mass_percent": 22.0, "tolerance_percent": 1.5},
+            {"name": "Calcium carbonate (Hydrocarb)", "cas_number": "1317-65-3", "function": "Экстендер-наполнитель", "mass_percent": 8.0, "tolerance_percent": 1.0},
+            {"name": "Talc (Steamic)", "cas_number": "14807-96-6", "function": "Экстендер, укрывистость", "mass_percent": 4.0, "tolerance_percent": 0.5}
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "Ввод связующего",
+          "process": {
+            "rotational_speed_rpm": 600,
+            "duration_min": 15,
+            "temperature_c": 23,
+            "control_points": [
+              {"parameter": "pH", "target": "8.0-9.0", "method": "ISO 787-9"},
+              {"parameter": "Температура", "target": "≤ 30°C", "method": "Термопара"}
+            ]
+          },
+          "components": [
+            {"name": "Water (deionized)", "cas_number": "7732-18-5", "function": "Разбавление", "mass_percent": 7.0, "tolerance_percent": 1.0},
+            {"name": "Acrylic emulsion (Acronal S 790, 50% solids, MFFT 0°C)", "cas_number": "proprietary", "function": "Плёнкообразователь", "manufacturer_reference": "BASF Acronal S 790, Dow Rhoplex AC-261", "mass_percent": 32.0, "tolerance_percent": 2.0},
+            {"name": "Coalescent (Texanol)", "cas_number": "25265-77-4", "function": "Коалесцент", "mass_percent": 1.5, "tolerance_percent": 0.3}
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "Финишная настройка реологии",
+          "process": {
+            "rotational_speed_rpm": 400,
+            "duration_min": 15,
+            "temperature_c": 23,
+            "control_points": [
+              {"parameter": "Вязкость Brookfield", "target": "3000-5000 мПа·с (sp.4, 20 об/мин, 23°C)", "method": "ASTM D2196"},
+              {"parameter": "Степень перетира (финальная)", "target": "≥ 7 (≤ 15 мкм)", "method": "ASTM D1210"}
+            ]
+          },
+          "components": [
+            {"name": "Thickener (associative HASE, Rheovis PE 1331)", "cas_number": "proprietary", "function": "Загуститель", "mass_percent": 0.8, "tolerance_percent": 0.2},
+            {"name": "Propylene glycol", "cas_number": "57-55-6", "function": "Антифриз, open-time extender", "mass_percent": 2.0, "tolerance_percent": 0.5}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 50.5, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Volume solids", "value": 36.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "VOC", "value": 28, "unit": "г/л", "method": "EU 2004/42/CE (cat A/a, limit 30 g/l)", "is_predicted": true, "tolerance": "±5"},
+        {"property": "Density", "value": 1.32, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.03"},
+        {"property": "PVC", "value": 26.5, "unit": "%", "method": "PVC = V_pigment / (V_pigment + V_binder_solids)", "is_predicted": true, "tolerance": "±2%"},
+        {"property": "Блеск 60°", "value": "≤ 5", "unit": "GU", "method": "ISO 2813", "is_predicted": true},
+        {"property": "Contrast ratio", "value": "≥ 0.97", "unit": "ratio", "method": "ISO 6504-1", "is_predicted": true},
+        {"property": "Scrub resistance", "value": "≥ 2000", "unit": "cycles", "method": "ISO 11998", "is_predicted": true},
+        {"property": "Adhesion (cross-cut)", "value": "0-1", "unit": "ISO class", "method": "ISO 2409", "is_predicted": true}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Подложка сухая, чистая, прочная. Пористые основания — грунтовать акриловой грунтовкой.",
+        "substrate_temperature_c": "5-35",
+        "ambient_temperature_c": "5-35",
+        "relative_humidity_percent_max": 80,
+        "tool": "Кисть, валик (микрофибра 9-12 мм), безвоздушное распыление (tip 0.017-0.019″, 120-150 бар)",
+        "spread_rate_m2_per_l": "10-12 (один слой по гладкой подложке)",
+        "dft_recommendation_um": "≈ 80-100 (2 слоя)",
+        "recoat_time_h": "4-6 (при 23°C, 50% RH)",
+        "full_cure_days": 14
+      },
+      "storage": {
+        "raw_materials": "В сухом прохладном месте; дисперсии — защищать от замерзания (T > +5°C)",
+        "finished_product": "T = 5-30°C, избегать прямого солнечного света, срок годности 24 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS07 (Warning)"],
+        "h_statements": ["H412 — вредно для водных организмов с долгосрочными последствиями"],
+        "p_statements": ["P273 — избегать попадания в окружающую среду"],
+        "ppe": "Перчатки нитриловые"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kras_002_exterior_alkyd_gloss",
+      "metadata": {
+        "category": "Краски",
+        "subcategory": "Алкидные (на растворителе)",
+        "binder_type": "Алкид (длинное масло, льняное)",
+        "product_class": "Standard",
+        "intended_use": "Глянцевая алкидная краска для наружных работ по дереву и металлу",
+        "finish": "Глянцевый (блеск 60° ≥ 80 GU)",
+        "color": "Белый / колерованный",
+        "tags": ["exterior", "gloss", "alkyd", "solvent-based"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Industrial Coatings Formulary. Park Ridge, NJ: Noyes Publications, 1986. ISBN: 978-0-8155-1086-4.",
+          "page_or_formula": "Form. IC-0189 'Long-Oil Alkyd Gloss Enamel', pp. 142-148"
+        },
+        "cross_references": [
+          {
+            "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+            "section": "Chapter 11 'Alkyd Resins', Example 11.6"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Диспергирование пигментов в алкиде",
+          "process": {
+            "equipment": "Бисерная мельница (Dyno-Mill, 0.8-1.2 мм шарик)",
+            "rotational_speed_rpm": 3000,
+            "temperature_c": 40,
+            "duration_min": 60,
+            "control_points": [
+              {"parameter": "Степень перетира", "target": "≤ 15 мкм", "method": "ASTM D1210"}
+            ]
+          },
+          "components": [
+            {"name": "Long-oil linseed alkyd (70% solids in mineral spirits)", "cas_number": "67746-08-1", "function": "Связующее", "manufacturer_reference": "Worlée, Synthron, Eastman", "mass_percent": 65.0, "tolerance_percent": 2.0},
+            {"name": "Titanium dioxide (rutile, Ti-Pure R-902)", "cas_number": "13463-67-7", "function": "Белый пигмент", "mass_percent": 22.0, "tolerance_percent": 1.5},
+            {"name": "Mineral spirits (white spirit)", "cas_number": "64742-88-7", "function": "Растворитель", "mass_percent": 8.0, "tolerance_percent": 1.0},
+            {"name": "Driers (Co 6%, Mn 4%, Zr 8%)", "cas_number": "136-52-7 / 13464-37-4", "function": "Катализаторы отверждения", "mass_percent": 1.5, "tolerance_percent": 0.2},
+            {"name": "Antiskin (MEKO)", "cas_number": "96-29-7", "function": "Антиоксидант", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Wetting agent (BYK-P104)", "cas_number": "63148-62-9", "function": "Смачиватель пигмента", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "UV absorber (Tinuvin 1130)", "cas_number": "104810-47-1", "function": "UV-защита", "mass_percent": 1.0, "tolerance_percent": 0.2},
+            {"name": "HALS (Tinuvin 292)", "cas_number": "41556-26-7", "function": "HALS", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Bodying agent (bentone, 10% gel)", "cas_number": "1302-78-9", "function": "Тиксотропия", "mass_percent": 1.0, "tolerance_percent": 0.2}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 67.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±2%"},
+        {"property": "Density", "value": 1.18, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.03"},
+        {"property": "VOC", "value": 420, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±30"},
+        {"property": "Gloss 60°", "value": "≥ 85", "unit": "GU", "method": "ISO 2813", "is_predicted": false},
+        {"property": "Drying time (touch)", "value": "4-6", "unit": "ч", "method": "ISO 1517", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Металл: пескоструйная обработка Sa 2.5 + грунт. Дерево: шлифовка P120 + антисептик.",
+        "ambient_temperature_c": "10-30",
+        "relative_humidity_percent_max": 80,
+        "tool": "Кисть, валик, краскопульт",
+        "spread_rate_m2_per_l": "12-14",
+        "recoat_time_h": "16-24",
+        "full_cure_days": 7
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS02 (Flammable)", "GHS07 (Warning)", "GHS08 (Health)"],
+        "h_statements": ["H226 — легковоспламеняющаяся жидкость", "H304 — смертельно при проглатывании"],
+        "p_statements": ["P210 — беречь от огня", "P301+P310 — при проглатывании — медпомощь"],
+        "ppe": "Перчатки, респиратор с угольным фильтром, защитные очки"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kras_003_silicate_exterior",
+      "metadata": {
+        "category": "Краски",
+        "subcategory": "Силикатные (на основе жидкого стекла)",
+        "binder_type": "Калиевое жидкое стекло + акриловая дисперсия",
+        "product_class": "Premium",
+        "intended_use": "Минеральная фасадная краска (паропроницаемая, долговечная)",
+        "finish": "Матовый (блеск 60° ≤ 3 GU)",
+        "color": "Белый / колерованный",
+        "tags": ["exterior", "silicate", "mineral", "vapor-permeable"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+          "page_or_formula": "§6.5 'Silicate Paints', pp. 451-468, Formulation 6.5-A"
+        },
+        "cross_references": [
+          {
+            "citation": "DIN 18363 — Coating work — silicate coatings"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание связующего и пигментов",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 800,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {"name": "Potassium water glass (K2SiO3, 30% solids, ratio SiO2:K2O = 3.3)", "cas_number": "1312-61-8", "function": "Минеральное связующее (силикатизация)", "mass_percent": 30.0, "tolerance_percent": 2.0},
+            {"name": "Acrylic dispersion (Acronal S 790, 50% solids)", "cas_number": "proprietary", "function": "Органический модификатор (улучшает адгезию)", "mass_percent": 10.0, "tolerance_percent": 1.0},
+            {"name": "Titanium dioxide (rutile)", "cas_number": "13463-67-7", "function": "Белый пигмент", "mass_percent": 18.0, "tolerance_percent": 1.0},
+            {"name": "Calcium carbonate", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 12.0, "tolerance_percent": 1.0},
+            {"name": "Talc", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 8.0, "tolerance_percent": 0.5},
+            {"name": "Quartz sand (fine)", "cas_number": "14808-60-7", "function": "Наполнитель", "mass_percent": 8.0, "tolerance_percent": 0.5},
+            {"name": "Hydrophobic agent (silane, BS 1701)", "cas_number": "64742-94-5", "function": "Гидрофобизация", "mass_percent": 1.5, "tolerance_percent": 0.3},
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Растворитель", "mass_percent": 12.0, "tolerance_percent": 1.0},
+            {"name": "Thickener (HEC)", "cas_number": "9004-62-0", "function": "Загуститель", "mass_percent": 0.5, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 55.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Density", "value": 1.42, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.05"},
+        {"property": "VOC", "value": 5, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±2"},
+        {"property": "Sd (water vapor)", "value": "≤ 0.05", "unit": "m", "method": "DIN EN ISO 7783", "is_predicted": false},
+        {"property": "Gloss 60°", "value": "≤ 3", "unit": "GU", "method": "ISO 2813", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Минеральные основания (бетон, штукатурка). Не применять на органических красках и ЛКМ-плёнках!",
+        "substrate_temperature_c": "5-30",
+        "ambient_temperature_c": "5-30",
+        "relative_humidity_percent_max": 80,
+        "tool": "Кисть, валик",
+        "spread_rate_m2_per_l": "4-6 (один слой — высокий расход из-за минеральной природы)",
+        "recoat_time_h": "12-24 (полная силикатизация 7-14 дней)",
+        "full_cure_days": 14
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS05 (Corrosive — щелочное pH)"],
+        "h_statements": ["H315 — раздражение кожи", "H318 — серьёзное повреждение глаз"],
+        "p_statements": ["P280 — СИЗ", "P305+P351+P338 — при попадании в глаза"],
+        "ppe": "Защитные очки, нитриловые перчатки, длинный рукав (щёлочь!)"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kras_004_epoxy_floor",
+      "metadata": {
+        "category": "Краски",
+        "subcategory": "Эпоксидные (2К)",
+        "binder_type": "Бисфенол-А эпоксидная смола + полиаминный отвердитель",
+        "product_class": "Industrial",
+        "intended_use": "Промышленное напольное покрытие (цеха, склады, паркинги)",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Серый, зелёный, жёлтый (RAL)",
+        "tags": ["epoxy", "2k", "industrial", "floor", "high-traffic"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Industrial Coatings Formulary. Park Ridge, NJ: Noyes Publications, 1986. ISBN: 978-0-8155-1086-4.",
+          "page_or_formula": "Form. IC-0245 'Epoxy Floor Coating', pp. 178-184"
+        },
+        "cross_references": [
+          {
+            "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+            "section": "Chapter 17 'Epoxy Coatings', pp. 318-348"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Компонент A (смола + пигменты)",
+          "process": {
+            "equipment": "Бисерная мельница",
+            "rotational_speed_rpm": 2500,
+            "temperature_c": 40,
+            "duration_min": 45
+          },
+          "components": [
+            {"name": "Epoxy resin (DGEBA, EEW 190, liquid)", "cas_number": "25068-38-6", "function": "Связующее (компонент A)", "manufacturer_reference": "Hexion EPON 828, Olin D.E.R. 331", "mass_percent": 55.0, "tolerance_percent": 2.0},
+            {"name": "Titanium dioxide (rutile)", "cas_number": "13463-67-7", "function": "Белый пигмент", "mass_percent": 15.0, "tolerance_percent": 1.0},
+            {"name": "Iron oxide (red, for color)", "cas_number": "1309-37-1", "function": "Цветной пигмент", "mass_percent": 8.0, "tolerance_percent": 0.5},
+            {"name": "Talc", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 12.0, "tolerance_percent": 1.0},
+            {"name": "Xylene", "cas_number": "1330-20-7", "function": "Растворитель", "mass_percent": 6.0, "tolerance_percent": 0.5},
+            {"name": "Defoamer (Byk-A530)", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Flow agent", "cas_number": "63148-62-9", "function": "Выравниватель", "mass_percent": 0.2, "tolerance_percent": 0.05},
+            {"name": "Wetting agent", "cas_number": "9003-04-7", "function": "Смачиватель пигмента", "mass_percent": 0.5, "tolerance_percent": 0.1}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Компонент B (отвердитель — смешивается перед нанесением)",
+          "process": {
+            "equipment": "Ручное смешивание",
+            "temperature_c": 23,
+            "duration_min": 5,
+            "control_points": [
+              {"parameter": "Соотношение A:B", "target": "4:1 (по массе)", "method": "Весы"},
+              {"parameter": "Pot life", "target": "30-45 мин", "method": "Вязкость"}
+            ]
+          },
+          "components": [
+            {"name": "Polyamide amine (amine value ~240)", "cas_number": "68410-23-1", "function": "Отвердитель", "manufacturer_reference": "Cray Valley, Evonik Vestamid", "mass_percent": 23.85, "tolerance_percent": 1.0},
+            {"name": "Xylene", "cas_number": "1330-20-7", "function": "Растворитель", "mass_percent": 6.0, "tolerance_percent": 0.5}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 88.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±2%"},
+        {"property": "VOC", "value": 165, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±30"},
+        {"property": "Pot life", "value": "30-45", "unit": "мин", "method": "Manufacturer data", "is_predicted": false},
+        {"property": "Hardness (Shore D)", "value": "75-85", "unit": "Shore D", "method": "ASTM D2240", "is_predicted": false},
+        {"property": "Compressive strength", "value": "≥ 60", "unit": "MPa", "method": "ASTM D695", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Бетон: пескоструйная/дробеструйная обработка, грунтование эпоксидным праймером",
+        "ambient_temperature_c": "15-30",
+        "relative_humidity_percent_max": 80,
+        "tool": "Кисть, валик, ракля, краскопульт",
+        "spread_rate_m2_per_l": "4-5 (один слой, толщина 200 мкм)",
+        "recoat_time_h": "12-24",
+        "full_cure_days": 7
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS02 (Flammable)", "GHS05 (Corrosive)", "GHS07 (Warning)", "GHS08 (Sensitizer)"],
+        "h_statements": ["H226 — легковоспламеняющаяся жидкость", "H315/H319 — раздражение", "H317 — аллергическая реакция (эпоксидные смолы — мощные сенсибилизаторы!)", "H411 — токсично для водных организмов"],
+        "p_statements": ["P280 — СИЗ", "P305+P351+P338 — при попадании в глаза", "P273 — избегать попадания в окружающую среду"],
+        "ppe": "Защитные очки, нитриловые перчатки, респиратор с угольным фильтром. Сенсибилизация — избегать контакта с кожей!"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kras_005_silicone_facade",
+      "metadata": {
+        "category": "Краски",
+        "subcategory": "Силиконовые",
+        "binder_type": "Силиконовая эмульсия + акриловая дисперсия",
+        "product_class": "Premium",
+        "intended_use": "Фасадная краска с высокой паропроницаемостью и водоотталкиванием",
+        "finish": "Матовый (блеск 60° ≤ 5 GU)",
+        "color": "Белый / колерованный",
+        "tags": ["exterior", "silicone", "hydrophobic", "vapor-permeable"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILRES BS 45 (2018). Munich: Wacker Chemie AG.",
+          "page_or_formula": "Application guideline SILRES BS 45 / 4.3 'Silicone-Acrylic Facade Paint', pp. 8-14"
+        },
+        "cross_references": [
+          {
+            "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+            "section": "§6.6 'Silicone Resin Paints', pp. 478-495"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс и диспергирование",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {"name": "Water (deionized)", "cas_number": "7732-18-5", "function": "Непрерывная фаза", "mass_percent": 25.0, "tolerance_percent": 2.0},
+            {"name": "Dispersant (polyacrylate)", "cas_number": "9003-04-7", "function": "Диспергатор", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Titanium dioxide (rutile)", "cas_number": "13463-67-7", "function": "Белый пигмент", "mass_percent": 22.0, "tolerance_percent": 1.5},
+            {"name": "Calcium carbonate", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 10.0, "tolerance_percent": 1.0},
+            {"name": "Talc", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 4.0, "tolerance_percent": 0.5}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Ввод связующего",
+          "process": {
+            "rotational_speed_rpm": 500,
+            "duration_min": 20,
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "Silicone emulsion (SILRES BS 45, 50% solids)", "cas_number": "67762-90-7", "function": "Минеральное связующее (гидрофобизация)", "manufacturer_reference": "Wacker SILRES BS 45", "mass_percent": 15.0, "tolerance_percent": 1.0},
+            {"name": "Acrylic dispersion (Acronal S 790, 50% solids)", "cas_number": "proprietary", "function": "Органический модификатор (улучшает адгезию)", "mass_percent": 20.0, "tolerance_percent": 1.5},
+            {"name": "Propylene glycol", "cas_number": "57-55-6", "function": "Антифриз", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Thickener (HEC)", "cas_number": "9004-62-0", "function": "Загуститель", "mass_percent": 0.6, "tolerance_percent": 0.1},
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Разбавление", "mass_percent": 0.6, "tolerance_percent": 0.3}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 50.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Density", "value": 1.35, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.03"},
+        {"property": "VOC", "value": 15, "unit": "г/л", "method": "EU 2004/42/CE (cat A/c)", "is_predicted": true, "tolerance": "±5"},
+        {"property": "Sd (water vapor)", "value": "≤ 0.1", "unit": "m", "method": "DIN EN ISO 7783", "is_predicted": false},
+        {"property": "Water absorption (W)", "value": "≤ 0.1", "unit": "kg/(m²·h^0.5)", "method": "DIN EN 1062-3", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Минеральные основания. Совместимо со старыми силиконовыми, силикатными, акриловыми красками.",
+        "substrate_temperature_c": "5-30",
+        "ambient_temperature_c": "5-30",
+        "relative_humidity_percent_max": 80,
+        "tool": "Кисть, валик",
+        "spread_rate_m2_per_l": "8-10 (один слой)",
+        "recoat_time_h": "12-24",
+        "full_cure_days": 7
+      },
+      "safety": {
+        "ghs_pictograms": [],
+        "h_statements": ["H412 — вредно для водных организмов"],
+        "p_statements": ["P273 — избегать попадания в окружающую среду"],
+        "ppe": "Минимальная — перчатки при длительной работе"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kras_006_waterbased_door",
+      "metadata": {
+        "category": "Краски",
+        "subcategory": "Водно-дисперсионные для дверей и окон",
+        "binder_type": "Акриловая PUD-дисперсия (полиуретан-акрил)",
+        "product_class": "Premium",
+        "intended_use": "Эмаль для деревянных дверей и окон (замена алкидной)",
+        "finish": "Полуглянцевый (блеск 60° 60-75 GU)",
+        "color": "Белый, RAL",
+        "tags": ["water-based", "acrylic", "wood", "doors", "eco"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Water-Based Paint Formulations, Vol. 4. Park Ridge, NJ: Noyes Publications, 1998. ISBN: 978-0-8155-1419-0.",
+          "page_or_formula": "Form. 4-0089 'Water-Based Door Enamel', pp. 64-69"
+        },
+        "cross_references": [
+          {
+            "citation": "Allnex technical bulletin, Daotan PUD 1400 (2019)."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 400,
+            "temperature_c": 23,
+            "duration_min": 15
+          },
+          "components": [
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Непрерывная фаза", "mass_percent": 22.0, "tolerance_percent": 2.0},
+            {"name": "Dispersant", "cas_number": "9003-04-7", "function": "Диспергатор", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.4, "tolerance_percent": 0.1},
+            {"name": "Wetting agent", "cas_number": "proprietary", "function": "Смачиватель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Thickener (associative HEUR)", "cas_number": "proprietary", "function": "Загуститель", "mass_percent": 0.8, "tolerance_percent": 0.2},
+            {"name": "Coalescent (Texanol)", "cas_number": "25265-77-4", "function": "Коалесцент", "mass_percent": 3.0, "tolerance_percent": 0.3},
+            {"name": "Propylene glycol", "cas_number": "57-55-6", "function": "Антифриз", "mass_percent": 2.0, "tolerance_percent": 0.3}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Диспергирование пигментов",
+          "process": {
+            "rotational_speed_rpm": 1800,
+            "peripheral_speed_m_per_s": 18,
+            "duration_min": 25,
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "Titanium dioxide (rutile)", "cas_number": "13463-67-7", "function": "Белый пигмент", "mass_percent": 25.0, "tolerance_percent": 1.5},
+            {"name": "Talc", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 4.0, "tolerance_percent": 0.5},
+            {"name": "Calcium carbonate", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 4.0, "tolerance_percent": 0.5}
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "Ввод связующего",
+          "process": {
+            "rotational_speed_rpm": 500,
+            "duration_min": 20,
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "PUD-acrylic hybrid dispersion (Daotan PUD 1400, 40% solids)", "cas_number": "proprietary", "function": "Плёнкообразователь (гибрид)", "mass_percent": 35.0, "tolerance_percent": 2.0},
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Разбавление", "mass_percent": 3.0, "tolerance_percent": 0.5}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 47.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Density", "value": 1.28, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.03"},
+        {"property": "VOC", "value": 75, "unit": "г/л", "method": "EU 2004/42/CE (cat A/d, limit 130)", "is_predicted": true, "tolerance": "±15"},
+        {"property": "Gloss 60°", "value": "60-75", "unit": "GU", "method": "ISO 2813", "is_predicted": false},
+        {"property": "Block resistance", "value": "Хорошая", "unit": "qualitative", "method": "ASTM D4946", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Дерево: шлифовка P150-180, обеспыливание, грунтование",
+        "substrate_temperature_c": "10-30",
+        "ambient_temperature_c": "10-30",
+        "relative_humidity_percent_max": 75,
+        "tool": "Кисть, валик, краскопульт (HVLP)",
+        "spread_rate_m2_per_l": "10-12",
+        "recoat_time_h": "4-6",
+        "full_cure_days": 14
+      },
+      "safety": {
+        "ghs_pictograms": [],
+        "h_statements": [],
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}

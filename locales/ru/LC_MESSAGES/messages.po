@@ -1,0 +1,249 @@
+# Russian translations for Formulation Workbench
+# Copyright (C) 2026 Formulation Workbench Team
+# This file is distributed under the same license as the project.
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0.0\n"
+"Report-Msgid-Bugs-To: team@formulation-workbench.local\n"
+"POT-Creation-Date: 2026-06-24\n"
+"PO-Revision-Date: 2026-06-24\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+# Application
+msgid "app.title"
+msgstr "Formulation Workbench"
+
+msgid "app.disclaimer"
+msgstr ""
+"Данные носят справочный характер. Перед промышленным применением требуется "
+"лабораторная валидация и адаптация под конкретное сырьё."
+
+# Main window
+msgid "menu.file"
+msgstr "Файл"
+
+msgid "menu.edit"
+msgstr "Правка"
+
+msgid "menu.view"
+msgstr "Вид"
+
+msgid "menu.help"
+msgstr "Справка"
+
+msgid "action.new_recipe"
+msgstr "Создать рецептуру"
+
+msgid "action.open_recipe"
+msgstr "Открыть рецептуру"
+
+msgid "action.search_recipe"
+msgstr "Поиск рецептуры"
+
+msgid "action.compare"
+msgstr "Сравнить рецептуры"
+
+msgid "action.calculator"
+msgstr "Калькулятор партии"
+
+msgid "action.predictor"
+msgstr "Прогноз характеристик"
+
+msgid "action.export_pdf"
+msgstr "Экспорт в PDF"
+
+msgid "action.export_xlsx"
+msgstr "Экспорт в Excel"
+
+msgid "action.export_1c"
+msgstr "Экспорт в 1С"
+
+msgid "action.settings"
+msgstr "Настройки"
+
+msgid "action.exit"
+msgstr "Выход"
+
+msgid "action.about"
+msgstr "О программе"
+
+# Catalog
+msgid "catalog.title"
+msgstr "Каталог рецептур"
+
+msgid "catalog.filter.category"
+msgstr "Категория"
+
+msgid "catalog.filter.subcategory"
+msgstr "Подкатегория"
+
+msgid "catalog.filter.product_class"
+msgstr "Класс продукта"
+
+msgid "catalog.filter.binder_type"
+msgstr "Тип связующего"
+
+msgid "catalog.filter.tags"
+msgstr "Теги"
+
+msgid "catalog.empty"
+msgstr "Рецептуры не найдены"
+
+# Recipe editor
+msgid "recipe.editor.title"
+msgstr "Редактор рецептуры"
+
+msgid "recipe.tab.general"
+msgstr "Общие сведения"
+
+msgid "recipe.tab.composition"
+msgstr "Состав"
+
+msgid "recipe.tab.process"
+msgstr "Технология"
+
+msgid "recipe.tab.properties"
+msgstr "Характеристики"
+
+msgid "recipe.tab.application"
+msgstr "Применение"
+
+msgid "recipe.tab.safety"
+msgstr "Безопасность"
+
+msgid "recipe.tab.sources"
+msgstr "Источники"
+
+msgid "recipe.field.category"
+msgstr "Категория"
+
+msgid "recipe.field.subcategory"
+msgstr "Подкатегория"
+
+msgid "recipe.field.binder_type"
+msgstr "Тип связующего"
+
+msgid "recipe.field.product_class"
+msgstr "Класс продукта"
+
+msgid "recipe.field.intended_use"
+msgstr "Назначение"
+
+msgid "recipe.field.finish"
+msgstr "Степень блеска"
+
+msgid "recipe.field.color"
+msgstr "Цвет"
+
+msgid "recipe.field.mass_percent"
+msgstr "Массовая доля, %"
+
+msgid "recipe.field.tolerance"
+msgstr "Допуск, %"
+
+msgid "recipe.field.cas_number"
+msgstr "CAS-номер"
+
+msgid "recipe.field.function"
+msgstr "Функция"
+
+# Verification
+msgid "verification.title"
+msgstr "Верификация"
+
+msgid "verification.status.draft"
+msgstr "Черновик"
+
+msgid "verification.status.pending_review"
+msgstr "На ревью"
+
+msgid "verification.status.verified"
+msgstr "Верифицировано"
+
+msgid "verification.status.rejected"
+msgstr "Отклонено"
+
+msgid "verification.count"
+msgstr "Подтверждений: {count}/{required}"
+
+msgid "verification.submit_for_review"
+msgstr "Отправить на ревью"
+
+msgid "verification.verify"
+msgstr "Подтвердить"
+
+msgid "verification.reject"
+msgstr "Отклонить"
+
+# Validation errors
+msgid "validation.cas_invalid"
+msgstr "Некорректный CAS-номер: {cas}"
+
+msgid "validation.isbn_invalid"
+msgstr "Некорректный ISBN: {isbn}"
+
+msgid "validation.mass_percent_sum"
+msgstr "Сумма массовых долей должна быть 100% (±0.5%), получено {actual}%"
+
+msgid "validation.source_missing"
+msgstr "Рецептура должна иметь первичный источник"
+
+msgid "verification.requires_3_sources"
+msgstr "Для верификации требуется 3 независимых подтверждения источника"
+
+# Calculator
+msgid "calculator.title"
+msgstr "Калькулятор партии"
+
+msgid "calculator.target_mass"
+msgstr "Целевая масса партии, кг"
+
+msgid "calculator.target_volume"
+msgstr "Целевой объём партии, л"
+
+# Predictor
+msgid "predictor.title"
+msgstr "Прогноз характеристик"
+
+msgid "predictor.warning_predicted"
+msgstr "Расчётное значение, требует лабораторного подтверждения"
+
+msgid "predictor.pvc_cpvc"
+msgstr "PVC / CPVC"
+
+msgid "predictor.density"
+msgstr "Плотность"
+
+msgid "predictor.voc"
+msgstr "VOC"
+
+msgid "predictor.solids"
+msgstr "Сухой остаток"
+
+msgid "predictor.tg"
+msgstr "Температура стеклования (Tg)"
+
+# Footer / status bar
+msgid "status.ready"
+msgstr "Готово"
+
+msgid "status.loading"
+msgstr "Загрузка..."
+
+msgid "status.saving"
+msgstr "Сохранение..."
+
+# Themes
+msgid "theme.light"
+msgstr "Светлая"
+
+msgid "theme.dark"
+msgstr "Тёмная"
+
+msgid "theme.high_contrast"
+msgstr "Высокий контраст"

@@ -1,0 +1,509 @@
+{
+  "_category": "Колеры и пигментные пасты",
+  "_description": "Tinting pastes and pigment concentrates: universal, water-based, solvent-based",
+  "recipes": [
+    {
+      "id": "rcp_kol_001_universal_paste",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Универсальные (для водных и алкидных систем)",
+        "binder_type": "Смесь акриловой + алкидной дисперсии",
+        "product_class": "Standard",
+        "intended_use": "Универсальная колеровочная паста для тонирования ЛКМ",
+        "finish": "Зависит от базы",
+        "color": "Различные цвета (RAL, NCS)",
+        "tags": [
+          "universal",
+          "pigment-paste",
+          "tinting"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Coloring of Plastics. 2nd ed. Munich: Hanser Publishers, 1999. ISBN: 978-1-56990-322-0.",
+          "page_or_formula": "Chapter 8 'Pigment Preparations', Example 8.4 'Universal Tinting Paste'"
+        },
+        "cross_references": [
+          {
+            "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+            "section": "Chapter 18 'Color and Appearance', pp. 349-380"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Полный производственный процесс (консолидированный)",
+          "description": "Multi-stage процесс: 2 стадий. Детали по стадиям в process_notes.",
+          "components": [
+            {
+              "name": "Water",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 35.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Alkyd emulsion (Bayhydrol A 2809, 45% solids)",
+              "cas_number": "proprietary",
+              "function": "Алкидный компонент (совместим с алкидными ЛКМ)",
+              "manufacturer_reference": "Covestro Bayhydrol A 2809",
+              "mass_percent": 25.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Acrylic emulsion (Acronal S 790)",
+              "cas_number": "proprietary",
+              "function": "Акриловый компонент (водные системы)",
+              "mass_percent": 15.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Dispersant (polyacrylate)",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "proprietary",
+              "function": "Смачиватель пигмента",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Thickener (HEC)",
+              "cas_number": "9004-62-0",
+              "function": "Загуститель",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 3.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Iron oxide red (Bayferrox 130)",
+              "cas_number": "1309-37-1",
+              "function": "Цветной пигмент",
+              "manufacturer_reference": "Lanxess Bayferrox 130",
+              "mass_percent": 18.0,
+              "tolerance_percent": 1.0
+            }
+          ],
+          "process": {
+            "equipment": "См. process_notes",
+            "control_points": [
+              {
+                "parameter": "Process notes",
+                "target": "Стадия 1 (Премикс связующих): оборудование — Диссольвер, T = 23°C, 600 об/мин, 20 мин; Стадия 2 (Ввод пигмента (на примере красного оксида железа)): оборудование — Бисерная мельница, T = 40°C, 3000 об/мин, 45 мин",
+                "method": "Documentation"
+              }
+            ]
+          }
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 35.0,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Density",
+          "value": 1.18,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.03"
+        },
+        {
+          "property": "Pigment concentration",
+          "value": "18",
+          "unit": "%",
+          "method": "Direct",
+          "is_predicted": false
+        },
+        {
+          "property": "Compatibility",
+          "value": "Universal (water + alkyd)",
+          "unit": "qualitative",
+          "method": "Manufacturer",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "dosage_recommendation_percent": "1-10% от базы (зависит от желаемой насыщенности)",
+        "mixing": "Тщательно перемешать перед добавлением в базу"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, срок годности 24 мес."
+      },
+      "safety": {
+        "ghs_pictograms": [],
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      },
+      "notes": [
+        "Нормализовано: 2 стадий консолидированы в 1. Параметры процесса по стадиям сохранены в control_points."
+      ]
+    },
+    {
+      "id": "rcp_kol_002_waterbased_iron_oxide",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Водные (для водно-дисперсионных ЛКМ)",
+        "binder_type": "Акриловая дисперсия",
+        "product_class": "Standard",
+        "intended_use": "Водная пигментная паста для колеровки водно-дисперсионных красок",
+        "finish": "—",
+        "color": "Жёлтый оксид железа",
+        "tags": [
+          "water-based",
+          "iron-oxide",
+          "tinting"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+          "page_or_formula": "§4.2 'Pigment Preparations', pp. 184-210, Example 4.2-C"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Бисерная мельница",
+            "rotational_speed_rpm": 3000,
+            "temperature_c": 40,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 45.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Acrylic dispersion (50% solids)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 20.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор пигмента",
+              "mass_percent": 2.5,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Iron oxide yellow (Bayferrox 920)",
+              "cas_number": "51274-00-1",
+              "function": "Цветной пигмент",
+              "manufacturer_reference": "Lanxess Bayferrox 920",
+              "mass_percent": 30.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 40.0,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Pigment concentration",
+          "value": 30.0,
+          "unit": "%",
+          "method": "Direct",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "dosage_recommendation_percent": "1-8%"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, 24 мес."
+      },
+      "safety": {
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kol_003_solventbased_organic",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Органоразбавляемые (для алкидных, ПУ, эпоксидных систем)",
+        "binder_type": "Алкид (среднее масло)",
+        "product_class": "Standard",
+        "intended_use": "Органоразбавляемая паста для колеровки алкидных эмалей",
+        "finish": "—",
+        "color": "Фталоцианиновый синий",
+        "tags": [
+          "solvent-based",
+          "phthalo-blue",
+          "tinting"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Coloring of Plastics. 2nd ed. Munich: Hanser Publishers, 1999. ISBN: 978-1-56990-322-0.",
+          "page_or_formula": "Example 8.6 'Solvent-Based Organic Pigment Paste'"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Бисерная мельница",
+            "rotational_speed_rpm": 3000,
+            "temperature_c": 40,
+            "duration_min": 45
+          },
+          "components": [
+            {
+              "name": "Long-oil alkyd resin (60% in mineral spirits)",
+              "cas_number": "67746-08-1",
+              "function": "Связующее",
+              "mass_percent": 50.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral spirits",
+              "cas_number": "64742-88-7",
+              "function": "Растворитель",
+              "mass_percent": 15.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Dispersant (BYK-161)",
+              "cas_number": "63148-62-9",
+              "function": "Диспергатор",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Phthalocyanine blue (Heliogen Blue L 6901)",
+              "cas_number": "147-14-8",
+              "function": "Органический пигмент",
+              "manufacturer_reference": "BASF Heliogen Blue L 6901",
+              "mass_percent": 30.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "proprietary",
+              "function": "Смачиватель",
+              "mass_percent": 2.7,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 60.0,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Pigment concentration",
+          "value": 30.0,
+          "unit": "%",
+          "method": "Direct",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "dosage_recommendation_percent": "1-5%"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, 18 мес. Беречь от огня!"
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS02 (Flammable)"
+        ],
+        "h_statements": [
+          "H226 — легковоспламеняющаяся жидкость"
+        ],
+        "p_statements": [
+          "P210 — беречь от огня"
+        ],
+        "ppe": "В вентилируемом помещении, перчатки"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kol_004_carbon_black_paste",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Универсальные (для водных и органоразбавляемых систем)",
+        "binder_type": "Акриловая + алкидная дисперсия",
+        "product_class": "Standard",
+        "intended_use": "Паста технического углерода для получения чёрного цвета",
+        "finish": "—",
+        "color": "Чёрный",
+        "tags": [
+          "carbon-black",
+          "black",
+          "tinting"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Coloring of Plastics. 2nd ed. Munich: Hanser Publishers, 1999. ISBN: 978-1-56990-322-0.",
+          "page_or_formula": "Example 8.8 'Carbon Black Pigment Paste'"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Бисерная мельница",
+            "rotational_speed_rpm": 3500,
+            "temperature_c": 40,
+            "duration_min": 60
+          },
+          "components": [
+            {
+              "name": "Water",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 50.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 20.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Dispersant (high-molecular-weight)",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор (для технического углерода — критично)",
+              "mass_percent": 4.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black (Printex 60)",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент",
+              "manufacturer_reference": "Evonik Printex 60",
+              "mass_percent": 20.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 5.5,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 30.0,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Pigment concentration",
+          "value": 20.0,
+          "unit": "%",
+          "method": "Direct",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "dosage_recommendation_percent": "1-5% (для насыщенного чёрного)"
+      },
+      "safety": {
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}

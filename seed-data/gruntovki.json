@@ -1,0 +1,305 @@
+{
+  "_category": "Грунтовки, шпатлёвки, штукатурки, наливные полы, ровнители",
+  "_description": "Primers, putties, plasters, self-leveling floors, screeds",
+  "recipes": [
+    {
+      "id": "rcp_grn_001_acrylic_primer_universal",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (универсальные)",
+        "binder_type": "Акриловая дисперсия (мелкий размер частиц)",
+        "product_class": "Standard",
+        "intended_use": "Универсальная проникающая грунтовка для пористых оснований",
+        "finish": "Прозрачный после высыхания",
+        "color": "Белый (в жидком виде)",
+        "tags": ["primer", "acrylic", "universal", "interior", "exterior"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+          "page_or_formula": "§6.4 'Primers', pp. 432-450, Formulation 6.4-A"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 600,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Непрерывная фаза", "mass_percent": 92.0, "tolerance_percent": 2.0},
+            {"name": "Acrylic dispersion (50% solids, мелкий размер частиц)", "cas_number": "proprietary", "function": "Связующее (плёнкообразователь)", "mass_percent": 6.0, "tolerance_percent": 0.5},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Wetting agent", "cas_number": "proprietary", "function": "Смачиватель подложки", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Penetration enhancer (TEGO Perenol S 4)", "cas_number": "proprietary", "function": "Глубокая пропитка", "mass_percent": 1.0, "tolerance_percent": 0.2},
+            {"name": "Biocide", "cas_number": "26172-55-4", "function": "Биоцид в таре", "mass_percent": 0.2, "tolerance_percent": 0.05}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 3.5, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±1%"},
+        {"property": "Density", "value": 1.00, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.02"},
+        {"property": "VOC", "value": 0, "unit": "г/л", "method": "EU 2004/42/CE (cat A/h)", "is_predicted": true, "tolerance": "±1"},
+        {"property": "Penetration depth (concrete)", "value": "5-15", "unit": "mm", "method": "Karsten tube", "is_predicted": false},
+        {"property": "Drying time", "value": "2-4", "unit": "ч", "method": "23°C", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Чистое, обеспыленное основание",
+        "ambient_temperature_c": "5-35",
+        "tool": "Кисть, валик, краскопульт",
+        "spread_rate_m2_per_l": "10-15 (зависит от пористости)",
+        "recoat_time_h": "2-4"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от замерзания, 12 мес."
+      },
+      "safety": {
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_grn_002_acrylic_putty_finish",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Шпатлёвки (финишные)",
+        "binder_type": "Акриловая дисперсия + микромрамор",
+        "product_class": "Standard",
+        "intended_use": "Финишная шпатлёвка для внутренних работ (под покраску)",
+        "finish": "Матовая (после шлифовки — гладкая)",
+        "color": "Белый",
+        "tags": ["putty", "acrylic", "finish", "interior", "ready-mix"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Goldschmidt, A.; Streitberger, H.-J. BASF Handbook on Basics of Coating Technology. 2nd ed. Hannover: Vincentz Network, 2014. ISBN: 978-3-86630-650-2.",
+          "page_or_formula": "§6.6 'Putties and Fillers', pp. 470-477, Formulation 6.6-A"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс связующего",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 400,
+            "temperature_c": 23,
+            "duration_min": 20
+          },
+          "components": [
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Непрерывная фаза", "mass_percent": 18.0, "tolerance_percent": 1.5},
+            {"name": "Acrylic dispersion (50% solids)", "cas_number": "proprietary", "function": "Связующее", "mass_percent": 20.0, "tolerance_percent": 1.5},
+            {"name": "Thickener (associative HEUR)", "cas_number": "proprietary", "function": "Загуститель", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Wetting agent", "cas_number": "proprietary", "function": "Смачиватель", "mass_percent": 0.2, "tolerance_percent": 0.1},
+            {"name": "Propylene glycol", "cas_number": "57-55-6", "function": "Антифриз", "mass_percent": 1.0, "tolerance_percent": 0.2}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Ввод наполнителей",
+          "process": {
+            "rotational_speed_rpm": 600,
+            "duration_min": 30,
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "Calcium carbonate (micro, d50=5 мкм)", "cas_number": "1317-65-3", "function": "Наполнитель (финишный)", "manufacturer_reference": "Omya Hydrocarb, Imerys Durcal", "mass_percent": 45.0, "tolerance_percent": 3.0},
+            {"name": "Talc (micro)", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 10.0, "tolerance_percent": 1.0},
+            {"name": "Dolomite (micro)", "cas_number": "16389-88-1", "function": "Наполнитель", "mass_percent": 5.0, "tolerance_percent": 0.5}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 72.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Density", "value": 1.70, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.05"},
+        {"property": "VOC", "value": 8, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±3"},
+        {"property": "Layer thickness", "value": "0.5-2", "unit": "мм", "method": "Practical", "is_predicted": false},
+        {"property": "Drying time (1 мм)", "value": "4-6", "unit": "ч", "method": "23°C, 50% RH", "is_predicted": false},
+        {"property": "Sanding", "value": "Excellent (P180-240)", "unit": "qualitative", "method": "Practical", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Грунтованное основание, сухое, ровное",
+        "ambient_temperature_c": "10-30",
+        "tool": "Шпатель (широкий 300-500 мм)",
+        "spread_rate_kg_per_m2_per_mm": "1.7",
+        "number_of_layers": "1-3 (до достижения нужной ровности)",
+        "recoat_time_h": "4-6"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от замерзания, 12 мес."
+      },
+      "safety": {
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_grn_003_cement_self_leveling",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Наливные полы (самонивелирующиеся, цементные)",
+        "binder_type": "Портландцемент + модификаторы",
+        "product_class": "Standard",
+        "intended_use": "Самонивелирующийся наливной пол для внутренних работ (под финишные покрытия)",
+        "finish": "Гладкая горизонтальная поверхность",
+        "color": "Серый",
+        "tags": ["self-leveling", "cement", "floor", "interior"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Construction and Structural Adhesives and Sealants. Park Ridge, NJ: Noyes Publications, 1988. ISBN: 978-0-8155-1150-2.",
+          "page_or_formula": "Form. CS-0245 'Cement-Based Self-Leveling Floor Screed', pp. 388-394"
+        },
+        "cross_references": [
+          {
+            "citation": "EN 13813 — Cementitious screeds for floors"
+          },
+          {
+            "citation": "ГОСТ 31356-2007 — Смеси сухие строительные на цементном вяжущем."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Сухое смешивание (на заводе)",
+          "process": {
+            "equipment": "Лопастной смеситель (сухой)",
+            "rotational_speed_rpm": 50,
+            "temperature_c": 23,
+            "duration_min": 20
+          },
+          "components": [
+            {"name": "Portland cement CEM I 42.5 R", "cas_number": "65997-15-1", "function": "Минеральное связующее", "mass_percent": 25.0, "tolerance_percent": 1.5},
+            {"name": "Calcium aluminate cement (for rapid strength)", "cas_number": "65997-16-2", "function": "Ускоритель твердения", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Quartz sand (0-1 мм)", "cas_number": "14808-60-7", "function": "Заполнитель", "mass_percent": 50.0, "tolerance_percent": 3.0},
+            {"name": "Calcium carbonate (fine)", "cas_number": "1317-65-3", "function": "Наполнитель (тонкомолотый)", "mass_percent": 10.0, "tolerance_percent": 1.0},
+            {"name": "Redispersible polymer powder (Vinnapas 5010 F)", "cas_number": "proprietary", "function": "Полимерный модификатор (адгезия, эластичность)", "mass_percent": 4.0, "tolerance_percent": 0.5},
+            {"name": "Superplasticizer (Melflux 1641 F)", "cas_number": "proprietary", "function": "Суперпластификатор (текучесть)", "mass_percent": 0.6, "tolerance_percent": 0.1},
+            {"name": "Accelerator (calcium formate)", "cas_number": "544-17-2", "function": "Ускоритель твердения", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Cellulose ether (Walocel MKX 6000 PF)", "cas_number": "9004-62-0", "function": "Водоудержание", "mass_percent": 0.2, "tolerance_percent": 0.05},
+            {"name": "Calcium carbonate filler (fine, 0-50 мкм)", "cas_number": "1317-65-3", "function": "Регулирование гранулометрии", "mass_percent": 4.7, "tolerance_percent": 0.5}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Water demand", "value": "20-22", "unit": "% от массы сухой смеси", "method": "EN 1348", "is_predicted": false},
+        {"property": "Flow (Henkel funnel)", "value": "130-140", "unit": "мм", "method": "EN 12706", "is_predicted": false},
+        {"property": "Working time", "value": "20-30", "unit": "мин", "method": "Practical", "is_predicted": false},
+        {"property": "Walkable after", "value": "4-6", "unit": "ч", "method": "Practical", "is_predicted": false},
+        {"property": "Tile-ready after", "value": "24", "unit": "ч", "method": "Practical", "is_predicted": false},
+        {"property": "Compressive strength (28d)", "value": "≥ 25", "unit": "MPa", "method": "EN 13892-2", "is_predicted": false},
+        {"property": "Flexural strength (28d)", "value": "≥ 5", "unit": "MPa", "method": "EN 13892-2", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Бетонное основание: очистка, грунтование акриловой грунтовкой",
+        "ambient_temperature_c": "10-25",
+        "water_mix_ratio": "5.5-6.0 л воды на 25 кг мешка",
+        "layer_thickness_mm": "3-15 (один слой)",
+        "pot_life_min": "20-30",
+        "tool": "Шпатель, игольчатый валик (деаэрация)"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от влаги, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS05 (Corrosive — цемент щелочной)"],
+        "h_statements": ["H315 — раздражение кожи", "H318 — серьёзное повреждение глаз", "H335 — раздражение дыхательных путей (пыль)"],
+        "p_statements": ["P280 — СИЗ", "P305+P351+P338", "P261 — избегать вдыхания пыли"],
+        "ppe": "Защитные очки, перчатки, респиратор при замешивании сухой смеси"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_grn_004_cement_tile_adhesive",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Standard",
+        "intended_use": "Декоративная минеральная штукатурка (фактура «короед»)",
+        "finish": "Шероховатая (зависит от фракции заполнителя)",
+        "color": "Белый / колерованный",
+        "tags": ["plaster", "cement", "decorative", "exterior", "koroed"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "ГОСТ Р 54358-2011 — Составы декоративные штукатурные на цементном вяжущем."
+        },
+        "cross_references": [
+          {
+            "citation": "EN 998-1 — Specification for mortar for masonry — Part 1: Rendering and plastering mortar"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Сухое смешивание",
+          "process": {
+            "equipment": "Лопастной смеситель (сухой)",
+            "rotational_speed_rpm": 50,
+            "temperature_c": 23,
+            "duration_min": 20
+          },
+          "components": [
+            {"name": "White Portland cement CEM I 52.5 N", "cas_number": "65997-15-1", "function": "Минеральное связующее", "mass_percent": 25.0, "tolerance_percent": 1.5},
+            {"name": "Hydrated lime (Ca(OH)2)", "cas_number": "1305-62-0", "function": "Минеральная добавка (работоспособность)", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Quartz sand (0-2 мм)", "cas_number": "14808-60-7", "function": "Заполнитель (фактурообразующий)", "mass_percent": 55.0, "tolerance_percent": 3.0},
+            {"name": "Calcium carbonate (micro)", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 10.0, "tolerance_percent": 1.0},
+            {"name": "Redispersible polymer powder", "cas_number": "proprietary", "function": "Полимерный модификатор (адгезия)", "mass_percent": 3.0, "tolerance_percent": 0.3},
+            {"name": "Cellulose ether", "cas_number": "9004-62-0", "function": "Водоудержание", "mass_percent": 0.3, "tolerance_percent": 0.05},
+            {"name": "Calcium stearate", "cas_number": "1592-23-0", "function": "Гидрофобизация", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Titanium dioxide (pigment)", "cas_number": "13463-67-7", "function": "Белый пигмент", "mass_percent": 1.2, "tolerance_percent": 0.2}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Water demand", "value": "22-24", "unit": "%", "method": "EN 1348", "is_predicted": false},
+        {"property": "Compressive strength (28d)", "value": "≥ 7.5", "unit": "MPa", "method": "EN 1015-11", "is_predicted": false},
+        {"property": "Adhesion to concrete", "value": "≥ 0.5", "unit": "MPa", "method": "EN 1015-12", "is_predicted": false},
+        {"property": "Water absorption (W2 class)", "value": "≤ 0.2", "unit": "kg/(m²·min^0.5)", "method": "EN 1015-18", "is_predicted": false},
+        {"property": "Sd (water vapor)", "value": "≤ 0.5", "unit": "m", "method": "EN 1015-19", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Минеральное основание (бетон, штукатурка)",
+        "ambient_temperature_c": "10-25",
+        "water_mix_ratio": "6.0-6.5 л на 25 кг",
+        "layer_thickness_mm": "2-5 (по фракции)",
+        "pot_life_min": "60-90",
+        "tool": "Шпатель, тёрка для фактуры («короед»)"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от влаги, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS05 (Corrosive)"],
+        "h_statements": ["H315 — раздражение кожи", "H318 — серьёзное повреждение глаз"],
+        "p_statements": ["P280 — СИЗ", "P305+P351+P338"],
+        "ppe": "Очки, перчатки, респиратор при замешивании"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "_category": "Мастики",
+  "_description": "Mastics: bitumen, bitumen-polymer, rubber, acrylic",
+  "recipes": [
+    {
+      "id": "rcp_mas_001_bitumen_roof",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Битумные (горячего применения)",
+        "binder_type": "Окисленный битум",
+        "product_class": "Standard",
+        "intended_use": "Кровельная битумная мастика для гидроизоляции кровли",
+        "finish": "—",
+        "color": "Чёрный",
+        "tags": ["bitumen", "hot-applied", "roof", "waterproofing"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Construction and Structural Adhesives and Sealants. Park Ridge, NJ: Noyes Publications, 1988. ISBN: 978-0-8155-1150-2.",
+          "page_or_formula": "Form. CS-0089 'Hot-Applied Bitumen Roof Mastic', pp. 245-250"
+        },
+        "cross_references": [
+          {
+            "citation": "ГОСТ 2889-80 — Мастика битумная кровельная горячая."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Расплавление битума",
+          "process": {
+            "equipment": "Реактор с мешалкой и терморегуляцией",
+            "rotational_speed_rpm": 100,
+            "temperature_c": 180,
+            "duration_min": 60
+          },
+          "components": [
+            {"name": "Oxidized bitumen (R 90/15 — penetration 90, softening point 80-90°C)", "cas_number": "64742-93-4", "function": "Связующее", "manufacturer_reference": "Various (refineries)", "mass_percent": 70.0, "tolerance_percent": 2.0},
+            {"name": "Limestone filler (ground, 0-100 мкм)", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 25.0, "tolerance_percent": 2.0},
+            {"name": "Mineral fiber (asbestos-free, rock wool)", "cas_number": "65997-17-3", "function": "Армирующий наполнитель", "mass_percent": 4.5, "tolerance_percent": 0.5},
+            {"name": "Tackifier (C9 hydrocarbon resin)", "cas_number": "68603-08-7", "function": "Адгезионная смола", "mass_percent": 0.5, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Softening point (R&B)", "value": "85-95", "unit": "°C", "method": "ГОСТ 11506 / ASTM D36", "is_predicted": false},
+        {"property": "Penetration (25°C)", "value": "10-20", "unit": "0.1 мм", "method": "ГОСТ 11501 / ASTM D5", "is_predicted": false},
+        {"property": "Flexibility (R=25 мм, -5°C)", "value": "No cracks", "unit": "qualitative", "method": "ГОСТ 2889", "is_predicted": false},
+        {"property": "Adhesion to concrete", "value": "≥ 0.5", "unit": "MPa", "method": "ASTM D4541", "is_predicted": false},
+        {"property": "Heat resistance (70°C, 5h)", "value": "No flow", "unit": "qualitative", "method": "ГОСТ 2889", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Бетонное основание: праймирование битумным праймером",
+        "ambient_temperature_c": "-10...+5 (только при положительной T основания)",
+        "tool": "Шпатель, кисть, наливом с разравниванием",
+        "spread_rate_kg_per_m2": "2-4 (один слой)",
+        "layer_thickness_mm": "3-5"
+      },
+      "storage": {
+        "finished_product": "Блоки в термоупаковке, T = 5-30°C, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS07 (Warning — горячий расплав)"],
+        "h_statements": ["H315 — раздражение кожи (горячий!)", "H335 — раздражение дыхательных путей (пары битума)"],
+        "p_statements": ["P280 — термозащитные СИЗ", "P261 — избегать вдыхания паров"],
+        "ppe": "Термозащитные перчатки, длинный рукав, респиратор, защитные очки. Работать при T ≤ 180°C!"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_mas_002_bitumen_polymer_cold",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Битумно-полимерные (холодного применения)",
+        "binder_type": "Битум + SBS-полимер + растворитель",
+        "product_class": "Standard",
+        "intended_use": "Холодная битумно-полимерная мастика для ремонта кровли",
+        "finish": "—",
+        "color": "Чёрный",
+        "tags": ["bitumen", "polymer", "cold-applied", "roof-repair"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Construction and Structural Adhesives and Sealants. Park Ridge, NJ: Noyes Publications, 1988. ISBN: 978-0-8155-1150-2.",
+          "page_or_formula": "Form. CS-0092 'SBS-Modified Bitumen Mastic', pp. 256-262"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 800,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {"name": "Oxidized bitumen (60% solids cutback in solvent)", "cas_number": "64742-93-4", "function": "Связующее", "mass_percent": 50.0, "tolerance_percent": 2.0},
+            {"name": "SBS polymer (Kraton D1101, 30% in mineral spirits)", "cas_number": "9003-55-8", "function": "Модификатор (эластичность)", "manufacturer_reference": "Kraton D1101", "mass_percent": 15.0, "tolerance_percent": 1.0},
+            {"name": "Mineral spirits", "cas_number": "64742-88-7", "function": "Растворитель", "mass_percent": 15.0, "tolerance_percent": 1.5},
+            {"name": "Limestone filler", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 15.0, "tolerance_percent": 1.5},
+            {"name": "Mineral fiber", "cas_number": "65997-17-3", "function": "Армирующий наполнитель", "mass_percent": 4.0, "tolerance_percent": 0.5},
+            {"name": "Adhesion promoter (silane)", "cas_number": "2530-85-0", "function": "Адгезия к бетону", "mass_percent": 1.0, "tolerance_percent": 0.2}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 70.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Density", "value": 1.05, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.03"},
+        {"property": "VOC", "value": 280, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±30"},
+        {"property": "Elongation at break (20°C)", "value": "≥ 100", "unit": "%", "method": "ГОСТ 26589", "is_predicted": false},
+        {"property": "Heat resistance", "value": "≥ 80", "unit": "°C", "method": "ГОСТ 26589", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Чистое, сухое основание. Без праймера в большинстве случаев.",
+        "ambient_temperature_c": "-5...+35",
+        "tool": "Шпатель, кисть, валик",
+        "spread_rate_kg_per_m2": "1.5-3 (один слой)",
+        "drying_time_h": "12-24"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, беречь от огня, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS02 (Flammable)", "GHS07 (Warning)"],
+        "h_statements": ["H226 — легковоспламеняющаяся жидкость", "H315 — раздражение кожи"],
+        "p_statements": ["P210 — беречь от огня", "P280 — СИЗ"],
+        "ppe": "Вентиляция, перчатки, респиратор при нанесении"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_mas_003_acrylic_waterproof",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Акриловые (водные)",
+        "binder_type": "Акриловая дисперсия (высоконаполненная)",
+        "product_class": "Standard",
+        "intended_use": "Акриловая гидроизоляционная мастика для кровли и фундаментов",
+        "finish": "—",
+        "color": "Серый, белый",
+        "tags": ["acrylic", "water-based", "waterproofing", "eco"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Water-Based Paint Formulations, Vol. 4. Park Ridge, NJ: Noyes Publications, 1998. ISBN: 978-0-8155-1419-0.",
+          "page_or_formula": "Form. 4-0125 'Acrylic Waterproofing Mastic', pp. 142-148"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 600,
+            "temperature_c": 23,
+            "duration_min": 20
+          },
+          "components": [
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Непрерывная фаза", "mass_percent": 20.0, "tolerance_percent": 2.0},
+            {"name": "Acrylic dispersion (60% solids, Acronal S 400)", "cas_number": "proprietary", "function": "Связующее", "mass_percent": 50.0, "tolerance_percent": 2.0},
+            {"name": "Dispersant", "cas_number": "9003-04-7", "function": "Диспергатор", "mass_percent": 0.4, "tolerance_percent": 0.1},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Thickener (associative HEUR)", "cas_number": "proprietary", "function": "Загуститель", "mass_percent": 0.5, "tolerance_percent": 0.1}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Ввод наполнителей",
+          "process": {
+            "rotational_speed_rpm": 1200,
+            "duration_min": 30,
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "Calcium carbonate (coarse)", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 20.0, "tolerance_percent": 2.0},
+            {"name": "Talc", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Plasticizer (DIBP)", "cas_number": "84-69-5", "function": "Пластификатор", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Propylene glycol", "cas_number": "57-55-6", "function": "Антифриз", "mass_percent": 1.5, "tolerance_percent": 0.3},
+            {"name": "Coalescent (Texanol)", "cas_number": "25265-77-4", "function": "Коалесцент", "mass_percent": 0.3, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 65.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Density", "value": 1.45, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.05"},
+        {"property": "VOC", "value": 25, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±10"},
+        {"property": "Elongation at break", "value": "≥ 200", "unit": "%", "method": "ASTM D2370", "is_predicted": false},
+        {"property": "Water vapor permeability", "value": "≥ 5", "unit": "г/(м²·сут)", "method": "DIN 52615", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Чистое, сухое основание (бетон, штукатурка)",
+        "ambient_temperature_c": "5-35",
+        "tool": "Шпатель, валик, кисть",
+        "spread_rate_kg_per_m2": "1.5-3 (один слой)",
+        "drying_time_h": "6-12",
+        "full_cure_days": 7
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от замерзания, 12 мес."
+      },
+      "safety": {
+        "ppe": "Минимальная (перчатки)"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}

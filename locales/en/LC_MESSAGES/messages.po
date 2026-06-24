@@ -1,0 +1,247 @@
+# English translations for Formulation Workbench
+# Copyright (C) 2026 Formulation Workbench Team
+# This file is distributed under the same license as the project.
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0.0\n"
+"Report-Msgid-Bugs-To: team@formulation-workbench.local\n"
+"POT-Creation-Date: 2026-06-24\n"
+"PO-Revision-Date: 2026-06-24\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+# Application
+msgid "app.title"
+msgstr "Formulation Workbench"
+
+msgid "app.disclaimer"
+msgstr ""
+"Data is provided for reference purposes. Industrial use requires laboratory "
+"validation and adaptation to specific raw materials."
+
+# Main window
+msgid "menu.file"
+msgstr "File"
+
+msgid "menu.edit"
+msgstr "Edit"
+
+msgid "menu.view"
+msgstr "View"
+
+msgid "menu.help"
+msgstr "Help"
+
+msgid "action.new_recipe"
+msgstr "New Recipe"
+
+msgid "action.open_recipe"
+msgstr "Open Recipe"
+
+msgid "action.search_recipe"
+msgstr "Search Recipe"
+
+msgid "action.compare"
+msgstr "Compare Recipes"
+
+msgid "action.calculator"
+msgstr "Batch Calculator"
+
+msgid "action.predictor"
+msgstr "Property Predictor"
+
+msgid "action.export_pdf"
+msgstr "Export to PDF"
+
+msgid "action.export_xlsx"
+msgstr "Export to Excel"
+
+msgid "action.export_1c"
+msgstr "Export to 1C"
+
+msgid "action.settings"
+msgstr "Settings"
+
+msgid "action.exit"
+msgstr "Exit"
+
+msgid "action.about"
+msgstr "About"
+
+# Catalog
+msgid "catalog.title"
+msgstr "Recipe Catalog"
+
+msgid "catalog.filter.category"
+msgstr "Category"
+
+msgid "catalog.filter.subcategory"
+msgstr "Subcategory"
+
+msgid "catalog.filter.product_class"
+msgstr "Product Class"
+
+msgid "catalog.filter.binder_type"
+msgstr "Binder Type"
+
+msgid "catalog.filter.tags"
+msgstr "Tags"
+
+msgid "catalog.empty"
+msgstr "No recipes found"
+
+# Recipe editor
+msgid "recipe.editor.title"
+msgstr "Recipe Editor"
+
+msgid "recipe.tab.general"
+msgstr "General"
+
+msgid "recipe.tab.composition"
+msgstr "Composition"
+
+msgid "recipe.tab.process"
+msgstr "Process"
+
+msgid "recipe.tab.properties"
+msgstr "Properties"
+
+msgid "recipe.tab.application"
+msgstr "Application"
+
+msgid "recipe.tab.safety"
+msgstr "Safety"
+
+msgid "recipe.tab.sources"
+msgstr "Sources"
+
+msgid "recipe.field.category"
+msgstr "Category"
+
+msgid "recipe.field.subcategory"
+msgstr "Subcategory"
+
+msgid "recipe.field.binder_type"
+msgstr "Binder Type"
+
+msgid "recipe.field.product_class"
+msgstr "Product Class"
+
+msgid "recipe.field.intended_use"
+msgstr "Intended Use"
+
+msgid "recipe.field.finish"
+msgstr "Finish"
+
+msgid "recipe.field.color"
+msgstr "Color"
+
+msgid "recipe.field.mass_percent"
+msgstr "Mass Fraction, %"
+
+msgid "recipe.field.tolerance"
+msgstr "Tolerance, %"
+
+msgid "recipe.field.cas_number"
+msgstr "CAS Number"
+
+msgid "recipe.field.function"
+msgstr "Function"
+
+# Verification
+msgid "verification.title"
+msgstr "Verification"
+
+msgid "verification.status.draft"
+msgstr "Draft"
+
+msgid "verification.status.pending_review"
+msgstr "Pending Review"
+
+msgid "verification.status.verified"
+msgstr "Verified"
+
+msgid "verification.status.rejected"
+msgstr "Rejected"
+
+msgid "verification.count"
+msgstr "Verifications: {count}/{required}"
+
+msgid "verification.submit_for_review"
+msgstr "Submit for Review"
+
+msgid "verification.verify"
+msgstr "Verify"
+
+msgid "verification.reject"
+msgstr "Reject"
+
+# Validation errors
+msgid "validation.cas_invalid"
+msgstr "Invalid CAS number: {cas}"
+
+msgid "validation.isbn_invalid"
+msgstr "Invalid ISBN: {isbn}"
+
+msgid "validation.mass_percent_sum"
+msgstr "Mass fractions must sum to 100% (±0.5%), got {actual}%"
+
+msgid "validation.source_missing"
+msgstr "Recipe must have a primary source reference"
+
+msgid "verification.requires_3_sources"
+msgstr "Verification requires 3 independent source confirmations"
+
+# Calculator
+msgid "calculator.title"
+msgstr "Batch Calculator"
+
+msgid "calculator.target_mass"
+msgstr "Target Batch Mass, kg"
+
+msgid "calculator.target_volume"
+msgstr "Target Batch Volume, L"
+
+# Predictor
+msgid "predictor.title"
+msgstr "Property Predictor"
+
+msgid "predictor.warning_predicted"
+msgstr "Predicted value, requires laboratory confirmation"
+
+msgid "predictor.pvc_cpvc"
+msgstr "PVC / CPVC"
+
+msgid "predictor.density"
+msgstr "Density"
+
+msgid "predictor.voc"
+msgstr "VOC"
+
+msgid "predictor.solids"
+msgstr "Solids"
+
+msgid "predictor.tg"
+msgstr "Glass Transition Temperature (Tg)"
+
+# Footer / status bar
+msgid "status.ready"
+msgstr "Ready"
+
+msgid "status.loading"
+msgstr "Loading..."
+
+msgid "status.saving"
+msgstr "Saving..."
+
+# Themes
+msgid "theme.light"
+msgstr "Light"
+
+msgid "theme.dark"
+msgstr "Dark"
+
+msgid "theme.high_contrast"
+msgstr "High Contrast"

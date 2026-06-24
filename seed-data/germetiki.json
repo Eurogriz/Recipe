@@ -1,0 +1,295 @@
+{
+  "_category": "Герметики",
+  "_description": "Sealants: silicone, acrylic, PU, polysulfide, butyl, MS-polymer",
+  "recipes": [
+    {
+      "id": "rcp_ger_001_silicone_acetoxy",
+      "metadata": {
+        "category": "Герметики",
+        "subcategory": "Силиконовые (ацетокси-отверждение)",
+        "binder_type": "PDMS + ацетоксисилановый сшиватель",
+        "product_class": "Standard",
+        "intended_use": "Универсальный силиконовый герметик для строительства (окна, двери, ванные)",
+        "finish": "—",
+        "color": "Прозрачный, белый, чёрный, серый",
+        "tags": ["silicone", "acetoxy", "construction", "universal"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE SEALANT — General Purpose (2018). Munich: Wacker Chemie AG.",
+          "page_or_formula": "Formulation 5.1 'Acetoxy-Cure General Purpose Sealant'"
+        },
+        "cross_references": [
+          {
+            "citation": "ISO 11600 — Classification of sealants for building construction"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание под вакуумом",
+          "process": {
+            "equipment": "Планетарный смеситель",
+            "rotational_speed_rpm": 50,
+            "temperature_c": 23,
+            "duration_min": 60
+          },
+          "components": [
+            {"name": "Polydimethylsiloxane (PDMS, 100,000 cSt)", "cas_number": "63148-62-9", "function": "Основа (полимер)", "mass_percent": 45.0, "tolerance_percent": 2.0},
+            {"name": "Calcium carbonate (ground, treated)", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 35.0, "tolerance_percent": 2.0},
+            {"name": "Mineral oil (plasticizer)", "cas_number": "8042-47-5", "function": "Пластификатор", "mass_percent": 8.0, "tolerance_percent": 1.0},
+            {"name": "Methyltriacetoxysilane (crosslinker)", "cas_number": "4253-34-3", "function": "Сшиватель (ацетокси)", "mass_percent": 4.0, "tolerance_percent": 0.5},
+            {"name": "Fumed silica (Aerosil 200)", "cas_number": "112945-52-5", "function": "Тиксотропия + усиление", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Titanium dioxide (pigment)", "cas_number": "13463-67-7", "function": "Белый пигмент", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Tin catalyst (dibutyltin dilaurate)", "cas_number": "77-58-7", "function": "Катализатор", "mass_percent": 0.05, "tolerance_percent": 0.01},
+            {"name": "Adhesion promoter (amino silane)", "cas_number": "919-30-2", "function": "Адгезия к стеклу/металлу", "mass_percent": 0.95, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Density", "value": 1.35, "unit": "г/см³", "method": "DIN 53479", "is_predicted": false},
+        {"property": "Shore A hardness", "value": "20-30", "unit": "Shore A", "method": "ISO 868", "is_predicted": false},
+        {"property": "Tensile strength", "value": "≥ 0.8", "unit": "MPa", "method": "ISO 8339", "is_predicted": false},
+        {"property": "Elongation at break", "value": "≥ 200", "unit": "%", "method": "ISO 8339", "is_predicted": false},
+        {"property": "Skin formation time", "value": "10-20", "unit": "мин", "method": "23°C, 50% RH", "is_predicted": false},
+        {"property": "Movement capability", "value": "±20", "unit": "%", "method": "ISO 11600 (Class 20HM)", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Поверхности чистые, сухие. Пористые — грунтовать праймером.",
+        "ambient_temperature_c": "5-40",
+        "tool": "Шприц-пистолет (310 мл картридж)",
+        "cure_rate_mm_per_24h": "2-3",
+        "full_cure_days": "5-7"
+      },
+      "storage": {
+        "finished_product": "T = 5-25°C, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS07 (Warning)"],
+        "h_statements": ["H315 — раздражение кожи", "H319 — раздражение глаз", "H334 — при вдыхании может вызвать аллергию (уксусная кислота при отверждении!)"],
+        "p_statements": ["P280 — СИЗ", "P305+P351+P338"],
+        "ppe": "Вентиляция! Уксусная кислота выделяется при отверждении — раздражает слизистые. Не использовать в закрытых помещениях без вентиляции."
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_ger_002_silicone_neutral",
+      "metadata": {
+        "category": "Герметики",
+        "subcategory": "Силиконовые (нейтральное отверждение)",
+        "binder_type": "PDMS + метокси/алкокси силановый сшиватель",
+        "product_class": "Premium",
+        "intended_use": "Нейтральный силикон для металла, бетона, природного камня (без коррозии)",
+        "finish": "—",
+        "color": "Прозрачный, белый, серый, чёрный",
+        "tags": ["silicone", "neutral", "corrosion-safe", "stone-safe"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE SEALANT — Neutral Cure Premium (2018). Munich: Wacker Chemie AG.",
+          "page_or_formula": "Formulation 6.2 'Alkoxy-Cure Neutral Sealant'"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание под вакуумом",
+          "process": {
+            "equipment": "Планетарный смеситель",
+            "rotational_speed_rpm": 50,
+            "temperature_c": 23,
+            "duration_min": 60
+          },
+          "components": [
+            {"name": "Polydimethylsiloxane (PDMS)", "cas_number": "63148-62-9", "function": "Основа", "mass_percent": 42.0, "tolerance_percent": 2.0},
+            {"name": "Calcium carbonate (treated)", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 40.0, "tolerance_percent": 2.0},
+            {"name": "Mineral oil", "cas_number": "8042-47-5", "function": "Пластификатор", "mass_percent": 6.0, "tolerance_percent": 1.0},
+            {"name": "Vinyltrimethoxysilane (crosslinker)", "cas_number": "2768-02-7", "function": "Сшиватель (метокси)", "mass_percent": 3.0, "tolerance_percent": 0.5},
+            {"name": "Methyltrimethoxysilane (crosslinker)", "cas_number": "1185-55-3", "function": "Сшиватель", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Fumed silica", "cas_number": "112945-52-5", "function": "Тиксотропия", "mass_percent": 4.0, "tolerance_percent": 0.5},
+            {"name": "Titanium dioxide", "cas_number": "13463-67-7", "function": "Пигмент", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Titanium catalyst (Tyzor TE)", "cas_number": "10583-66-1", "function": "Катализатор (Ti-комплекс)", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Adhesion promoter", "cas_number": "919-30-2", "function": "Адгезия", "mass_percent": 0.5, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Density", "value": 1.40, "unit": "г/см³", "method": "DIN 53479", "is_predicted": false},
+        {"property": "Shore A hardness", "value": "25-35", "unit": "Shore A", "method": "ISO 868", "is_predicted": false},
+        {"property": "Movement capability", "value": "±25", "unit": "%", "method": "ISO 11600 (Class 25HM)", "is_predicted": false},
+        {"property": "Skin formation time", "value": "20-40", "unit": "мин", "method": "23°C, 50% RH", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Поверхности чистые, сухие. Может применяться на щелочных основаниях (бетон) без грунта.",
+        "ambient_temperature_c": "5-40",
+        "tool": "Шприц-пистолет",
+        "cure_rate_mm_per_24h": "1-2",
+        "full_cure_days": "5-10"
+      },
+      "storage": {
+        "finished_product": "T = 5-25°C, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS07 (Warning)"],
+        "h_statements": ["H315 — раздражение кожи"],
+        "p_statements": ["P280 — СИЗ"],
+        "ppe": "Нейтральный — метанол при отверждении, но в небольших количествах. Вентиляция для больших объёмов."
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_ger_003_acrylic_paintable",
+      "metadata": {
+        "category": "Герметики",
+        "subcategory": "Акриловые",
+        "binder_type": "Акриловая дисперсия",
+        "product_class": "Standard",
+        "intended_use": "Акриловый герметик для внутренних работ (под окраску)",
+        "finish": "—",
+        "color": "Белый",
+        "tags": ["acrylic", "water-based", "paintable", "interior"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Adhesives and Sealants Manual. Park Ridge, NJ: Noyes Publications, 1982. ISBN: 978-0-8155-0905-0.",
+          "page_or_formula": "Form. AS-0156 'Acrylic Latex Sealant', pp. 218-222"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Диссольвер (вакуум)",
+            "rotational_speed_rpm": 400,
+            "temperature_c": 23,
+            "duration_min": 45
+          },
+          "components": [
+            {"name": "Acrylic dispersion (Acronal S 790, 50% solids)", "cas_number": "proprietary", "function": "Основа", "mass_percent": 60.0, "tolerance_percent": 2.0},
+            {"name": "Calcium carbonate", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 25.0, "tolerance_percent": 2.0},
+            {"name": "Talc", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Plasticizer (DIBP)", "cas_number": "84-69-5", "function": "Пластификатор", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Propylene glycol", "cas_number": "57-55-6", "function": "Антифриз, коалесцент", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Thickener (associative HEUR)", "cas_number": "proprietary", "function": "Загуститель", "mass_percent": 1.0, "tolerance_percent": 0.2},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Coalescent (Texanol)", "cas_number": "25265-77-4", "function": "Коалесцент", "mass_percent": 1.5, "tolerance_percent": 0.2},
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Разбавление", "mass_percent": 0.2, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Density", "value": 1.55, "unit": "г/см³", "method": "DIN 53479", "is_predicted": false},
+        {"property": "Mass solids", "value": 75.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±2%"},
+        {"property": "Movement capability", "value": "±12", "unit": "%", "method": "ISO 11600 (Class 12.5P)", "is_predicted": false},
+        {"property": "Paintability", "value": "Excellent (water-based paints)", "unit": "qualitative", "method": "Manufacturer", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Поверхности чистые, сухие",
+        "ambient_temperature_c": "5-40",
+        "tool": "Шприц-пистолет",
+        "cure_rate_mm_per_24h": "1-2",
+        "full_cure_days": "7-14"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от замерзания, 12 мес."
+      },
+      "safety": {
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_ger_004_polysulfide_2k",
+      "metadata": {
+        "category": "Герметики",
+        "subcategory": "Тиоколовые (полисульфидные, 2К)",
+        "binder_type": "Полисульфидный полимер + пероксидный отвердитель",
+        "product_class": "Industrial",
+        "intended_use": "Герметик для авиационной, судостроительной промышленности (топливные баки, стёкла)",
+        "finish": "—",
+        "color": "Чёрный, серый",
+        "tags": ["polysulfide", "2k", "aviation", "chemical-resistant"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Petrie, E.M. Handbook of Adhesives and Sealants. 2nd ed. New York: McGraw-Hill, 2007. ISBN: 978-0-07-147916-5.",
+          "page_or_formula": "Chapter 16 'Polysulfide Sealants', Formulation 16.3 '2K Aircraft Fuel-Tank Sealant', pp. 615-628"
+        }
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Компонент A (полимер + наполнители)",
+          "process": {
+            "equipment": "Планетарный смеситель",
+            "rotational_speed_rpm": 100,
+            "temperature_c": 23,
+            "duration_min": 60
+          },
+          "components": [
+            {"name": "Liquid polysulfide polymer (LP-32, MW 4000)", "cas_number": "68611-50-7", "function": "Основа (тиол-концевой)", "manufacturer_reference": "Torrothane LP-32", "mass_percent": 55.0, "tolerance_percent": 2.0},
+            {"name": "Carbon black (N550)", "cas_number": "1333-86-4", "function": "Наполнитель + усиление", "mass_percent": 25.0, "tolerance_percent": 1.5},
+            {"name": "Calcium carbonate", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 15.0, "tolerance_percent": 1.0},
+            {"name": "Adhesion promoter (silane)", "cas_number": "2530-85-0", "function": "Адгезия", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Plasticizer", "cas_number": "84-69-5", "function": "Пластификатор", "mass_percent": 3.0, "tolerance_percent": 0.3}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Компонент B (отвердитель)",
+          "process": {
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "Manganese dioxide (activator paste)", "cas_number": "1313-13-9", "function": "Окислитель (сшиватель тиолов)", "mass_percent": 50.0, "tolerance_percent": 2.0},
+            {"name": "Plasticizer (DIBP)", "cas_number": "84-69-5", "function": "Паста-носитель", "mass_percent": 45.0, "tolerance_percent": 2.0},
+            {"name": "Retarder (stearic acid)", "cas_number": "57-11-4", "function": "Замедлитель", "mass_percent": 3.0, "tolerance_percent": 0.5},
+            {"name": "Carbon black", "cas_number": "1333-86-4", "function": "Пигмент", "mass_percent": 2.0, "tolerance_percent": 0.3}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mix ratio A:B", "value": "100:7", "unit": "by weight", "method": "Manufacturer", "is_predicted": false},
+        {"property": "Pot life", "value": "2-4", "unit": "ч", "method": "23°C", "is_predicted": false},
+        {"property": "Shore A hardness", "value": "35-45", "unit": "Shore A", "method": "ISO 868", "is_predicted": false},
+        {"property": "Fuel resistance", "value": "Excellent (jet fuel, gasoline)", "unit": "qualitative", "method": "ASTM D471", "is_predicted": false},
+        {"property": "Service temperature", "value": "-55...+130", "unit": "°C", "method": "Manufacturer", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Металл: обезжиривание + грунтование праймером для тиоколовых герметиков",
+        "ambient_temperature_c": "15-30",
+        "tool": "Шприц-дозатор (двухкомпонентный), шпатель",
+        "cure_time_h": "24-48",
+        "full_cure_days": 7
+      },
+      "storage": {
+        "raw_materials": "A — 12 мес, B (MnO₂ паста) — 6 мес (отдельно)"
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS07 (Warning)"],
+        "h_statements": ["H315 — раздражение кожи", "H319 — раздражение глаз"],
+        "p_statements": ["P280 — СИЗ"],
+        "ppe": "Перчатки, защитные очки. MnO₂ — окислитель — хранить отдельно от органики!"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}

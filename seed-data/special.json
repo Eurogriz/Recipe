@@ -1,0 +1,273 @@
+{
+  "_category": "Антикоррозионные покрытия, огнезащита, гидроизоляция",
+  "_description": "Specialty coatings: anti-corrosion, fire protection, waterproofing",
+  "recipes": [
+    {
+      "id": "rcp_spec_001_anticorrosion_zinc_rich",
+      "metadata": {
+        "category": "Антикоррозионные покрытия, огнезащита, гидроизоляция",
+        "subcategory": "Антикоррозионные (цинк-наполненные грунты)",
+        "binder_type": "Эпоксидная смола (2К) + цинковая пыль",
+        "product_class": "Industrial",
+        "intended_use": "Антикоррозионный грунт для металлоконструкций (мосты, резервуары, морские сооружения)",
+        "finish": "Матовый серый",
+        "color": "Серый (цинковый)",
+        "tags": ["anti-corrosion", "zinc-rich", "epoxy", "industrial"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Industrial Coatings Formulary. Park Ridge, NJ: Noyes Publications, 1986. ISBN: 978-0-8155-1086-4.",
+          "page_or_formula": "Form. IC-0342 'Zinc-Rich Epoxy Primer', pp. 258-264"
+        },
+        "cross_references": [
+          {
+            "citation": "ISO 12944 — Corrosion protection of steel structures by protective paint systems"
+          },
+          {
+            "citation": "ГОСТ 9.402 — ЕСЗКС. Покрытия лакокрасочные. Подготовка металлических поверхностей к окрашиванию."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Компонент A (смола + добавки)",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 400,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {"name": "Epoxy resin (DGEBA, EEW 190, liquid)", "cas_number": "25068-38-6", "function": "Связующее (компонент A)", "mass_percent": 18.0, "tolerance_percent": 1.0},
+            {"name": "Reactive diluent (C12-C14 alkyl glycidyl ether)", "cas_number": "68609-97-2", "function": "Реактивный разбавитель", "mass_percent": 3.0, "tolerance_percent": 0.3},
+            {"name": "Xylene", "cas_number": "1330-20-7", "function": "Растворитель", "mass_percent": 2.5, "tolerance_percent": 0.3},
+            {"name": "Butanol", "cas_number": "71-36-3", "function": "Растворитель (для смачивания цинка)", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.3, "tolerance_percent": 0.1},
+            {"name": "Adhesion promoter (silane)", "cas_number": "2530-85-0", "function": "Адгезия к стали", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Fumed silica", "cas_number": "112945-52-5", "function": "Тиксотропия", "mass_percent": 1.5, "tolerance_percent": 0.2}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Ввод цинковой пыли (после смешивания добавок)",
+          "process": {
+            "rotational_speed_rpm": 200,
+            "duration_min": 15,
+            "temperature_c": 23,
+            "control_points": [
+              {"parameter": "Защита от влаги", "target": "Строго избегать контакта с водой (реакция цинка!)", "method": "Технологический"}
+            ]
+          },
+          "components": [
+            {"name": "Zinc dust (99% purity, particle size 3-5 мкм)", "cas_number": "7440-66-6", "function": "Антикоррозионный пигмент (жертвенный)", "manufacturer_reference": "Various (US Zinc, Zinifex)", "mass_percent": 70.0, "tolerance_percent": 2.0}
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "Компонент B (отвердитель)",
+          "process": {
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "Polyamide amine (amine value 240)", "cas_number": "68410-23-1", "function": "Отвердитель", "mass_percent": 2.0, "tolerance_percent": 0.3},
+            {"name": "Xylene", "cas_number": "1330-20-7", "function": "Растворитель", "mass_percent": 0.2, "tolerance_percent": 0.05}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Zinc content in dry film", "value": "≥ 85", "unit": "%", "method": "ISO 3549 / ASTM D6580", "is_predicted": false},
+        {"property": "Mass solids", "value": 85.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±2%"},
+        {"property": "VOC", "value": 350, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±30"},
+        {"property": "DFT per coat", "value": "60-80", "unit": "мкм", "method": "Practical", "is_predicted": false},
+        {"property": "Salt spray resistance", "value": "≥ 1000", "unit": "ч", "method": "ISO 9227", "is_predicted": false},
+        {"property": "Pot life", "value": "3-5", "unit": "ч", "method": "Manufacturer", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Сталь: пескоструйная обработка Sa 2.5 (ISO 8501-1), профиль 50-75 мкм. НЕ ПРИМЕНЯТЬ на влажной поверхности!",
+        "ambient_temperature_c": "10-30",
+        "relative_humidity_percent_max": 80,
+        "tool": "Безвоздушное распыление (Airless, 150-200 бар), кисть",
+        "spread_rate_m2_per_l": "5-7 (один слой 60 мкм)",
+        "recoat_time_h": "12-24 (top coat)",
+        "full_cure_days": 7
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS02 (Flammable)", "GHS07 (Warning)", "GHS08 (Sensitizer)", "GHS09 (Aquatic)"],
+        "h_statements": ["H226 — легковоспламеняющаяся жидкость", "H315/H319 — раздражение", "H317 — аллергическая реакция (эпоксидные смолы!)", "H410 — токсично для водных организмов (цинк)"],
+        "p_statements": ["P210 — беречь от огня", "P273 — избегать попадания в окружающую среду", "P280 — СИЗ"],
+        "ppe": "Защитные очки, нитриловые перчатки, респиратор с угольным фильтром. Цинковая пыль — токсична!"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_spec_002_fire_protection_intumescent",
+      "metadata": {
+        "category": "Антикоррозионные покрытия, огнезащита, гидроизоляция",
+        "subcategory": "Огнезащитные (вспучивающиеся покрытия)",
+        "binder_type": "Акриловая дисперсия + вспучивающиеся добавки",
+        "product_class": "Industrial",
+        "intended_use": "Огнезащита металлических конструкций (R30-R90)",
+        "finish": "Матовый белый",
+        "color": "Белый",
+        "tags": ["fire-protection", "intumescent", "acrylic", "structural-steel"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wicks, Z.W. Jr.; Jones, F.N.; Pappas, S.P. Organic Coatings: Science and Technology. 4th ed. Hoboken, NJ: Wiley, 2017. ISBN: 978-1-118-83620-6.",
+          "page_or_formula": "Chapter 30 'Flame-Retardant Coatings', Example 30.4 'Intumescent Acrylic Coating', pp. 690-700"
+        },
+        "cross_references": [
+          {
+            "citation": "ГОСТ Р 53295-2009 — Средства огнезащиты для стальных конструкций."
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 600,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {"name": "Water", "cas_number": "7732-18-5", "function": "Непрерывная фаза", "mass_percent": 30.0, "tolerance_percent": 2.0},
+            {"name": "Acrylic dispersion (50% solids)", "cas_number": "proprietary", "function": "Связующее", "mass_percent": 30.0, "tolerance_percent": 2.0},
+            {"name": "Dispersant", "cas_number": "9003-04-7", "function": "Диспергатор", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Defoamer", "cas_number": "63148-62-9", "function": "Пеногаситель", "mass_percent": 0.4, "tolerance_percent": 0.1},
+            {"name": "Thickener (associative HEUR)", "cas_number": "proprietary", "function": "Загуститель", "mass_percent": 0.6, "tolerance_percent": 0.1}
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Ввод огнезащитных компонентов",
+          "process": {
+            "rotational_speed_rpm": 400,
+            "duration_min": 45,
+            "temperature_c": 23
+          },
+          "components": [
+            {"name": "Ammonium polyphosphate (APP, Phase II)", "cas_number": "68333-79-9", "function": "Кислотный источник (вспучивание)", "manufacturer_reference": "Clariant Exolit AP 422", "mass_percent": 20.0, "tolerance_percent": 1.5},
+            {"name": "Pentaerythritol (PER)", "cas_number": "115-77-5", "function": "Углеродный источник (коксообразование)", "mass_percent": 8.0, "tolerance_percent": 0.5},
+            {"name": "Melamine (MEL)", "cas_number": "108-78-1", "function": "Газообразователь (вспенивание)", "mass_percent": 4.0, "tolerance_percent": 0.5},
+            {"name": "Titanium dioxide (rutile)", "cas_number": "13463-67-7", "function": "Белый пигмент + УФ-защита", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Calcium carbonate", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 1.0, "tolerance_percent": 0.2},
+            {"name": "Propylene glycol", "cas_number": "57-55-6", "function": "Антифриз, коалесцент", "mass_percent": 0.5, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 60.0, "unit": "%", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±3%"},
+        {"property": "Density", "value": 1.30, "unit": "г/см³", "method": "Rule of mixtures", "is_predicted": true, "tolerance": "±0.05"},
+        {"property": "VOC", "value": 20, "unit": "г/л", "method": "EU 2004/42/CE", "is_predicted": true, "tolerance": "±5"},
+        {"property": "DFT (for R60)", "value": "1.0-1.5", "unit": "мм", "method": "ГОСТ Р 53295 / EN 13381-4", "is_predicted": false},
+        {"property": "Expansion ratio (500°C)", "value": "20-30", "unit": "x", "method": "EN 13381-4", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Грунтованная сталь (антикоррозионный грунт)",
+        "ambient_temperature_c": "10-30",
+        "tool": "Безвоздушное распыление (Airless), шпатель для толстых слоёв",
+        "spread_rate_kg_per_m2_per_mm": "1.3",
+        "number_of_layers": "3-6 (до достижения нужного DFT)",
+        "recoat_time_h": "12-24",
+        "full_cure_days": 14
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от замерзания, 12 мес."
+      },
+      "safety": {
+        "ppe": "При нагревании (>200°C) выделяются токсичные газы. Избегать вдыхания продуктов горения при пожаре."
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_spec_003_pu_waterproofing_membrane",
+      "metadata": {
+        "category": "Антикоррозионные покрытия, огнезащита, гидроизоляция",
+        "subcategory": "Гидроизоляция (ПУ мембраны)",
+        "binder_type": "Полиуретан (ароматический, 1К, отверждение влагой)",
+        "product_class": "Premium",
+        "intended_use": "Бесшовная гидроизоляционная мембрана для кровли, фундаментов, балконов",
+        "finish": "Гладкая эластичная плёнка",
+        "color": "Серый, чёрный",
+        "tags": ["waterproofing", "pu", "1k", "membrane", "seamless"]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes', pp. 615-635"
+        },
+        "cross_references": [
+          {
+            "citation": "EN 13867 — Flexible sheets for waterproofing — Plastic and rubber sheets for waterproofing of concrete bridges"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание под вакуумом",
+          "process": {
+            "equipment": "Диссольвер (вакуум)",
+            "rotational_speed_rpm": 200,
+            "temperature_c": 23,
+            "duration_min": 60
+          },
+          "components": [
+            {"name": "Aromatic prepolymer (MDI-based, NCO ~3.5%)", "cas_number": "proprietary", "function": "Основа (NCO-преполимер)", "manufacturer_reference": "BASF Lupranat, Covestro Desmodur", "mass_percent": 55.0, "tolerance_percent": 2.0},
+            {"name": "Plasticizer (DINP)", "cas_number": "68515-48-0", "function": "Пластификатор", "mass_percent": 15.0, "tolerance_percent": 1.0},
+            {"name": "Calcium carbonate", "cas_number": "1317-65-3", "function": "Наполнитель", "mass_percent": 15.0, "tolerance_percent": 1.0},
+            {"name": "Talc", "cas_number": "14807-96-6", "function": "Наполнитель", "mass_percent": 8.0, "tolerance_percent": 0.5},
+            {"name": "Titanium dioxide (rutile)", "cas_number": "13463-67-7", "function": "Пигмент + UV", "mass_percent": 5.0, "tolerance_percent": 0.5},
+            {"name": "Catalyst (DBTL)", "cas_number": "77-58-7", "function": "Катализатор", "mass_percent": 0.5, "tolerance_percent": 0.1},
+            {"name": "Adhesion promoter (silane)", "cas_number": "2530-85-0", "function": "Адгезия", "mass_percent": 1.0, "tolerance_percent": 0.2},
+            {"name": "UV absorber", "cas_number": "104810-47-1", "function": "UV-защита (для наружного применения)", "mass_percent": 0.5, "tolerance_percent": 0.1}
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {"property": "Mass solids", "value": 100.0, "unit": "%", "method": "100% reactive", "is_predicted": false},
+        {"property": "VOC", "value": 0, "unit": "г/л", "method": "100% solids", "is_predicted": false},
+        {"property": "Tensile strength", "value": "≥ 4", "unit": "MPa", "method": "ISO 37", "is_predicted": false},
+        {"property": "Elongation at break", "value": "≥ 500", "unit": "%", "method": "ISO 37", "is_predicted": false},
+        {"property": "Shore A hardness", "value": "70-85", "unit": "Shore A", "method": "ISO 868", "is_predicted": false},
+        {"property": "Water vapor permeability", "value": "≤ 15", "unit": "г/(м²·сут)", "method": "EN 1931", "is_predicted": false},
+        {"property": "Crack bridging", "value": "≥ 2", "unit": "мм", "method": "EN 1062-7", "is_predicted": false}
+      ],
+      "application_conditions": {
+        "surface_preparation": "Бетон: грунтовка ПУ праймером. Сталь: пескоструй Sa 2.5 + грунт.",
+        "ambient_temperature_c": "5-35",
+        "relative_humidity_percent": "40-80 (влага воздуха отверждает)",
+        "tool": "Безвоздушное распыление, шпатель, валик",
+        "spread_rate_kg_per_m2_per_mm": "1.05",
+        "number_of_layers": "2-3",
+        "recoat_time_h": "12-24",
+        "full_cure_days": 7
+      },
+      "storage": {
+        "raw_materials": "Банки/бочки, T = 5-25°C, защищать от влаги, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": ["GHS07 (Warning)", "GHS08 (Sensitizer)"],
+        "h_statements": ["H315 — раздражение кожи", "H317 — аллергическая реакция (ароматические изоцианаты — ОЧЕНЬ опасные сенсибилизаторы!)", "H332 — вредно при вдыхании"],
+        "p_statements": ["P280 — СИЗ обязательно (респиратор!)", "P304+P340 — при вдыхании", "P342+P311 — при респираторных симптомах — медпомощь"],
+        "ppe": "Респиратор с угольным фильтром (для изоцианатов!), нитриловые перчатки, очки. Ароматические изоцианаты — мощные сенсибилизаторы дыхательных путей! Проф. астма!"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}

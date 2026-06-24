@@ -1,0 +1,830 @@
+{
+  "_category": "Клеи",
+  "_description": "Adhesives: PVA, cyanoacrylate, epoxy, PU, contact, hot-melt, MS-polymer",
+  "recipes": [
+    {
+      "id": "rcp_kl_001_pva_d3",
+      "metadata": {
+        "category": "Клеи",
+        "subcategory": "ПВА (поливинилацетатные)",
+        "binder_type": "ПВА дисперсия (ПВАД)",
+        "product_class": "Standard",
+        "intended_use": "Столярный клей для дерева (интерьер, влагостойкий D3)",
+        "finish": "Прозрачный после высыхания",
+        "color": "Белый (в жидком виде)",
+        "tags": [
+          "pva",
+          "d3",
+          "wood",
+          "carpentry",
+          "interior"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Flick, E.W. Adhesives and Sealants Manual. Park Ridge, NJ: Noyes Publications, 1982. ISBN: 978-0-8155-0905-0.",
+          "page_or_formula": "Form. AS-0042 'PVA Wood Glue (D3)', pp. 88-92"
+        },
+        "cross_references": [
+          {
+            "citation": "Petrie, E.M. Handbook of Adhesives and Sealants. 2nd ed. New York: McGraw-Hill, 2007. ISBN: 978-0-07-147916-5.",
+            "section": "Chapter 6 'Polyvinyl Acetate Emulsions', pp. 245-278"
+          },
+          {
+            "citation": "EN 204 — Classification of thermoplastic wood adhesives for non-structural applications (D1/D2/D3/D4 classes)"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс и гомогенизация",
+          "process": {
+            "equipment": "Диссольвер",
+            "rotational_speed_rpm": 400,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "PVAc emulsion (Vinnapas EP 401, 50% solids)",
+              "cas_number": "9003-20-7",
+              "function": "Связующее (основа клея)",
+              "manufacturer_reference": "Wacker Vinnapas EP 401",
+              "mass_percent": 48.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Water",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 49.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DIBP, diisobutyl phthalate)",
+              "cas_number": "84-69-5",
+              "function": "Пластификатор (улучшает эластичность)",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.2,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Biocide",
+              "cas_number": "26172-55-4",
+              "function": "Биоцид",
+              "mass_percent": 0.1,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Thickener (HEC)",
+              "cas_number": "9004-62-0",
+              "function": "Загуститель",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Freeze-thaw stabilizer (ethylene glycol)",
+              "cas_number": "107-21-1",
+              "function": "Антифриз",
+              "mass_percent": 0.4,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 25.0,
+          "unit": "%",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±2%"
+        },
+        {
+          "property": "Density",
+          "value": 1.08,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.03"
+        },
+        {
+          "property": "VOC",
+          "value": 12,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±5"
+        },
+        {
+          "property": "Open time",
+          "value": "5-10",
+          "unit": "мин",
+          "method": "EN 1346",
+          "is_predicted": false
+        },
+        {
+          "property": "Tensile shear strength (beech-beech)",
+          "value": "≥ 10",
+          "unit": "MPa",
+          "method": "EN 205 (D3)",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "surface_preparation": "Поверхности чистые, обеспыленные. Один из материалов должно быть пористым (для отвода воды).",
+        "ambient_temperature_c": "15-25",
+        "relative_humidity_percent_max": 70,
+        "tool": "Кисть, валик, шпатель, дозатор",
+        "spread_rate_g_per_m2": "100-150 (один слой)",
+        "open_time_min": "5-10",
+        "press_time_h": "1-2 (при 20°C)",
+        "full_cure_h": "24"
+      },
+      "storage": {
+        "finished_product": "T = 5-30°C, защищать от замерзания, срок годности 12 мес."
+      },
+      "safety": {
+        "ppe": "Минимальная"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kl_002_pu_wood_d4",
+      "metadata": {
+        "category": "Клеи",
+        "subcategory": "Полиуретановые (1К, отверждение влагой)",
+        "binder_type": "Полиуретановый преполимер (NCO-концевой)",
+        "product_class": "Premium",
+        "intended_use": "Влагостойкий столярный клей (D4 — для наружного применения)",
+        "finish": "Прозрачный после высыхания",
+        "color": "Желтовато-коричневый",
+        "tags": [
+          "pu",
+          "1k",
+          "d4",
+          "wood",
+          "exterior",
+          "moisture-cure"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Petrie, E.M. Handbook of Adhesives and Sealants. 2nd ed. New York: McGraw-Hill, 2007. ISBN: 978-0-07-147916-5.",
+          "page_or_formula": "Chapter 11 'Polyurethane Adhesives', Formulation 11.3 '1K PU Wood Adhesive (D4)', pp. 478-485"
+        },
+        "cross_references": [
+          {
+            "citation": "Ebnesajjad, S. Adhesives Technology Handbook. 3rd ed. Norwich, NY: William Andrew, 2014. ISBN: 978-0-323-35595-7.",
+            "section": "Chapter 6 'Polyurethane Adhesives', pp. 154-180"
+          },
+          {
+            "citation": "EN 204 / EN 205 — D4 class requirements"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Премикс",
+          "process": {
+            "equipment": "Диссольвер (сухое помещение!)",
+            "rotational_speed_rpm": 300,
+            "temperature_c": 23,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether polyol (PPG, MW ~2000)",
+              "cas_number": "25322-69-4",
+              "function": "База полимера",
+              "mass_percent": 35.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "MDI (methylene diphenyl diisocyanate)",
+              "cas_number": "101-68-8",
+              "function": "Сшивающий агент (NCO)",
+              "mass_percent": 25.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 10.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель (тиксотропия)",
+              "mass_percent": 15.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 13.5,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Catalyst (DBTL, 0.5% in plasticizer)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Adhesion promoter (silane, KH-560)",
+              "cas_number": "2530-85-0",
+              "function": "Адгезионный промотор",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mass solids",
+          "value": 100.0,
+          "unit": "%",
+          "method": "100% reactive system",
+          "is_predicted": false
+        },
+        {
+          "property": "VOC",
+          "value": 0,
+          "unit": "г/л",
+          "method": "100% solids",
+          "is_predicted": false
+        },
+        {
+          "property": "NCO content",
+          "value": "5-7",
+          "unit": "%",
+          "method": "DIN EN 1242",
+          "is_predicted": false
+        },
+        {
+          "property": "Open time",
+          "value": "15-30",
+          "unit": "мин",
+          "method": "EN 1346",
+          "is_predicted": false
+        },
+        {
+          "property": "Tensile shear strength",
+          "value": "≥ 12",
+          "unit": "MPa",
+          "method": "EN 205 (D4)",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "surface_preparation": "Поверхности чистые. Склеиваемые материалы должны быть достаточно сухими (но для D4 — допускается влажность 8-18%).",
+        "ambient_temperature_c": "15-35",
+        "relative_humidity_percent": "40-80 (влага воздуха отверждает клей)",
+        "tool": "Кисть, шпатель, дозатор",
+        "spread_rate_g_per_m2": "150-200",
+        "press_time_h": "2-4",
+        "full_cure_h": "24"
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS07 (Warning)",
+          "GHS08 (Health — sensitizer)"
+        ],
+        "h_statements": [
+          "H315 — раздражение кожи",
+          "H317 — аллергическая реакция (изоцианаты)",
+          "H332 — вредно при вдыхании"
+        ],
+        "p_statements": [
+          "P280 — СИЗ (респиратор обязательно)",
+          "P304+P340 — при вдыхании"
+        ],
+        "ppe": "Респиратор с угольным фильтром, нитриловые перчатки, защитные очки. Изоцианаты — мощные сенсибилизаторы!"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kl_003_epoxy_2k",
+      "metadata": {
+        "category": "Клеи",
+        "subcategory": "Эпоксидные (2К)",
+        "binder_type": "Бисфенол-А эпоксидная смола + полиамин",
+        "product_class": "Industrial",
+        "intended_use": "Универсальный конструкционный клей (металл, бетон, керамика, дерево)",
+        "finish": "Прозрачный или жёлтый",
+        "color": "Прозрачный/жёлтый",
+        "tags": [
+          "epoxy",
+          "2k",
+          "structural",
+          "high-strength"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Petrie, E.M. Handbook of Adhesives and Sealants. 2nd ed. New York: McGraw-Hill, 2007. ISBN: 978-0-07-147916-5.",
+          "page_or_formula": "Chapter 8 'Epoxy Adhesives', Formulation 8.4 '2K Epoxy Structural Adhesive', pp. 332-340"
+        },
+        "cross_references": [
+          {
+            "citation": "Ebnesajjad, S. Adhesives Technology Handbook. 3rd ed. Norwich, NY: William Andrew, 2014. ISBN: 978-0-323-35595-7.",
+            "section": "Chapter 4 'Epoxy Adhesives', pp. 94-130"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Полный производственный процесс (консолидированный)",
+          "description": "Multi-stage процесс: 3 стадий. Детали по стадиям в process_notes.",
+          "components": [
+            {
+              "name": "Epoxy resin (DGEBA, EEW 190)",
+              "cas_number": "25068-38-6",
+              "function": "Основа (компонент A)",
+              "mass_percent": 33.368,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Reactive diluent (C12-C14 alkyl glycidyl ether)",
+              "cas_number": "68609-97-2",
+              "function": "Реактивный разбавитель (снижает вязкость)",
+              "mass_percent": 5.133,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 7.7,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.154,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Adhesion promoter (KH-560 silane)",
+              "cas_number": "2530-85-0",
+              "function": "Адгезионный промотор (к стеклу/металлу)",
+              "mass_percent": 0.77,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Fumed silica (Aerosil R972)",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия (анти-просадка)",
+              "mass_percent": 1.54,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Polyamide amine (amine value ~240)",
+              "cas_number": "68410-23-1",
+              "function": "Отвердитель",
+              "mass_percent": 46.201,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 4.107,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 1.027,
+              "tolerance_percent": 0.3
+            }
+          ],
+          "process": {
+            "equipment": "См. process_notes",
+            "control_points": [
+              {
+                "parameter": "Process notes",
+                "target": "Стадия 1 (Компонент A (смола)): оборудование — Диссольвер, T = 23°C, 300 об/мин, 30 мин; Стадия 2 (Компонент B (отвердитель)): оборудование — Диссольвер, T = 23°C; Стадия 3 (Смешивание A+B (перед применением)), T = 23°C, 3 мин",
+                "method": "Documentation"
+              }
+            ]
+          }
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Mix ratio A:B",
+          "value": "1:1",
+          "unit": "by volume",
+          "method": "Stoichiometric",
+          "is_predicted": false
+        },
+        {
+          "property": "Pot life",
+          "value": "30-60",
+          "unit": "мин",
+          "method": "Manufacturer",
+          "is_predicted": false
+        },
+        {
+          "property": "Tensile shear strength (steel-steel)",
+          "value": "≥ 20",
+          "unit": "MPa",
+          "method": "EN 1465",
+          "is_predicted": false
+        },
+        {
+          "property": "T-peel strength (aluminum-aluminum)",
+          "value": "≥ 2.5",
+          "unit": "N/mm",
+          "method": "ISO 11339",
+          "is_predicted": false
+        },
+        {
+          "property": "Service temperature",
+          "value": "-40...+120",
+          "unit": "°C",
+          "method": "Manufacturer",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "surface_preparation": "Металл: обезжиривание + механическая обработка (шлифовка P80-120). Бетон: пескоструй + обеспыливание.",
+        "ambient_temperature_c": "15-30",
+        "tool": "Шпатель, дозатор, шприц",
+        "spread_rate_g_per_m2": "200-300 (один слой)",
+        "fixture_time_min": "30-90",
+        "full_cure_days": "3-7"
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS05 (Corrosive)",
+          "GHS07 (Warning)",
+          "GHS08 (Sensitizer)"
+        ],
+        "h_statements": [
+          "H315/H319 — раздражение",
+          "H317 — аллергическая реакция (эпоксидные смолы — СЕНСИБИЛИЗАТОРЫ!)",
+          "H411 — токсично для водных организмов"
+        ],
+        "p_statements": [
+          "P280 — СИЗ",
+          "P305+P351+P338 — при попадании в глаза",
+          "P273 — избегать попадания в окружающую среду"
+        ],
+        "ppe": "Защитные очки, нитриловые перчатки, вентиляция. После контакта с кожей — немедленно промыть!"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      },
+      "notes": [
+        "Нормализовано: 3 стадий консолидированы в 1. Параметры процесса по стадиям сохранены в control_points."
+      ]
+    },
+    {
+      "id": "rcp_kl_004_hotmelt_eva",
+      "metadata": {
+        "category": "Клеи",
+        "subcategory": "Термоплавкие (EVA-based)",
+        "binder_type": "EVA (этилен-винилацетат) сополимер",
+        "product_class": "Industrial",
+        "intended_use": "Упаковочный клей (картон, бумага), сборка мебели",
+        "finish": "—",
+        "color": "Прозрачный / белый",
+        "tags": [
+          "hotmelt",
+          "eva",
+          "packaging",
+          "fast-setting"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Ebnesajjad, S. Adhesives Technology Handbook. 3rd ed. Norwich, NY: William Andrew, 2014. ISBN: 978-0-323-35595-7.",
+          "page_or_formula": "Chapter 8 'Hot-Melt Adhesives', Formulation 8.1 'EVA-Based Packaging Hot-Melt', pp. 220-228"
+        },
+        "cross_references": [
+          {
+            "citation": "Petrie, E.M. Handbook of Adhesives and Sealants. 2nd ed. New York: McGraw-Hill, 2007. ISBN: 978-0-07-147916-5.",
+            "section": "Chapter 14 'Hot-Melt Adhesives', pp. 555-590"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Расплавление и смешивание",
+          "process": {
+            "equipment": "Реактор с мешалкой и терморегуляцией",
+            "rotational_speed_rpm": 200,
+            "temperature_c": 160,
+            "duration_min": 120
+          },
+          "components": [
+            {
+              "name": "EVA copolymer (28% VA, MFI 40)",
+              "cas_number": "24937-78-8",
+              "function": "Основа (сополимер)",
+              "manufacturer_reference": "DuPont Elvax 260, ExxonMobil Escorene",
+              "mass_percent": 45.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Tackifying resin (C5 hydrocarbon, Escorez 1310)",
+              "cas_number": "68478-08-4",
+              "function": "Адгезионная смола (липкость)",
+              "manufacturer_reference": "ExxonMobil Escorez 1310",
+              "mass_percent": 35.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Paraffin wax (M.P. 65°C)",
+              "cas_number": "8002-74-2",
+              "function": "Снижение вязкости, открытое время",
+              "mass_percent": 15.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Antioxidant (Irganox 1010)",
+              "cas_number": "6683-19-8",
+              "function": "Антиоксидант",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Plasticizer (mineral oil)",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 4.5,
+              "tolerance_percent": 0.5
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Softening point (R&B)",
+          "value": "85-95",
+          "unit": "°C",
+          "method": "ASTM E28",
+          "is_predicted": false
+        },
+        {
+          "property": "Viscosity (160°C)",
+          "value": "3000-5000",
+          "unit": "мПа·с",
+          "method": "ASTM D3236",
+          "is_predicted": false
+        },
+        {
+          "property": "Open time",
+          "value": "5-15",
+          "unit": "сек",
+          "method": "EN 1346 (модиф.)",
+          "is_predicted": false
+        },
+        {
+          "property": "Setting time",
+          "value": "1-3",
+          "unit": "сек",
+          "method": "Производственное",
+          "is_predicted": false
+        },
+        {
+          "property": "Heat resistance (Peel)",
+          "value": "60-70",
+          "unit": "°C",
+          "method": "ASTM D4498",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "tool": "Клеевой пистолет, клеенаносящий узел (wheel applicator, slot die)",
+        "application_temperature_c": "150-170",
+        "open_time_sec": "5-15",
+        "bonding_pressure": "Лёгкий прижим"
+      },
+      "storage": {
+        "finished_product": "Гранулы или блоки, T = 5-30°C, беречь от прямых солнечных лучей, 24 мес."
+      },
+      "safety": {
+        "ghs_pictograms": [
+          "GHS07 (Warning — горячий расплав)"
+        ],
+        "h_statements": [
+          "H315 — раздражение кожи (горячий расплав!)",
+          "H335 — раздражение дыхательных путей (пары при нагреве)"
+        ],
+        "p_statements": [
+          "P280 — СИЗ (термозащитные перчатки)",
+          "P305+P351+P338"
+        ],
+        "ppe": "Термозащитные перчатки, защитные очки, вентиляция рабочей зоны"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    },
+    {
+      "id": "rcp_kl_005_ms_polymer",
+      "metadata": {
+        "category": "Клеи",
+        "subcategory": "MS-полимерные (модифицированный силан)",
+        "binder_type": "SilaPPO (полипропиленоксид с концевыми силанами)",
+        "product_class": "Premium",
+        "intended_use": "Универсальный эластичный клей-герметик",
+        "finish": "—",
+        "color": "Белый / серый / чёрный",
+        "tags": [
+          "ms-polymer",
+          "hybrid",
+          "elastic",
+          "paintable"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, GENIOSIL STP-E 35 (2020). Munich: Wacker Chemie AG.",
+          "page_or_formula": "Application guideline 'MS-Polymer Construction Adhesive', pp. 12-18"
+        },
+        "cross_references": [
+          {
+            "citation": "Ebnesajjad, S. Adhesives Technology Handbook. 3rd ed. Norwich, NY: William Andrew, 2014. ISBN: 978-0-323-35595-7.",
+            "section": "Chapter 7 'Silane-Modified Polymer Adhesives', pp. 184-200"
+          }
+        ]
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Смешивание",
+          "process": {
+            "equipment": "Планетарный смеситель (вакуум!)",
+            "rotational_speed_rpm": 100,
+            "temperature_c": 23,
+            "duration_min": 60
+          },
+          "components": [
+            {
+              "name": "MS polymer base (GENIOSIL STP-E 35)",
+              "cas_number": "proprietary",
+              "function": "Основа (силан-модифицированный полимер)",
+              "manufacturer_reference": "Wacker GENIOSIL STP-E 35",
+              "mass_percent": 50.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate (ground)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 35.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 10.0,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Thixotropic agent (fumed silica, Aerosil 200)",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 2.5,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Adhesion promoter (amino silane, GENIOSIL GF 9)",
+              "cas_number": "proprietary",
+              "function": "Адгезионный промотор",
+              "mass_percent": 1.5,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Catalyst (dibutyltin dilaurate)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор силан-реакции",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "UV stabilizer (Tinuvin 292)",
+              "cas_number": "41556-26-7",
+              "function": "UV-защита",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Antioxidant (Irganox 1135)",
+              "cas_number": "125643-61-0",
+              "function": "Антиоксидант",
+              "mass_percent": 0.2,
+              "tolerance_percent": 0.05
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.45,
+          "unit": "г/см³",
+          "method": "DIN 53479",
+          "is_predicted": false
+        },
+        {
+          "property": "Shore A hardness",
+          "value": "40-50",
+          "unit": "Shore A",
+          "method": "ISO 868",
+          "is_predicted": false
+        },
+        {
+          "property": "Tensile strength",
+          "value": "≥ 2.0",
+          "unit": "MPa",
+          "method": "ISO 37",
+          "is_predicted": false
+        },
+        {
+          "property": "Elongation at break",
+          "value": "≥ 200",
+          "unit": "%",
+          "method": "ISO 37",
+          "is_predicted": false
+        },
+        {
+          "property": "Skin formation time",
+          "value": "15-30",
+          "unit": "мин",
+          "method": "23°C, 50% RH",
+          "is_predicted": false
+        },
+        {
+          "property": "Cure rate (24h)",
+          "value": "≥ 3",
+          "unit": "мм/24ч",
+          "method": "ISO 868",
+          "is_predicted": false
+        }
+      ],
+      "application_conditions": {
+        "surface_preparation": "Поверхности чистые, сухие, обеспыленные. Можно наносить на влажные поверхности (но не мокрые).",
+        "ambient_temperature_c": "5-40",
+        "tool": "Шприц-пистолет (310 мл картриджи), шпатель",
+        "spread_rate": "≈ 8 м/погонный при шве 5×5 мм",
+        "open_time_min": "10-15",
+        "cure_rate_mm_per_24h": "2-3"
+      },
+      "storage": {
+        "finished_product": "T = 5-25°C, 12 мес."
+      },
+      "safety": {
+        "ghs_pictograms": [],
+        "h_statements": [
+          "H412 — вредно для водных организмов"
+        ],
+        "p_statements": [
+          "P273"
+        ],
+        "ppe": "Минимальная (перчатки)"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3
+      }
+    }
+  ]
+}
