@@ -1,0 +1,15 @@
+# Создать LICENSE.txt в папке installer/
+@"
+Formulation Workbench v1.0.0
+Copyright (c) 2026 Formulation Workbench Team. All rights reserved.
+
+PROPRIETARY LICENSE
+
+This software is proprietary and confidential. Unauthorized copying,
+distribution, modification, or use of this software, via any medium,
+is strictly prohibited without prior written permission.
+
+The software is provided "as is" without warranty of any kind.
+
+For licensing inquiries, contact: licensing@formulation-workbench.local
+"@ | Out-File -FilePath C:\Users\eurog\Desktop\Рецепты\installer\LICENSE.txt -Encoding utf8
