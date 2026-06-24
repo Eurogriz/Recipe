@@ -1,0 +1,11 @@
+@"
+ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ / IMPORTANT DISCLAIMER
+
+RU: Данные носят справочный характер. Перед промышленным применением любой
+рецептуры требуется лабораторная валидация и адаптация под конкретное сырьё.
+
+EN: The data is provided for reference purposes. Industrial use requires
+laboratory validation and adaptation to specific raw materials.
+
+(c) 2026 Formulation Workbench Team. All rights reserved.
+"@ | Out-File -FilePath C:\Users\eurog\Desktop\Рецепты\docs\00-discovery\disclaimer.txt -Encoding utf8
