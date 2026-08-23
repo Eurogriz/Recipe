@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -8,11 +8,13 @@ import {
   Beaker,
   ClipboardCheck,
   DollarSign,
+  Download,
   LineChart,
-  Target,
-  Plus,
-  Trash2,
   Network,
+  Plus,
+  Sliders,
+  Target,
+  Trash2,
 } from "lucide-react";
 import {
   api,
@@ -24,6 +26,7 @@ import {
   type PropertyTarget,
   type RecipeCost,
   type RecipeFull,
+  type SensitivityResult,
   type SimilarRecipesOut,
 } from "@/lib/api";
 import { fmt } from "@/lib/utils";
@@ -39,7 +42,8 @@ type Tab =
   | "predict"
   | "cost"
   | "optimise"
-  | "similar";
+  | "similar"
+  | "sensitivity";
 
 export default function RecipeDetailPage() {
   const t = useT();
@@ -66,12 +70,21 @@ export default function RecipeDetailPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <Link
-        href="/recipes"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> {t("recipe.back")}
-      </Link>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <Link
+          href="/recipes"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" /> {t("recipe.back")}
+        </Link>
+        <a
+          href={api.recipeCsvUrl(id)}
+          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          download
+        >
+          <Download className="h-4 w-4" /> {t("recipe.export.csv")}
+        </a>
+      </div>
 
       <header className="space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
@@ -154,6 +167,14 @@ export default function RecipeDetailPage() {
         >
           {t("recipe.tab.similar")}
         </TabButton>
+        <TabButton
+          current={tab}
+          v="sensitivity"
+          onClick={setTab}
+          icon={<Sliders className="h-4 w-4" />}
+        >
+          {t("recipe.tab.sensitivity")}
+        </TabButton>
       </div>
 
       {tab === "composition" && <CompositionTab recipe={recipe} />}
@@ -162,6 +183,7 @@ export default function RecipeDetailPage() {
       {tab === "cost" && <CostTab recipe={recipe} />}
       {tab === "optimise" && <OptimiseTab id={id} />}
       {tab === "similar" && <SimilarTab id={id} />}
+      {tab === "sensitivity" && <SensitivityTab recipe={recipe} />}
     </div>
   );
 }
@@ -1220,6 +1242,333 @@ function SimilarityBar({ value }: { value: number }) {
       </div>
       <span className="font-mono text-xs w-14 text-right">{value.toFixed(3)}</span>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------- Sensitivity */
+function SensitivityTab({ recipe }: { recipe: RecipeFull }) {
+  const t = useT();
+  const components = useMemo(
+    () => recipe.stages.flatMap((s) => s.components),
+    [recipe]
+  );
+  const [component, setComponent] = useState<string>("");
+  const [minPct, setMinPct] = useState<number>(0);
+  const [maxPct, setMaxPct] = useState<number>(0);
+  const [steps, setSteps] = useState<number>(11);
+  const [busy, setBusy] = useState<boolean>(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [models, setModels] = useState<ModelMetadata[] | null>(null);
+  const [result, setResult] = useState<SensitivityResult | null>(null);
+
+  useEffect(() => {
+    api.listModels().then(setModels).catch(() => setModels([]));
+  }, []);
+
+  useEffect(() => {
+    // Default to the largest component, and a ±50 % sweep around its
+    // baseline (clamped to 0..min(90, 3× baseline)).
+    if (components.length === 0) return;
+    const biggest = components.reduce((a, b) =>
+      a.mass_percent >= b.mass_percent ? a : b
+    );
+    setComponent(biggest.name);
+    const base = biggest.mass_percent;
+    setMinPct(Math.max(0, Math.round((base * 0.5) * 100) / 100));
+    setMaxPct(Math.min(90, Math.round((base * 1.5) * 100) / 100));
+  }, [components]);
+
+  const run = async () => {
+    if (!component) return;
+    setBusy(true);
+    setErr(null);
+    setResult(null);
+    try {
+      const r = await api.sensitivity(recipe.id, {
+        component_name: component,
+        min_percent: minPct,
+        max_percent: maxPct,
+        steps,
+      });
+      setResult(r);
+    } catch (e: any) {
+      setErr(t("sensitivity.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const noModels = models !== null && models.length === 0;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sensitivity.title")}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {t("sensitivity.subtitle")}
+          </p>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+          <div className="md:col-span-2">
+            <label className="text-xs text-muted-foreground">
+              {t("sensitivity.component")}
+            </label>
+            <select
+              className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+              value={component}
+              onChange={(e) => setComponent(e.target.value)}
+            >
+              {components.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name} ({fmt(c.mass_percent, 2)}%)
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">{t("sensitivity.min")}</label>
+            <input
+              type="number"
+              step="0.1"
+              min={0}
+              max={100}
+              value={minPct}
+              onChange={(e) => setMinPct(Number(e.target.value))}
+              className="w-full h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">{t("sensitivity.max")}</label>
+            <input
+              type="number"
+              step="0.1"
+              min={0}
+              max={100}
+              value={maxPct}
+              onChange={(e) => setMaxPct(Number(e.target.value))}
+              className="w-full h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">{t("sensitivity.steps")}</label>
+            <input
+              type="number"
+              min={3}
+              max={41}
+              value={steps}
+              onChange={(e) => setSteps(Number(e.target.value) || 11)}
+              className="w-full h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+            />
+          </div>
+          <div className="md:col-span-5">
+            <Button onClick={run} disabled={busy || noModels || !component}>
+              {busy ? t("sensitivity.running") : t("sensitivity.run")}
+            </Button>
+            {noModels && (
+              <span className="ml-3 text-sm text-amber-700">
+                {t("sensitivity.no_models")}
+              </span>
+            )}
+          </div>
+          {err && (
+            <div className="md:col-span-5 text-sm text-red-700">{err}</div>
+          )}
+        </CardContent>
+      </Card>
+
+      {result && <SensitivityChart result={result} />}
+    </div>
+  );
+}
+
+function SensitivityChart({ result }: { result: SensitivityResult }) {
+  const t = useT();
+
+  // Build a series per property_code, dropping skipped points.
+  const series: {
+    code: string;
+    points: { x: number; y: number }[];
+    yMin: number;
+    yMax: number;
+  }[] = [];
+  for (const code of result.property_codes) {
+    const pts: { x: number; y: number }[] = [];
+    for (const p of result.points) {
+      if (p.skipped) continue;
+      const y = p.predictions[code];
+      if (y === null || y === undefined || Number.isNaN(y)) continue;
+      pts.push({ x: p.target_percent, y });
+    }
+    if (pts.length < 2) continue;
+    const ys = pts.map((p) => p.y);
+    series.push({ code, points: pts, yMin: Math.min(...ys), yMax: Math.max(...ys) });
+  }
+
+  if (series.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-sm text-muted-foreground">
+          {t("sensitivity.hint")}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Palette matches the ML model list ordering; wrap if we ever have
+  // more than 6 properties.
+  const palette = [
+    "hsl(221 83% 53%)",
+    "hsl(0 84% 60%)",
+    "hsl(142 71% 45%)",
+    "hsl(38 92% 50%)",
+    "hsl(280 70% 55%)",
+    "hsl(190 80% 45%)",
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {series.map((s, i) => (
+        <Card key={s.code}>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>{s.code}</span>
+              <Badge variant="outline">n = {s.points.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Curve
+              points={s.points}
+              yMin={s.yMin}
+              yMax={s.yMax}
+              baseline={result.baseline_percent}
+              color={palette[i % palette.length]}
+              xLabel={t("sensitivity.chart.axis_x")}
+              baselineLabel={t("sensitivity.chart.baseline")}
+            />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function Curve({
+  points,
+  yMin,
+  yMax,
+  baseline,
+  color,
+  xLabel,
+  baselineLabel,
+}: {
+  points: { x: number; y: number }[];
+  yMin: number;
+  yMax: number;
+  baseline: number;
+  color: string;
+  xLabel: string;
+  baselineLabel: string;
+}) {
+  const W = 480;
+  const H = 220;
+  const M = 34;
+  const xMin = points[0].x;
+  const xMax = points[points.length - 1].x;
+  // Add a little vertical padding so the curve doesn't hug the top/bottom.
+  const yPad = (yMax - yMin) * 0.08 || 1.0;
+  const yLo = yMin - yPad;
+  const yHi = yMax + yPad;
+  const nx = (x: number) =>
+    M + ((x - xMin) / Math.max(1e-9, xMax - xMin)) * (W - 2 * M);
+  const ny = (y: number) =>
+    H - M - ((y - yLo) / Math.max(1e-9, yHi - yLo)) * (H - 2 * M);
+  const d = points
+    .map((p, i) => `${i === 0 ? "M" : "L"}${nx(p.x).toFixed(1)},${ny(p.y).toFixed(1)}`)
+    .join(" ");
+  const showBaseline = baseline >= xMin && baseline <= xMax;
+  return (
+    <svg width={W} height={H} className="mx-auto block max-w-full">
+      {/* axes */}
+      <line x1={M} y1={H - M} x2={W - M} y2={H - M} stroke="hsl(215 16% 65%)" />
+      <line x1={M} y1={M} x2={M} y2={H - M} stroke="hsl(215 16% 65%)" />
+      {/* baseline marker */}
+      {showBaseline && (
+        <>
+          <line
+            x1={nx(baseline)}
+            y1={M}
+            x2={nx(baseline)}
+            y2={H - M}
+            stroke="hsl(38 92% 50%)"
+            strokeDasharray="4 3"
+          />
+          <text
+            x={nx(baseline)}
+            y={M - 4}
+            textAnchor="middle"
+            fill="hsl(38 92% 40%)"
+            className="text-[10px]"
+          >
+            {baselineLabel} {baseline.toFixed(2)}
+          </text>
+        </>
+      )}
+      {/* axis labels */}
+      <text
+        x={W / 2}
+        y={H - 8}
+        textAnchor="middle"
+        className="text-xs"
+        fill="hsl(215 16% 47%)"
+      >
+        {xLabel}
+      </text>
+      <text
+        x={M}
+        y={H - M + 14}
+        className="text-[10px]"
+        fill="hsl(215 16% 47%)"
+      >
+        {xMin.toFixed(1)}
+      </text>
+      <text
+        x={W - M}
+        y={H - M + 14}
+        textAnchor="end"
+        className="text-[10px]"
+        fill="hsl(215 16% 47%)"
+      >
+        {xMax.toFixed(1)}
+      </text>
+      <text
+        x={M - 4}
+        y={H - M}
+        textAnchor="end"
+        className="text-[10px]"
+        fill="hsl(215 16% 47%)"
+      >
+        {yLo.toFixed(2)}
+      </text>
+      <text
+        x={M - 4}
+        y={M + 4}
+        textAnchor="end"
+        className="text-[10px]"
+        fill="hsl(215 16% 47%)"
+      >
+        {yHi.toFixed(2)}
+      </text>
+      {/* curve */}
+      <path d={d} fill="none" stroke={color} strokeWidth={2} />
+      {points.map((p, i) => (
+        <circle key={i} cx={nx(p.x)} cy={ny(p.y)} r={3} fill={color}>
+          <title>
+            {`x = ${p.x.toFixed(2)}%, y = ${p.y.toFixed(4)}`}
+          </title>
+        </circle>
+      ))}
+    </svg>
   );
 }
 

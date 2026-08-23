@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Download } from "lucide-react";
 import { api, type RecipeSummary, type SearchResponse } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,11 +45,20 @@ export default function RecipesPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold tracking-tight">{t("recipes.title")}</h1>
-        <p className="text-muted-foreground mt-1">
-          {t("recipes.subtitle", { n: total })}
-        </p>
+      <header className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">{t("recipes.title")}</h1>
+          <p className="text-muted-foreground mt-1">
+            {t("recipes.subtitle", { n: total })}
+          </p>
+        </div>
+        <a
+          href={api.catalogCsvUrl()}
+          download
+          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+        >
+          <Download className="h-4 w-4" /> {t("recipes.export.csv")}
+        </a>
       </header>
 
       <Card>

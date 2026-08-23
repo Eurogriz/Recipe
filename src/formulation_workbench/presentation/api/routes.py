@@ -12,6 +12,7 @@ from dataclasses import asdict
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import PlainTextResponse
 
 from ... import __version__
 from ...application.dto.recipe_dto import RecipeSummaryDto
@@ -92,6 +93,9 @@ from .schemas import (
     RejectRequest,
     RuleFindingOut,
     SearchResponse,
+    SensitivityPointOut,
+    SensitivityRequest,
+    SensitivityResultOut,
     SimilarRecipeOut,
     SimilarRecipesOut,
     StoichiometryFindingOut,
@@ -350,6 +354,197 @@ async def get_similar_recipes(
             )
             for m in matches
         ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Sensitivity analysis (what-if for one component's mass %)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/sensitivity",
+    response_model=SensitivityResultOut,
+    tags=["recipes", "ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Sweep one component's mass % and predict how properties respond",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def sensitivity_analysis(
+    recipe_id: str,
+    payload: SensitivityRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> SensitivityResultOut:
+    from ...application.use_cases.sensitivity_analysis import (
+        ComponentNotInRecipeError,
+        SensitivityQuery,
+    )
+
+    try:
+        result = await container.sensitivity_analysis.execute(
+            SensitivityQuery(
+                recipe_id=recipe_id,
+                component_name=payload.component_name,
+                min_percent=payload.min_percent,
+                max_percent=payload.max_percent,
+                steps=payload.steps,
+                property_codes=tuple(payload.property_codes),
+            )
+        )
+    except ComponentNotInRecipeError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    if result is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    return SensitivityResultOut(
+        recipe_id=result.recipe_id,
+        component_name=result.component_name,
+        baseline_percent=round(result.baseline_percent, 4),
+        min_percent=result.min_percent,
+        max_percent=result.max_percent,
+        steps=result.steps,
+        property_codes=list(result.property_codes),
+        points=[
+            SensitivityPointOut(
+                target_percent=round(p.target_percent, 4),
+                predictions={
+                    k: (round(v, 4) if v is not None else None) for k, v in p.predictions.items()
+                },
+                skipped=p.skipped,
+                skip_reason=p.skip_reason,
+            )
+            for p in result.points
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# CSV export
+# ---------------------------------------------------------------------------
+def _csv_escape(value: object) -> str:
+    """RFC-4180 minimal escaping: quote when the field contains a comma,
+    quote, or newline; double up embedded quotes."""
+    s = "" if value is None else str(value)
+    if any(c in s for c in (",", '"', "\n", "\r")):
+        return '"' + s.replace('"', '""') + '"'
+    return s
+
+
+@router.get(
+    "/recipes/{recipe_id}/export.csv",
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Download the recipe composition as CSV (one row per component)",
+    response_class=PlainTextResponse,
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def export_recipe_csv(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> PlainTextResponse:
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    rows: list[list[object]] = [
+        [
+            "recipe_id",
+            "recipe_version",
+            "category",
+            "subcategory",
+            "product_class",
+            "stage_number",
+            "stage_name",
+            "component_name",
+            "cas_number",
+            "function",
+            "mass_percent",
+            "tolerance_percent",
+            "manufacturer_reference",
+        ]
+    ]
+    for stage in recipe.stages:
+        for comp in stage.components:
+            rows.append(
+                [
+                    recipe.id,
+                    recipe.version,
+                    recipe.category,
+                    recipe.subcategory,
+                    recipe.product_class.value,
+                    stage.stage_number,
+                    stage.name,
+                    comp.name,
+                    comp.cas_number,
+                    comp.function,
+                    f"{comp.mass_percent:.4f}",
+                    f"{comp.tolerance_percent:.4f}",
+                    comp.manufacturer_reference or "",
+                ]
+            )
+
+    body = "\n".join(",".join(_csv_escape(cell) for cell in row) for row in rows) + "\n"
+    filename = f"recipe_{recipe.id[:16]}_v{recipe.version}.csv"
+    return PlainTextResponse(
+        content=body,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get(
+    "/catalog/export.csv",
+    tags=["recipes", "catalog"],
+    dependencies=[Depends(require_reader)],
+    summary="Download a summary CSV of every recipe in the catalog (no compositions)",
+    response_class=PlainTextResponse,
+    responses={**_UNAUTHORIZED},
+)
+async def export_catalog_csv(
+    container: Annotated[Container, Depends(get_container)],
+    category: list[str] = Query(default_factory=list),
+    limit: int = Query(default=5000, ge=1, le=10000),
+) -> PlainTextResponse:
+    result = await container.search_recipes.execute(
+        SearchFilter(categories=tuple(category), limit=limit, offset=0)
+    )
+    rows: list[list[object]] = [
+        [
+            "recipe_id",
+            "category",
+            "subcategory",
+            "binder_type",
+            "product_class",
+            "intended_use",
+            "status",
+            "verification_count",
+            "verification_required",
+            "version",
+        ]
+    ]
+    for recipe in result.recipes:
+        rows.append(
+            [
+                recipe.id,
+                recipe.category,
+                recipe.subcategory,
+                recipe.binder_type,
+                recipe.product_class.value,
+                recipe.intended_use,
+                recipe.status.state.value,
+                recipe.status.verification_count,
+                recipe.status.required_verifications,
+                recipe.version,
+            ]
+        )
+    body = "\n".join(",".join(_csv_escape(cell) for cell in row) for row in rows) + "\n"
+    return PlainTextResponse(
+        content=body,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": 'attachment; filename="catalog.csv"',
+        },
     )
 
 

@@ -108,6 +108,28 @@ export const ru: Dict = {
   "recipe.tab.cost": "Стоимость",
   "recipe.tab.optimise": "Оптимизация",
   "recipe.tab.similar": "Похожие",
+  "recipe.tab.sensitivity": "Чувствительность",
+  "recipe.export.csv": "Скачать в CSV",
+  "recipes.export.csv": "Скачать каталог (CSV)",
+
+  // sensitivity
+  "sensitivity.title": "Анализ чувствительности",
+  "sensitivity.subtitle":
+    "Меняем массовую долю одного компонента; остальные компоненты пересчитываются пропорционально. Модели предсказывают, как изменятся свойства.",
+  "sensitivity.component": "Компонент",
+  "sensitivity.baseline": "База: {v} %",
+  "sensitivity.min": "От, %",
+  "sensitivity.max": "До, %",
+  "sensitivity.steps": "Шагов",
+  "sensitivity.run": "Построить кривые",
+  "sensitivity.running": "Считаем…",
+  "sensitivity.failed": "Не удалось: {msg}",
+  "sensitivity.no_models": "Нет обученных моделей. Обучите их на странице «Модели».",
+  "sensitivity.hint":
+    "Точки в местах, где пересчёт невозможен (недостаточно массы у остальных компонентов), помечены как пропущенные.",
+  "sensitivity.chart.axis_x": "Массовая доля компонента, %",
+  "sensitivity.chart.baseline": "База",
+  "sensitivity.chart.skipped": "пропущено",
 
   // similar
   "similar.title": "Похожие рецепты",

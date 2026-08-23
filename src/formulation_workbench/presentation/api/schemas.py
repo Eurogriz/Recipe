@@ -82,6 +82,40 @@ class SimilarRecipesOut(BaseModel):
     matches: list[SimilarRecipeOut]
 
 
+# ---------------------------------------------------------------------------
+# Sensitivity analysis
+# ---------------------------------------------------------------------------
+class SensitivityRequest(BaseModel):
+    component_name: str = Field(examples=["TiO2 R-902+"], min_length=1)
+    min_percent: float = Field(examples=[10.0], ge=0.0, le=100.0)
+    max_percent: float = Field(examples=[30.0], ge=0.0, le=100.0)
+    steps: int = Field(default=11, ge=3, le=41)
+    property_codes: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Restrict predictions to these property codes.  Empty = every currently trained model."
+        ),
+    )
+
+
+class SensitivityPointOut(BaseModel):
+    target_percent: float
+    predictions: dict[str, float | None] = Field(default_factory=dict)
+    skipped: bool = False
+    skip_reason: str = ""
+
+
+class SensitivityResultOut(BaseModel):
+    recipe_id: str
+    component_name: str
+    baseline_percent: float
+    min_percent: float
+    max_percent: float
+    steps: int
+    property_codes: list[str]
+    points: list[SensitivityPointOut]
+
+
 class CatalogStats(BaseModel):
     total: int = Field(examples=[500])
     by_status: dict[str, int] = Field(
@@ -878,6 +912,9 @@ __all__ = [
     "RejectRequest",
     "RuleFindingOut",
     "SearchResponse",
+    "SensitivityPointOut",
+    "SensitivityRequest",
+    "SensitivityResultOut",
     "SimilarRecipeOut",
     "SimilarRecipesOut",
     "StoichiometryFindingOut",

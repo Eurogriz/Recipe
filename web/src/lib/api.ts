@@ -104,6 +104,18 @@ export const api = {
   getJob: (id: string) => request<JobRecord>(`/ml/jobs/${id}`),
   cancelJob: (id: string) => request<void>(`/ml/jobs/${id}`, { method: "DELETE" }),
 
+  // sensitivity
+  sensitivity: (id: string, body: SensitivityRequest) =>
+    request<SensitivityResult>(`/recipes/${id}/sensitivity`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  // Direct URL helpers for downloads — the browser triggers the actual
+  // GET so we get the Content-Disposition attachment behaviour.
+  recipeCsvUrl: (id: string) => `/api/recipes/${encodeURIComponent(id)}/export.csv`,
+  catalogCsvUrl: () => `/api/catalog/export.csv`,
+
   // similar recipes
   similarRecipes: (
     id: string,
@@ -403,6 +415,32 @@ export interface DriftFullOut {
 export interface DriftAlertOut extends DriftFullOut {
   alert_dispatched: boolean;
   dispatch_reason: string;
+}
+
+export interface SensitivityRequest {
+  component_name: string;
+  min_percent: number;
+  max_percent: number;
+  steps: number;
+  property_codes?: string[];
+}
+
+export interface SensitivityPoint {
+  target_percent: number;
+  predictions: Record<string, number | null>;
+  skipped: boolean;
+  skip_reason: string;
+}
+
+export interface SensitivityResult {
+  recipe_id: string;
+  component_name: string;
+  baseline_percent: number;
+  min_percent: number;
+  max_percent: number;
+  steps: number;
+  property_codes: string[];
+  points: SensitivityPoint[];
 }
 
 export interface SimilarRecipe {

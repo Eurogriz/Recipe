@@ -7,6 +7,111 @@
 
 ---
 
+## [1.11.0] — Анализ чувствительности + экспорт в CSV (2026-08-23)
+
+Две ценные визуальные фичи в одном раунде.
+
+### Added — Анализ чувствительности (what-if по одному компоненту)
+
+Новый use case `SensitivityAnalysisUseCase` варьирует mass % одного
+компонента в диапазоне `[min, max]` в N шагов, пересчитывая остальные
+компоненты пропорционально (сумма всегда 100 %), и просит все
+обученные модели предсказать свойства. Возвращает набор кривых.
+
+**Дизайн-заметки:**
+
+- Персистируемая рецептура не мутируется — работаем с копиями.
+- Pro-rata пересчёт сохраняет и порядок компонентов, и их множество,
+  поэтому вектор фич ML остаётся размерно консистентным для всех
+  шагов свипа.
+- Если пересчёт делает какой-то компонент ≤ 0 (недостаточно массы у
+  остальных), точка помечается `skipped=true` и пропускается —
+  остальная часть кривой всё равно возвращается вызывающему.
+
+**Endpoint:** `POST /recipes/{id}/sensitivity`  
+Тело: `{component_name, min_percent, max_percent, steps, property_codes?}`
+
+**В UI:** новый таб «Чувствительность» в карточке рецепта
+- Выбор компонента (по умолчанию — самый крупный)
+- Диапазон `от % .. до %` (по умолчанию ±50 % вокруг baseline)
+- Число шагов (3..41, default 11)
+- Кривые в SVG для каждой модели: точки с tooltip, вертикальная
+  оранжевая линия «база» (текущее значение в рецепте), автопадинг
+  по Y
+
+### Added — Экспорт в CSV
+
+Два endpoint, оба возвращают `text/csv` с `Content-Disposition:
+attachment`:
+
+- `GET /recipes/{id}/export.csv` — одна строка на компонент, столбцы:
+  `recipe_id, recipe_version, category, subcategory, product_class,
+  stage_number, stage_name, component_name, cas_number, function,
+  mass_percent, tolerance_percent, manufacturer_reference`
+- `GET /catalog/export.csv?category=...&limit=5000` — summary по
+  всему каталогу (без композиций, до 10000 записей за раз)
+
+RFC-4180-совместимый эскейпинг (запятые, кавычки, переводы строк
+корректно оборачиваются в двойные кавычки и удваиваются внутри).
+
+**В UI:** кнопка «Скачать в CSV» в шапке карточки рецепта и
+«Скачать каталог (CSV)» в шапке страницы `/recipes`.
+
+Замечание про роутинг: `/catalog/export.csv` намеренно вне
+`/recipes/*` дерева, чтобы не конфликтовать с динамическим
+`/recipes/{recipe_id}` (FastAPI бы иначе распознал `export.csv` как
+recipe_id и всегда возвращал 404).
+
+### Endpoints
+
+**39 REST endpoints** (+3 к v1.10.0):
+- `POST /recipes/{id}/sensitivity`
+- `GET  /recipes/{id}/export.csv`
+- `GET  /catalog/export.csv`
+
+### i18n
+
++18 новых ключей (sensitivity + csv кнопки). **Итого 245 переведённых
+строк, паритет 100 %.**
+
+### Tests
+
+- 9 новых unit-тестов для `SensitivityAnalysisUseCase` (`_linspace`,
+  `_rebalance_around` арифметика, отказ на 100 %, self-exclusion,
+  предикт по всем моделям, пропуск шагов).
+- 4 integration-теста для `POST /sensitivity` (базовый свип, 404, 422,
+  skipped points).
+- 4 integration-теста для CSV-экспорта (заголовки, эскейпинг запятых
+  и кавычек, 404, каталог).
+- **Итого: 453 passed, 0 failed** (+17 к v1.10.0).
+
+### Metrics
+
+| | v1.10.0 | v1.11.0 |
+|---|---|---|
+| Тесты | 436 | **453** (+17) |
+| REST endpoints | 36 | **39** (+3) |
+| i18n ключей | 227 | **245** (+18) |
+| Табов в Recipe | 6 | **7** |
+| Source files | 104 | **105** |
+| ruff/mypy/bandit | clean | clean |
+
+### Files
+
+- src/formulation_workbench/application/use_cases/sensitivity_analysis.py (new)
+- src/formulation_workbench/infrastructure/di/__init__.py (регистрация)
+- src/formulation_workbench/presentation/api/routes.py (+3 endpoints, PlainTextResponse)
+- src/formulation_workbench/presentation/api/schemas.py (+3 Sensitivity DTOs)
+- tests/unit/application/test_sensitivity_analysis.py (new, 9 tests)
+- tests/integration/test_api_sensitivity.py (new, 4 tests)
+- tests/integration/test_api_export_csv.py (new, 4 tests)
+- web/src/lib/api.ts (SensitivityRequest/Result + CSV URLs)
+- web/src/i18n/dictionaries/{ru,en}.ts (+18 keys)
+- web/src/app/recipes/[id]/page.tsx (Sensitivity tab + SVG curves + CSV button)
+- web/src/app/recipes/page.tsx (catalog CSV button)
+
+---
+
 ## [1.10.0] — Строгая русификация, поиск похожих рецептов, реальный дрейф из каталога (2026-08-23)
 
 Три изменения по мотивам обратной связи пользователя:

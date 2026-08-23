@@ -99,6 +99,28 @@ export const en: Dict = {
   "recipe.tab.cost": "Cost",
   "recipe.tab.optimise": "Optimise",
   "recipe.tab.similar": "Similar",
+  "recipe.tab.sensitivity": "Sensitivity",
+  "recipe.export.csv": "Download as CSV",
+  "recipes.export.csv": "Download catalog (CSV)",
+
+  // sensitivity
+  "sensitivity.title": "Sensitivity analysis",
+  "sensitivity.subtitle":
+    "Sweep the mass fraction of one component; others are rebalanced pro-rata. Models predict how properties respond.",
+  "sensitivity.component": "Component",
+  "sensitivity.baseline": "Baseline: {v} %",
+  "sensitivity.min": "From, %",
+  "sensitivity.max": "To, %",
+  "sensitivity.steps": "Steps",
+  "sensitivity.run": "Build curves",
+  "sensitivity.running": "Running…",
+  "sensitivity.failed": "Failed: {msg}",
+  "sensitivity.no_models": "No trained models yet. Train them on the Models page.",
+  "sensitivity.hint":
+    "Points where the rebalancing is infeasible (no mass budget left for the other components) are marked as skipped.",
+  "sensitivity.chart.axis_x": "Component mass fraction, %",
+  "sensitivity.chart.baseline": "baseline",
+  "sensitivity.chart.skipped": "skipped",
 
   // similar
   "similar.title": "Similar recipes",
