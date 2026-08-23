@@ -1,6 +1,6 @@
 [project]
 name = "formulation-workbench"
-version = "1.6.0"
+version = "1.6.1"
 description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -276,6 +276,10 @@ addopts = [
     "--cov-report=xml:coverage.xml",
     "--cov-branch",
     "--cov-fail-under=60",
+    # Qualification benchmarks are opt-in; run them explicitly with
+    # ``pytest -m qualification tests/qualification`` from the docs.
+    "-m",
+    "not qualification",
 ]
 testpaths = ["tests"]
 asyncio_mode = "auto"
@@ -284,6 +288,7 @@ markers = [
     "integration: Integration tests (DB, external services)",
     "e2e: End-to-end tests (full stack)",
     "slow: Slow tests (>5s)",
+    "qualification: End-to-end quality benchmark (not run by default; see pytest -m qualification)",
     "api: FastAPI HTTP tests",
 ]
 filterwarnings = [

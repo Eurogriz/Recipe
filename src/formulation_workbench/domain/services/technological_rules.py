@@ -139,12 +139,19 @@ def _rule_additive_envelopes(recipe: Recipe) -> list[RuleFinding]:
         if env.max_percent >= 100.0:
             continue  # nothing to check
         if total > env.max_percent:
+            # A modest overdose is a warning; a gross overdose (≥ 5× the
+            # typical maximum) is almost certainly a labelling mistake or
+            # a broken formulation and gets flagged as an ERROR so it
+            # cannot slip through to production.
+            gross_overdose = env.max_percent > 0 and total >= env.max_percent * 5.0
+            severity = Severity.ERROR if gross_overdose else Severity.WARNING
             findings.append(
                 RuleFinding(
                     rule_id="T3",
-                    severity=Severity.WARNING,
+                    severity=severity,
                     message=(
-                        f"{func.value} totals {total:.2f} % — above typical maximum "
+                        f"{func.value} totals {total:.2f} % — "
+                        f"{'≥ 5× above' if gross_overdose else 'above'} typical maximum "
                         f"{env.max_percent} %. {env.notes}"
                     ),
                     reference=env.reference,

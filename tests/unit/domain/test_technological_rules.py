@@ -93,17 +93,33 @@ class TestNoBinder:
 
 
 class TestAdditiveEnvelope:
-    def test_defoamer_overdose_warning(self) -> None:
+    def test_moderate_defoamer_overdose_warns(self) -> None:
+        # 1.5 % is above the 0.8 % max but well under the ≥ 5× ERROR
+        # threshold, so it stays a WARNING.
+        recipe = _make_recipe(
+            [
+                _c("Water", ComponentFunction.VEHICLE, 40.0, cas="7732-18-5"),
+                _c("Acrylic", ComponentFunction.BINDER, 38.5),
+                _c("TiO2", ComponentFunction.PIGMENT, 20.0, cas="13463-67-7"),
+                _c("Foamex", ComponentFunction.DEFOAMER, 1.5),
+            ]
+        )
+        findings = evaluate(recipe)
+        assert any(f.rule_id == "T3" and f.severity is Severity.WARNING for f in findings)
+
+    def test_gross_defoamer_overdose_is_an_error(self) -> None:
+        # 5 % is ≥ 5× the 0.8 % envelope maximum — must escalate to ERROR
+        # so a broken formulation cannot reach production-ready maturity.
         recipe = _make_recipe(
             [
                 _c("Water", ComponentFunction.VEHICLE, 40.0, cas="7732-18-5"),
                 _c("Acrylic", ComponentFunction.BINDER, 35.0),
                 _c("TiO2", ComponentFunction.PIGMENT, 20.0, cas="13463-67-7"),
-                _c("Foamex", ComponentFunction.DEFOAMER, 5.0),  # ×10 typical
+                _c("Foamex", ComponentFunction.DEFOAMER, 5.0),
             ]
         )
         findings = evaluate(recipe)
-        assert any(f.rule_id == "T3" and f.severity is Severity.WARNING for f in findings)
+        assert any(f.rule_id == "T3" and f.severity is Severity.ERROR for f in findings)
 
     def test_biocide_within_envelope_ok(self) -> None:
         recipe = _make_recipe(

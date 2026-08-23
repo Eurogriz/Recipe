@@ -7,6 +7,68 @@
 
 ---
 
+## [1.6.1] — Quality benchmark + gross-overdose escalation (2026-08-23)
+
+Проверка **насколько качественно система реально подбирает рецептуры**.
+
+### Added — End-to-end qualification benchmark
+
+- `tests/qualification/` — новый opt-in test suite (`pytest -m
+  qualification tests/qualification`):
+  - `ground_truth.py` — синтетическая «истинная физика» рецептур
+    (gloss, hiding_power, viscosity, VOC, freeze-thaw) с
+    нелинейностями и interactions.
+  - `factories.py` — construction helpers для recipes/experiments.
+  - `test_recipe_quality_benchmark.py` — 10 тестов измеряющих:
+    - точность prediction (R² + MAE) на hold-out для 4 свойств;
+    - точность optimiser'а: gap между targeted и actual value;
+    - способность assessment ловить дефектные рецепты;
+    - способность Pareto выдавать реальный front (не одна точка).
+  - Печатает финальный отчёт с числами:
+
+    ```
+     corpus  : 60 train / 20 holdout
+     ─── Property prediction ─────────────────────────
+       gloss_60             R²=+0.935   MAE=  2.05
+       hiding_power         R²=+0.938   MAE=  0.28
+       viscosity_mid_shear  R²=+0.987   MAE= 15.09
+       voc_content          R²=+0.985   MAE=  0.35
+     ─── Optimiser ──────────────────────────────────
+       target=gloss_60             gap =  1.4 %
+       target=viscosity_mid_shear  gap =  9.7 %
+     ─── Assessment (defect detection) ──────────────
+       detected 3 of 3 defective recipes as ERROR
+     ─── Pareto (gloss ↑ vs voc ↓) ──────────────────
+       front size = 8, gloss spread = 13.43
+    ```
+- Тесты запускаются командой `pytest -m qualification`; из обычного
+  `pytest` они deselect'нуты через `addopts += ["-m", "not
+  qualification"]`.
+
+### Fixed — Assessment: gross additive overdose is now an ERROR
+
+Бенчмарк поймал реальный defect quality: рецепт с 10 % defoamer'а
+(× 12 typical maximum 0.8 %) получал `production_ready` maturity,
+потому что правило T3 выдавало только warning.  Теперь: перекос ≥ 5×
+от `env.max_percent` эскалируется до **ERROR**, что автоматически
+ограничивает Maturity до DRAFT.
+
+Существующий тест `test_defoamer_overdose_warning` (× 6.25) переименован
+и разделён:
+  - `test_moderate_defoamer_overdose_warns` — оставляет warning при
+    моменте 1.5 % (× 1.9 от типичного max);
+  - `test_gross_defoamer_overdose_is_an_error` — 5 % → ERROR.
+
+### Metrics after 1.6.1
+
+- **404 обычных теста зелёные** (+1 к 403).
+- **10 qualification-тестов проходят** — предсказание R² 0.935-0.987,
+  optimiser gap 1.4-9.7 %, assessment 3/3 defect detection,
+  Pareto front 8 pts / 13.4 gloss spread.
+- Ruff / ruff-format / bandit / mypy — clean.
+
+---
+
 ## [1.6.0] — Feature drift, calibration, Pareto, explainability, ECHA ETL (2026-08-23)
 
 Девятый раунд — пять отложенных пунктов v1.5.
