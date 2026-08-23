@@ -7,6 +7,99 @@
 
 ---
 
+## [1.27.0] — Compare-tray: multi-select через клики, sticky bottom bar, deep-link (2026-08-23)
+
+v1.26 добавил compare-эндпоинт и `/compare` страницу, но пользователь
+должен был вручную копировать UUID из URL в 4 input'а — плохой UX.
+Этот раунд закрывает цикл: **клики → сравнение**.
+
+### Added — Sticky ``CompareTray``
+
+Bottom-bar появляется как только пользователь выбрал ≥1 рецепт.
+Показывает:
+- «Выбрано N / 4:» + chip'ы с обрезанными UUID + крестик per chip
+  для точечного удаления
+- «Очистить» — сбрасывает всю selection
+- Большая primary-кнопка **«Сравнить N →»** ведёт на
+  `/compare?ids=…` — активна с 2 recipes
+- Плашка «выберите ещё один — минимум 2» когда выбран 1
+
+Отрисован **глобально** в `AppShell` — selection живёт между
+переходами `/recipes → /recipes/{id} → /search → …`.  Скрывается
+когда selection пустая (не крадёт layout).
+
+### Added — Multi-select чекбоксы на карточках `/recipes`
+
+Кнопка в правом-верхнем углу карточки. Три состояния:
+- **✓ (primary)** — рецепт в selection, ring на карточке
+- **⇄ (grey)** — не в selection, click добавляет
+- **⇄ (muted, disabled)** — tray полный (4/4)
+
+`preventDefault + stopPropagation` внутри `<button>` — иначе
+wrapping `<Link>` навигирует до React handler'а.  Обычный клик
+по карточке (не по кнопке) по-прежнему открывает detail-страницу.
+
+### Added — Кнопка «В сравнение» на `/recipes/{id}`
+
+Toolbar рядом с «Клонировать» и «CSV». Тот же state что и tray —
+если рецепт уже выбран, кнопка меняется на «В сравнении».
+
+### Added — ``useCompareSelection`` hook + ``localStorage`` store
+
+`web/src/lib/compare-selection.ts` — минимальный pub-sub store
+(без Context, чтобы AppShell не re-render'ился на каждый tick):
+
+- Persist в `localStorage["fw:compare-selection"]`
+- Cross-tab sync через `storage` event
+- Hard cap 4 (== `COMPARE_MAX_SIZE` == compare-endpoint limit)
+- Corrupt storage → clean start, не крашит SSR
+
+API: `useCompareSelection()` возвращает `{ ids, has, toggle, add,
+remove, clear, isFull, canCompare }`.  Использует
+`useState + useEffect + subscribe` (не `useSyncExternalStore` —
+проще, зависимостей меньше, поведение то же для наших нужд).
+
+### Changed
+
+- `/compare` теперь берёт `ids` из URL, но **fallback на selection**
+  если URL пустой.  Deep-link выигрывает — воспроизводимость
+  ссылок важнее «удобства».
+- `RecipeCard` выделен в отдельный компонент (был inline block в
+  `/recipes` page).
+
+### Metrics
+
+- **655 тестов** (без изменений — backend не менялся).
+- **65 REST endpoints** (без изменений).
+- **17 UI страниц** (без изменений).
+- **3 web components** в `web/src/components/` (было 2, +1: `CompareTray.tsx`).
+- **606 i18n ключей** (было 593, +13 для tray/card RU+EN),
+  паритет 100%.
+- **`/recipes` bundle**: 3.91 → 4.97 kB (+1kB для RecipeCard + checkbox).
+- **`/recipes/[id]` bundle**: 13.8 → 14.8 kB (+1kB для AddToCompareButton).
+
+### QA
+
+- `ruff check src tests` — All checks passed!
+- `ruff format --check` — clean (backend не менялся)
+- `mypy src/formulation_workbench` — Success: 125 files
+- `pytest --no-cov --deselect ...` — 655 passed, 16 deselected,
+  1 skipped
+- `npx tsc --noEmit` — clean
+- `npx next build` — 17 маршрутов, все ○ Static кроме
+  `/recipes/[id]` ƒ Dynamic
+- Смок 4 страниц через прокси next→api: 200 на всех, HTML
+  compile за 30-1000 мс
+
+### Ops-заметка (повтор урока v1.26)
+
+После `next build` в dev-режиме опять нужно `rm -rf web/.next &&
+npm run dev`.  Симптом на этот раз — синтаксические ошибки при
+чтении `dictionaries/ru.ts` в dev-runtime после сборки.  Фикс тот
+же: чистая перекомпиляция.
+
+---
+
 ## [1.26.0] — Side-by-side compare: сравнение 2-4 рецептов на одном экране (2026-08-23)
 
 Классическая нужда технолога: «новая версия vs текущий продакшн»,

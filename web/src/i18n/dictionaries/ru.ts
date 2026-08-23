@@ -570,6 +570,22 @@ export const ru: Dict = {
   // navigation extra (v1.26)
   "nav.compare": "Сравнение рецептов",
 
+  // compare tray + card selection (v1.27)
+  "compare.tray.aria": "Выбранные рецепты для сравнения",
+  "compare.tray.selected": "Выбрано {n} / {max}:",
+  "compare.tray.remove_aria": "Убрать рецепт {id} из сравнения",
+  "compare.tray.clear": "Очистить",
+  "compare.tray.go": "Сравнить {n} →",
+  "compare.tray.need_two": "выберите ещё один — минимум 2",
+  "recipes.card.select_aria": "Добавить рецепт в сравнение",
+  "recipes.card.deselect_aria": "Убрать рецепт из сравнения",
+  "recipes.card.select_title": "Добавить в сравнение",
+  "recipes.card.deselect_title": "Убрать из сравнения",
+  "recipes.card.compare_full":
+    "В сравнении уже {max} рецептов — уберите один, чтобы добавить новый.",
+  "recipe.compare.add": "В сравнение",
+  "recipe.compare.remove": "В сравнении",
+
   // compare (v1.26)
   "compare.title": "Сравнение рецептов бок о бок",
   "compare.subtitle":

@@ -6,10 +6,12 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Beaker,
+  Check,
   ClipboardCheck,
   DollarSign,
   Download,
   GitBranch,
+  GitCompareArrows,
   History,
   LineChart,
   Network,
@@ -41,6 +43,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TBody, THead, TH, TR, TD } from "@/components/ui/table";
 import { useT } from "@/i18n/I18nProvider";
+import {
+  COMPARE_MAX_SIZE,
+  useCompareSelection,
+} from "@/lib/compare-selection";
 
 type Tab =
   | "composition"
@@ -86,6 +92,7 @@ export default function RecipeDetailPage() {
           <ArrowLeft className="h-4 w-4" /> {t("recipe.back")}
         </Link>
         <div className="flex items-center gap-3">
+          <AddToCompareButton id={id} />
           <CloneButton id={id} />
           <a
             href={api.recipeCsvUrl(id)}
@@ -2742,4 +2749,42 @@ function defaultPrice(fn: string): string {
     wax: "5.00",
   };
   return table[fn] ?? "2.00";
+}
+
+
+/** Compact toolbar button that adds the current recipe to the
+ *  compare-selection.  Toggles OFF if already selected, disables
+ *  when the tray is at ``COMPARE_MAX_SIZE`` capacity. */
+function AddToCompareButton({ id }: { id: string }) {
+  const t = useT();
+  const { has, toggle, isFull } = useCompareSelection();
+  const selected = has(id);
+  const disabled = !selected && isFull;
+  const label = selected
+    ? t("recipe.compare.remove")
+    : t("recipe.compare.add");
+  const Icon = selected ? Check : GitCompareArrows;
+  return (
+    <button
+      type="button"
+      onClick={() => toggle(id)}
+      disabled={disabled}
+      title={
+        disabled
+          ? t("recipes.card.compare_full", { max: COMPARE_MAX_SIZE })
+          : label
+      }
+      className={
+        "inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm transition-colors " +
+        (selected
+          ? "border-primary bg-primary/5 text-primary"
+          : disabled
+            ? "border-border bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+            : "border-border bg-white text-foreground hover:border-primary/60 hover:text-primary")
+      }
+    >
+      <Icon className="h-4 w-4" />
+      {label}
+    </button>
+  );
 }

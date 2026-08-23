@@ -553,6 +553,22 @@ export const en: Dict = {
   // navigation extra (v1.26)
   "nav.compare": "Recipe compare",
 
+  // compare tray + card selection (v1.27)
+  "compare.tray.aria": "Recipes selected for compare",
+  "compare.tray.selected": "Selected {n} / {max}:",
+  "compare.tray.remove_aria": "Remove recipe {id} from compare",
+  "compare.tray.clear": "Clear",
+  "compare.tray.go": "Compare {n} →",
+  "compare.tray.need_two": "pick one more — need at least 2",
+  "recipes.card.select_aria": "Add recipe to compare",
+  "recipes.card.deselect_aria": "Remove recipe from compare",
+  "recipes.card.select_title": "Add to compare",
+  "recipes.card.deselect_title": "Remove from compare",
+  "recipes.card.compare_full":
+    "Compare tray is full ({max} recipes) — remove one to add another.",
+  "recipe.compare.add": "Compare",
+  "recipe.compare.remove": "In compare",
+
   // compare (v1.26)
   "compare.title": "Side-by-side recipe compare",
   "compare.subtitle":

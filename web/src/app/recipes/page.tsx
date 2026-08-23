@@ -22,6 +22,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/i18n/I18nProvider";
+import {
+  COMPARE_MAX_SIZE,
+  useCompareSelection,
+} from "@/lib/compare-selection";
+import { Check, GitCompareArrows } from "lucide-react";
 
 // 60 fits neatly in a 3-col grid at any breakpoint and is small enough
 // to render at ~5 ms per page.  200 (v1.19) was too coarse — the user
@@ -338,37 +343,7 @@ export default function RecipesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {items?.map((r) => (
-          <Link
-            key={r.id}
-            href={`/recipes/${encodeURIComponent(r.id)}`}
-            className="block"
-          >
-            <Card className="hover:border-primary/40 hover:shadow transition-all h-full">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-xs text-muted-foreground">
-                      {r.category}
-                    </div>
-                    <div className="font-semibold leading-tight">
-                      {r.subcategory || r.id}
-                    </div>
-                  </div>
-                  <StatusBadge status={r.status} />
-                </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {r.intended_use || "—"}
-                </p>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Badge variant="outline">{r.product_class}</Badge>
-                  {r.binder_type && <Badge variant="info">{r.binder_type}</Badge>}
-                  <Badge variant="default">
-                    {t("recipe.version", { n: r.version })}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+          <RecipeCard key={r.id} recipe={r} />
         ))}
         {items?.length === 0 && !loading && (
           <div className="col-span-full text-center text-muted-foreground py-12 border border-dashed border-border rounded-lg">
@@ -480,4 +455,103 @@ function StatusBadge({ status }: { status: string }) {
           ? "destructive"
           : "outline";
   return <Badge variant={v}>{status}</Badge>;
+}
+
+/** Card that both navigates on the main click AND allows toggling
+ *  the compare-selection via a checkbox in the top-right corner.
+ *
+ *  The checkbox is a plain ``<button>`` (not an ``<input>``) because
+ *  the whole card is wrapped in a ``<Link>`` and nested interactive
+ *  elements need explicit ``stopPropagation`` — a real checkbox
+ *  triggers browser default-click before React sees the event,
+ *  which navigates the wrapping link.
+ */
+function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
+  const t = useT();
+  const { has, toggle, isFull } = useCompareSelection();
+  const selected = has(recipe.id);
+  const disabled = !selected && isFull;
+
+  return (
+    <div className="relative">
+      <Link
+        href={`/recipes/${encodeURIComponent(recipe.id)}`}
+        className="block"
+      >
+        <Card
+          className={
+            "hover:border-primary/40 hover:shadow transition-all h-full" +
+            (selected ? " ring-2 ring-primary/70" : "")
+          }
+        >
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="pr-8 min-w-0">
+                <div className="text-xs text-muted-foreground truncate">
+                  {recipe.category}
+                </div>
+                <div className="font-semibold leading-tight truncate">
+                  {recipe.subcategory || recipe.id}
+                </div>
+              </div>
+              <StatusBadge status={recipe.status} />
+            </div>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {recipe.intended_use || "—"}
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Badge variant="outline">{recipe.product_class}</Badge>
+              {recipe.binder_type && (
+                <Badge variant="info">{recipe.binder_type}</Badge>
+              )}
+              <Badge variant="default">
+                {t("recipe.version", { n: recipe.version })}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+      {/* Compare-selection toggle — absolutely positioned so it
+        * overlays the top-right corner of the card without breaking
+        * the link's clickable area.  ``preventDefault`` is critical
+        * — without it the wrapping ``<Link>`` navigates before the
+        * onClick handler ever fires. */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (disabled) return;
+          toggle(recipe.id);
+        }}
+        disabled={disabled}
+        aria-label={
+          selected
+            ? t("recipes.card.deselect_aria")
+            : t("recipes.card.select_aria")
+        }
+        title={
+          disabled
+            ? t("recipes.card.compare_full", { max: COMPARE_MAX_SIZE })
+            : selected
+              ? t("recipes.card.deselect_title")
+              : t("recipes.card.select_title")
+        }
+        className={
+          "absolute top-3 right-3 h-6 w-6 rounded-md border transition-colors flex items-center justify-center " +
+          (selected
+            ? "bg-primary text-primary-foreground border-primary"
+            : disabled
+              ? "bg-muted border-border text-muted-foreground opacity-50 cursor-not-allowed"
+              : "bg-white border-border text-muted-foreground hover:border-primary/60 hover:text-primary")
+        }
+      >
+        {selected ? (
+          <Check className="h-3.5 w-3.5" />
+        ) : (
+          <GitCompareArrows className="h-3.5 w-3.5" />
+        )}
+      </button>
+    </div>
+  );
 }

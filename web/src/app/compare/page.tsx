@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/i18n/I18nProvider";
+import { useCompareSelection } from "@/lib/compare-selection";
 
 /** Wrapper around ``useSearchParams`` — Next 14 requires a
  * ``<Suspense>`` boundary for the hook to work under `output=static`. */
@@ -34,11 +35,22 @@ export default function ComparePageWithSuspense() {
 function ComparePage() {
   const t = useT();
   const params = useSearchParams();
+  const selection = useCompareSelection();
   const rawIds = params.get("ids") ?? "";
-  const initialIds = rawIds
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  // URL wins over the persistent selection so a deep-link is
+  // reproducible even when the local user has a different
+  // selection stored — but if the URL has nothing, we fall back to
+  // whatever the tray remembers.
+  const initialIds =
+    rawIds
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean).length > 0
+      ? rawIds
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : selection.ids;
   const [ids, setIds] = useState<string[]>(initialIds);
   const [diffThreshold, setDiffThreshold] = useState<string>("0.1");
   const [result, setResult] = useState<CompareResultOut | null>(null);
