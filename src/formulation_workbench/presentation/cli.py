@@ -300,7 +300,7 @@ def audit_log(
                             {
                                 "timestamp": row.timestamp.isoformat(),
                                 "action": row.action,
-                                "actor": row.user_id,
+                                "actor": row.actor_label,
                                 "recipe_id": row.recipe_id,
                                 "changes": row.changes_json,
                                 "ip_address": row.ip_address,

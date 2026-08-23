@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: formulation-workbench-config
+  namespace: formulation-workbench
+data:
+  FW_ENVIRONMENT: "production"
+  FW_LOG_LEVEL: "INFO"
+  FW_LOG_JSON: "true"
+  FW_API_HOST: "0.0.0.0"
+  FW_API_PORT: "8000"
+  FW_METRICS_ENABLED: "true"
+  FW_RATE_LIMIT_ENABLED: "true"
+  FW_RATE_LIMIT_PER_MINUTE: "600"
+  FW_JWT_ALGORITHM: "HS256"
+  FW_JWT_REQUIRE_EXP: "true"

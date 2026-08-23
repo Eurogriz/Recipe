@@ -1,6 +1,6 @@
 [project]
 name = "formulation-workbench"
-version = "1.1.2"
+version = "1.1.3"
 description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -77,6 +77,11 @@ desktop = [
 postgres = [
     "asyncpg>=0.29",
     "psycopg[binary]>=3.1",  # used by alembic sync flows
+]
+# Full JWT support (RS256/ES256, JWKS, …).  HS256 works without this extra
+# thanks to the in-tree fallback but production installs should include it.
+jwt = [
+    "pyjwt[crypto]>=2.8",
 ]
 # Observability / production ops
 observability = [

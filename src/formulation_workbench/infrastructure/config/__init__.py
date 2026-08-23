@@ -55,8 +55,16 @@ class AppSettings(BaseSettings):
     api_cors_origins: list[str] = Field(default_factory=list)
 
     # ---- Auth ----------------------------------------------------------------
-    # If empty, API auth is disabled (only allowed outside production).
+    # Static bearer token — the legacy option from 1.1.x.  Kept for
+    # backwards compatibility.  Prefer JWT for new deployments.
     api_token: str = ""
+
+    # JWT settings.  When ``jwt_secret`` is non-empty, JWTs are accepted
+    # (and preferred over the static token).  HS256 by default.
+    jwt_secret: str = ""
+    jwt_algorithm: str = "HS256"
+    jwt_issuer: str = ""
+    jwt_require_exp: bool = True
 
     # ---- Paths ---------------------------------------------------------------
     data_dir: Path = Path("./data")
@@ -92,8 +100,10 @@ class AppSettings(BaseSettings):
         problems: list[str] = []
         if self.debug:
             problems.append("FW_DEBUG must be false in production")
-        if not self.api_token:
-            problems.append("FW_API_TOKEN must be set in production")
+        if not self.api_token and not self.jwt_secret:
+            problems.append("Either FW_API_TOKEN or FW_JWT_SECRET must be set in production")
+        if self.jwt_secret and self.jwt_algorithm == "HS256" and len(self.jwt_secret) < 32:
+            problems.append("FW_JWT_SECRET must be at least 32 characters when using HS256")
         if not self.encryption_key_hex and "sqlite" in self.database_url:
             problems.append("FW_ENCRYPTION_KEY_HEX must be set in production when using SQLite")
         if problems:

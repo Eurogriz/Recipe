@@ -8,5 +8,5 @@ or ``formulation_workbench.presentation``.
 
 from __future__ import annotations
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 __all__ = ["__version__"]

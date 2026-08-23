@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: formulation-workbench
+
+resources:
+  - ../../base
+
+images:
+  - name: ghcr.io/eurogriz/recipe
+    newTag: "1.1.3"
+
+patches:
+  - path: replicas.yaml
+    target:
+      kind: Deployment
+      name: formulation-workbench
+  - path: resources.yaml
+    target:
+      kind: Deployment
+      name: formulation-workbench
+
+configMapGenerator:
+  - name: formulation-workbench-config
+    behavior: merge
+    literals:
+      - FW_RATE_LIMIT_PER_MINUTE=1200

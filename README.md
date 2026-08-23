@@ -109,6 +109,40 @@ docker compose run --rm api formulation-workbench generate-key
 docker compose up --build api          # http://localhost:8000
 ```
 
+### Kubernetes
+
+Both Kustomize and Helm manifests are shipped in [`deploy/`](deploy):
+
+```bash
+# Kustomize (production overlay)
+kubectl apply -k deploy/kustomize/overlays/production
+
+# Helm
+helm upgrade --install formulation ./deploy/helm/formulation-workbench \
+    --namespace formulation-workbench --create-namespace \
+    --set image.tag=1.1.3
+```
+
+Both flavours ship with:
+
+- non-root pod (`uid=10001`, `readOnlyRootFilesystem`, seccomp
+  `RuntimeDefault`, `drop: [ALL]` capabilities),
+- Pod Security Standards `restricted` namespace,
+- startup / readiness / liveness probes hitting `/health`,
+- HPA (CPU + memory) + PodDisruptionBudget,
+- NetworkPolicy (ingress-nginx & monitoring only; egress DNS / Postgres / HTTPS),
+- ConfigMap ↔ Secret separation with checksum-based rollout on change.
+
+## Authentication
+
+The API supports three modes, resolved automatically from settings:
+
+| Setting | Mode | Notes |
+| --- | --- | --- |
+| `FW_JWT_SECRET` set | **JWT** (HS256 by default) | Preferred. Scopes read from `scope` claim: `recipes:read`, `recipes:write`. |
+| `FW_API_TOKEN` set (no JWT) | **Static bearer** | Legacy 1.1.x mode; grants both scopes. |
+| Both empty | **Open** | Development only — production start-up fails. |
+
 ## Configuration
 
 Every setting is loaded from environment variables (prefix `FW_`) or a `.env`

@@ -7,6 +7,89 @@
 
 ---
 
+## [1.1.3] — Full write API, JWT auth, K8s, CVE-scanning (2026-08-23)
+
+Четвёртый раунд production-grade доработок.
+
+### Added
+
+- **Write endpoints** — API теперь не read-only:
+  - `POST /recipes` → 201 (создаёт recipe с валидацией Pydantic + domain).
+  - `PUT /recipes/{id}` → 200 / 404 / 409 (Verified нельзя обновить
+    напрямую — сначала create-new-version).
+  - `DELETE /recipes/{id}` → 204 (soft = мягкое отклонение, `?hard=true`
+    — физическое удаление).
+  - `POST /recipes/{id}/submit-review` → перевод Draft→PendingReview.
+  - `POST /recipes/{id}/verify` → 200 / 404 / 409 (при 3+ достигает Verified).
+  - `POST /recipes/{id}/reject` → 200 / 404.
+- **JWT-аутентификация** (`presentation/api/auth.py`):
+  - HS256 через опциональный `[jwt]` extra (PyJWT). Есть in-tree
+    HS256 fallback для случаев, когда PyJWT не установлен — прод-инстанции
+    должны ставить extra.
+  - Скоупы `recipes:read` / `recipes:write`; `require_reader` / `require_writer`
+    зависимости.
+  - Legacy static-bearer (`FW_API_TOKEN`) продолжает работать и
+    автоматически получает оба скоупа.
+  - Dev-mode (оба секрета пустые, `FW_ENVIRONMENT != production`) — anonymous
+    principal с всеми скоупами (для локальной разработки).
+  - `enforce_production_invariants()` теперь требует любой из двух:
+    `FW_API_TOKEN` или `FW_JWT_SECRET`; HS256-секрет обязан быть ≥ 32
+    символов.
+- **OpenAPI examples**: все схемы (`CreateRecipeRequest`, `ComponentIn`,
+  `CompositionStageIn`, `CitationIn`, …) несут inline-примеры → Swagger UI
+  "Try it out" сразу заполняется рабочими данными; все responses
+  задокументированы (`401`, `403`, `404`, `409`, `422`).
+- **Kubernetes** (`deploy/kustomize/` + `deploy/helm/`):
+  - Kustomize: namespace с PSS `restricted`, ServiceAccount без токена,
+    ConfigMap + Secret, Service с prometheus-аннотациями, Deployment
+    (non-root uid 10001, `readOnlyRootFilesystem`, seccomp
+    RuntimeDefault, drop ALL caps, startup/ready/live-пробы,
+    topologySpreadConstraints), PodDisruptionBudget, HPA (CPU+memory),
+    NetworkPolicy (ingress-nginx + monitoring; egress DNS/Postgres/HTTPS).
+  - Overlay `production` — replicas: 3, увеличенные resources.
+  - Helm chart с `values.yaml` (каждый ключ прокомментирован),
+    checksum-аннотации на ConfigMap/Secret, ExternalSecrets/SealedSecrets
+    hint в README.
+- **PostgreSQL drift-check** (`tests/integration/test_migrations_postgres.py`):
+  запускается в CI-job `postgres-integration` против service container
+  Postgres 16 и сравнивает схему alembic-миграций с
+  `Base.metadata.create_all` — не даёт моделям расходиться с миграциями
+  ни на SQLite (уже было), ни на Postgres.
+- **Trivy CVE-scan в CI** (`.github/workflows/ci.yml` job `container-scan`):
+  - vulnerability scan (`ignore-unfixed`, severity HIGH+CRITICAL) → SARIF
+    в GitHub Security tab.
+  - config scan (Dockerfile + K8s manifests) → SARIF.
+  - hard gate: билд падает при **любой** CRITICAL CVE, для которой есть fix.
+
+### Changed
+
+- **Модель** (миграция `0002_relax_user_fks`): `recipe.created_by` и
+  `audit_log_entry.user_id` теперь nullable FK; добавлен
+  `audit_log_entry.actor_label` (свободная строка) — это разрешает
+  логировать действия system-jobs, JWT subjects, static API tokens
+  без предварительного provisioning в `user` table.
+- **Repository**: eager-loading для `primary_source.citation`,
+  `stages.components` во всех запросах; `save()` теперь корректно
+  обновляет verified-agnostic поля (primary_source пересоздаётся, stages
+  clear+flush до insert — иначе SQLite ловит UNIQUE constraint).
+- **`require_api_token`** заменён на `require_reader` в read-endpoints
+  — теперь JWT и static token работают единообразно на всём API.
+
+### Fixed
+
+- `RecipeSummary.model_validate(dto.__dict__)` падал на slots-dataclass'ах —
+  заменено на `asdict(dto)`.
+
+### Metrics after 1.1.3
+
+- **203 теста зелёные** (было 180, добавил 23: 13 write-endpoints, 10 JWT/static auth).
+- **Coverage 78.33%** (было 74.52%).
+- **Ruff clean · Ruff-format clean · Bandit clean · MyPy clean** (69 файлов).
+- Kubernetes YAML синтаксически валиден для всех 13 базовых манифестов
+  и Helm-темплейтов.
+
+---
+
 ## [1.1.2] — Hardening pass 3 (2026-08-23)
 
 Третий раунд production-grade доработок поверх 1.1.1.

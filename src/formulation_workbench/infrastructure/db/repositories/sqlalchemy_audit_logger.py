@@ -44,7 +44,10 @@ class SqlAlchemyAuditLogger(AuditLogger):
         """
         entry = AuditLogEntryModel(
             recipe_id=aggregate_id,
-            user_id=actor,
+            # We don't (yet) resolve the actor to a user row — keep the FK
+            # unset and preserve the free-form label instead.
+            user_id=None,
+            actor_label=actor or "system",
             action=action,
             changes_json=json.dumps(changes) if changes else None,
             timestamp=datetime.now(timezone.utc),

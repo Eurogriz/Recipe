@@ -129,7 +129,12 @@ class RecipeModel(Base):
     finish: Mapped[str | None] = mapped_column(String(64))
     color: Mapped[str | None] = mapped_column(String(64))
 
-    created_by: Mapped[str] = mapped_column(String(36), ForeignKey("user.id"), nullable=False)
+    # Nullable in 1.x — the user table is optional (populated only when the
+    # RBAC module is enabled).  A future major release will make this
+    # mandatory once the user provisioning story is in place.
+    created_by: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utc_now
     )
@@ -270,7 +275,13 @@ class AuditLogEntryModel(Base):
     recipe_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("recipe.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("user.id"), nullable=False)
+    user_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+    # Free-form label for the acting principal — always populated even
+    # when there is no matching row in the ``user`` table (e.g. system
+    # jobs, JWT subjects, static API tokens, seed imports).
+    actor_label: Mapped[str] = mapped_column(String(128), nullable=False, default="system")
     action: Mapped[str] = mapped_column(String(64), nullable=False)
     changes_json: Mapped[str | None] = mapped_column(Text)
     timestamp: Mapped[datetime] = mapped_column(

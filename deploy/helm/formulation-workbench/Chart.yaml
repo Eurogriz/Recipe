@@ -1,0 +1,18 @@
+apiVersion: v2
+name: formulation-workbench
+description: Verified formulation database — headless REST/CLI service.
+type: application
+version: 0.1.0
+appVersion: "1.1.3"
+kubeVersion: ">=1.27.0"
+home: https://github.com/Eurogriz/Recipe
+sources:
+  - https://github.com/Eurogriz/Recipe
+maintainers:
+  - name: Formulation Workbench Team
+    email: team@formulation-workbench.local
+keywords:
+  - paint
+  - coatings
+  - formulation
+  - LIMS

@@ -38,6 +38,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _looks_like_uuid(value: str | None) -> bool:
+    """Cheap check to keep the FK constraint from firing on non-uuid labels."""
+    if not value:
+        return False
+    import uuid as _uuid
+
+    try:
+        _uuid.UUID(value)
+    except (ValueError, AttributeError, TypeError):
+        return False
+    return True
+
+
 class SqlAlchemyRecipeRepository:
     """SQLAlchemy implementation of RecipeRepository.
 
@@ -52,13 +65,21 @@ class SqlAlchemyRecipeRepository:
         model = await self._session.get(
             RecipeModel,
             recipe_id,
-            options=[
-                selectinload(RecipeModel.stages).selectinload(CompositionStageModel.components)
-            ],
+            options=list(self._eager_options()),
         )
         if model is None:
             return None
         return await self._to_entity(model)
+
+    @staticmethod
+    def _eager_options() -> tuple:  # type: ignore[type-arg]
+        """Options avoiding N+1 and MissingGreenlet in async sessions."""
+        return (
+            selectinload(RecipeModel.stages).selectinload(CompositionStageModel.components),
+            selectinload(RecipeModel.primary_source).selectinload(
+                RecipeSourceReferenceModel.citation
+            ),
+        )
 
     async def save(self, recipe: Recipe) -> None:
         """Save (insert or update) a recipe.
@@ -66,17 +87,26 @@ class SqlAlchemyRecipeRepository:
         For MVP, we do full replace: delete old stages/components and insert new ones.
         For production, we'd do more granular change detection.
         """
-        existing = await self._session.get(RecipeModel, recipe.id)
+        existing = await self._session.get(
+            RecipeModel, recipe.id, options=list(self._eager_options())
+        )
         if existing is None:
             model = self._to_model(recipe)
             self._session.add(model)
+            await self._session.flush()
         else:
-            # Update in-place
+            # In-place update; the stages/primary_source clear must be
+            # flushed *before* new rows are inserted, otherwise SQLite's
+            # UNIQUE(recipe_id, stage_number) constraint fires because
+            # the SQL statement order becomes INSERT before DELETE.
+            existing.stages.clear()
+            existing.primary_source = None  # type: ignore[assignment]
+            await self._session.flush()
             self._update_model_from_entity(existing, recipe)
-        await self._session.flush()
+            await self._session.flush()
 
     async def delete(self, recipe_id: str) -> None:
-        model = await self._session.get(RecipeModel, recipe_id)
+        model = await self._session.get(RecipeModel, recipe_id, options=list(self._eager_options()))
         if model is not None:
             await self._session.delete(model)
             await self._session.flush()
@@ -85,6 +115,7 @@ class SqlAlchemyRecipeRepository:
         """Simple LIKE search for MVP. FTS5 will be added in next iteration."""
         stmt = (
             select(RecipeModel)
+            .options(*self._eager_options())
             .where(
                 (RecipeModel.category.contains(query))
                 | (RecipeModel.subcategory.contains(query))
@@ -107,7 +138,7 @@ class SqlAlchemyRecipeRepository:
         limit: int = 100,
         offset: int = 0,
     ) -> list[Recipe]:
-        stmt = select(RecipeModel)
+        stmt = select(RecipeModel).options(*self._eager_options())
         if category:
             stmt = stmt.where(RecipeModel.category == category)
         if subcategory:
@@ -167,7 +198,9 @@ class SqlAlchemyRecipeRepository:
             intended_use=recipe.intended_use,
             finish=recipe.finish,
             color=recipe.color,
-            created_by=recipe.created_by,
+            # Only persist FK when it looks like a uuid; otherwise leave
+            # null so we don't violate the `user` foreign key.
+            created_by=recipe.created_by if _looks_like_uuid(recipe.created_by) else None,
             created_at=recipe.created_at,
             updated_at=recipe.created_at,
             version=recipe.version,
@@ -247,8 +280,16 @@ class SqlAlchemyRecipeRepository:
         model.verification_count = recipe.status.verification_count
         model.required_verifications = recipe.status.required_verifications
         model.metadata_json = json.dumps({"tags": list(recipe.tags)})
-        # Stages/components replace (simplified for MVP)
-        model.stages.clear()
+        # Re-attach a fresh primary source reference (the old one was
+        # cleared+flushed by save() so the delete-orphan cascade fires).
+        primary_citation = self._to_citation_model(recipe.primary_source)
+        model.primary_source = RecipeSourceReferenceModel(
+            citation=primary_citation,
+            is_primary=True,
+            page_or_formula=recipe.primary_source.page_or_formula,
+            section=recipe.primary_source.section,
+        )
+        # Stages already cleared + flushed by save()
         for stage in recipe.stages:
             stage_model = CompositionStageModel(
                 stage_number=stage.stage_number,
@@ -363,7 +404,7 @@ class SqlAlchemyRecipeRepository:
             cross_references=cross_references,
             status=status,
             created_at=model.created_at,
-            created_by=model.created_by,
+            created_by=model.created_by or "",
             version=model.version,
             previous_version_id=model.previous_version_id,
             tags=tags,
