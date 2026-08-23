@@ -616,6 +616,104 @@ class ParetoResultOut(BaseModel):
     generations: int
 
 
+# ---------------------------------------------------------------------------
+# Async jobs
+# ---------------------------------------------------------------------------
+class JobRecordOut(BaseModel):
+    id: str
+    kind: str
+    status: str = Field(examples=["queued", "running", "succeeded", "failed", "cancelled"])
+    created_at: str
+    started_at: str | None = None
+    finished_at: str | None = None
+    duration_seconds: float | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    result: Any | None = None
+    error: str | None = None
+
+
+class JobsListOut(BaseModel):
+    jobs: list[JobRecordOut]
+
+
+# ---------------------------------------------------------------------------
+# Batch calibration (one call, many models)
+# ---------------------------------------------------------------------------
+class CalibrationBatchPropertyIn(BaseModel):
+    property_code: str
+    samples: list[CalibrationSample] = Field(min_length=2)
+
+
+class CalibrationBatchRequest(BaseModel):
+    entries: list[CalibrationBatchPropertyIn] = Field(min_length=1)
+    target_coverage: float = Field(default=0.9, gt=0.0, lt=1.0)
+
+
+class CalibrationBatchOut(BaseModel):
+    calibrated: list[CalibrationOut] = Field(default_factory=list)
+    skipped: dict[str, str] = Field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
+# Calibration coverage matrix
+# ---------------------------------------------------------------------------
+class CalibrationMatrixRowOut(BaseModel):
+    property_code: str
+    model_version: str
+    cv_mean_r2: float
+    n_samples: int
+    has_calibration: bool
+    has_isotonic: bool
+    has_interval: bool
+    target_coverage: float | None = None
+    empirical_coverage: float | None = None
+    coverage_gap: float | None = Field(
+        default=None,
+        description=(
+            "empirical_coverage - target_coverage; negative means the interval "
+            "is under-covering, positive means it is conservatively wide."
+        ),
+    )
+    factor: float | None = None
+    calibration_n: int | None = None
+
+
+class CalibrationMatrixOut(BaseModel):
+    rows: list[CalibrationMatrixRowOut]
+    n_models: int
+    n_calibrated: int
+    n_under_covered: int = Field(
+        description="Models whose empirical coverage is more than 5pp below target."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Drift alerts
+# ---------------------------------------------------------------------------
+class DriftAlertRequest(DriftFullRequest):
+    """Same payload as ``DriftFullRequest`` plus alert-routing controls."""
+
+    dispatch_min_level: str = Field(
+        default="severe_drift",
+        description=(
+            "Only dispatch an alert when the worst-per-feature drift level is at "
+            "least this value.  Accepted: no_drift, moderate_drift, severe_drift."
+        ),
+    )
+    context: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Free-form context attached to the alert (e.g. batch id, plant).",
+    )
+
+
+class DriftAlertOut(BaseModel):
+    property_code: str
+    worst_level: str
+    reports: list[DriftReportOut]
+    alert_dispatched: bool
+    dispatch_reason: str
+
+
 class ValidationErrorResponse(BaseModel):
     detail: list[dict[str, Any]] = Field(
         examples=[
@@ -639,6 +737,11 @@ __all__ = [
     "BatchCostLineOut",
     "BatchCostOut",
     "BatchInfoIn",
+    "CalibrationBatchOut",
+    "CalibrationBatchPropertyIn",
+    "CalibrationBatchRequest",
+    "CalibrationMatrixOut",
+    "CalibrationMatrixRowOut",
     "CalibrationOut",
     "CalibrationRequest",
     "CalibrationSample",
@@ -651,6 +754,8 @@ __all__ = [
     "CostRequest",
     "CreateRecipeRequest",
     "DeviationOut",
+    "DriftAlertOut",
+    "DriftAlertRequest",
     "DriftCheckOut",
     "DriftCheckRequest",
     "DriftFullOut",
@@ -663,6 +768,8 @@ __all__ = [
     "FeatureImpactOut",
     "FeatureImpactOutBase",
     "HealthResponse",
+    "JobRecordOut",
+    "JobsListOut",
     "MassBalanceOut",
     "ModelMetadataOut",
     "OptimisationRequestIn",

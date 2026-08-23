@@ -7,6 +7,115 @@
 
 ---
 
+## [1.7.0] — Async training, batch calibration & drift alerts (2026-08-23)
+
+Роадмап-релиз, закрывающий три «отложенных» пункта после quality
+benchmark: **фоновая тренировка ML моделей**, **batch-калибровка + coverage
+matrix для всех свойств**, и **алерты на feature-drift** (webhook /
+Slack / logging fallback).
+
+### Added — Async job registry
+
+- `formulation_workbench.infrastructure.ml.jobs` — новый `JobRegistry`:
+  - лёгкая внутрипроцессная очередь на `asyncio.create_task`, без
+    Celery / Redis / брокера;
+  - жизненный цикл `queued → running → succeeded | failed | cancelled`
+    c `duration_seconds` и `error` в терминальном состоянии;
+  - опциональный JSON-snapshot на диск (`data/models/jobs.snapshot.json`)
+    — при рестарте процесса «зависшие» running-jobs поднимаются как
+    `failed` c причиной `"Process restarted mid-job"`;
+  - LRU-эвикция терминальных записей при превышении
+    `FW_ASYNC_JOB_MAX_RECORDS` (по умолчанию 500);
+  - `shutdown()` останавливает pending-задачи при закрытии `Container`.
+- Новые endpoints:
+  - `POST /ml/train/async` → 202 Accepted, возвращает `{id, status,
+    ...}` и запускает тренировку в фоне.
+  - `GET /ml/jobs` — список последних задач с фильтрами `?status=`,
+    `?kind=`, `?limit=`.
+  - `GET /ml/jobs/{job_id}` — статус + результат.
+  - `DELETE /ml/jobs/{job_id}` — cancel (409, если задача уже
+    terminal; 404, если id неизвестен).
+
+### Added — Batch calibration & coverage matrix
+
+- `POST /ml/calibrate` — калибрует **много моделей за один вызов**:
+  тело — `{"entries": [{"property_code": "...", "samples": [...]}, ...]}`,
+  ответ — `{"calibrated": [...], "skipped": {code: reason}}`.  Пропущенные
+  коды (нет модели, слишком мало сэмплов) сообщаются, а не роняют
+  весь batch.
+- `GET /ml/calibration-matrix` — сводная таблица по всем
+  зарегистрированным моделям: `property_code`, `model_version`,
+  `cv_mean_r2`, `n_samples`, флаги `has_calibration / has_isotonic /
+  has_interval`, `target_coverage`, `empirical_coverage`,
+  `coverage_gap` (empirical − target), `factor`.  Метрики
+  `n_calibrated` и `n_under_covered` (интервалы, которые
+  недодают ≥ 5 п.п. до target) — оперативный dashboard для QA.
+
+### Added — Drift alerts
+
+- Новый пакет `formulation_workbench.infrastructure.notifications`:
+  - `AlertNotifier` (Protocol) + реализации `NullNotifier`,
+    `LoggingNotifier`, `WebhookNotifier`;
+  - `Alert` — типизированное сообщение (kind, severity, title, summary,
+    fields) с рендером в Slack Block Kit или generic JSON;
+  - `build_notifier(webhook_url, format, min_severity)` — фабрика,
+    которую использует `Container`.  Пустой URL → `LoggingNotifier`.
+- Новый endpoint `POST /ml/models/{property_code}/drift-full/alert` —
+  прогоняет per-feature drift и **дispatches** alert через notifier,
+  если `worst_level` ≥ `dispatch_min_level` (`no_drift` |
+  `moderate_drift` | `severe_drift`).  В payload alert'а — top-5
+  «поехавших» фич с PSI и KS + произвольный `context` (plant, batch
+  ref) из тела запроса.
+
+### Added — Configuration
+
+Новые env-переменные (`FW_*`, значения по умолчанию безопасны для
+dev):
+
+- `FW_ALERT_WEBHOOK_URL` — пустая = логи; иначе POST JSON.
+- `FW_ALERT_WEBHOOK_FORMAT` = `slack` | `generic`.
+- `FW_ALERT_MIN_SEVERITY` = `info` | `warning` | `critical`.
+- `FW_ASYNC_JOB_MAX_RECORDS` — потолок in-memory registry (LRU).
+- `FW_ASYNC_JOB_SNAPSHOT_ENABLED` — писать snapshot на диск.
+
+### Fixed — `tests/__init__.py` & `tests/integration/__init__.py`
+
+Добавлены пустые `__init__.py`, чтобы `test_api_auth.py` мог
+импортировать `VALID_RECIPE` из `tests.integration.test_api_write`
+при изолированном запуске (`pytest tests/integration/test_api_auth.py`).
+Раньше три теста падали с `ModuleNotFoundError: No module named 'tests'`.
+
+### Tests
+
+- +7 новых интеграционных API-тестов (`test_api_async_jobs.py`,
+  `test_api_calibration_batch.py`, `test_api_drift_alerts.py`).
+- +7 unit-тестов для `JobRegistry` (`test_ml_jobs.py`) и +11 для
+  notifier stack (`test_notifier.py`).
+- **Итог: 434 unit/integration passed (+30 vs 1.6.1), 10
+  qualification passed, 0 skipped**.
+- coverage 85.49 % (gate 60 %).
+
+### Endpoints
+
+**30 REST endpoints** (+7 vs 1.6.1).  Итоговый список ML-раздела:
+
+```
+/ml/train                       POST   (sync training)
+/ml/train/async                 POST   (submit background job)
+/ml/models                      GET
+/ml/models/{code}/drift         POST
+/ml/models/{code}/drift-full    POST
+/ml/models/{code}/drift-full/alert POST
+/ml/models/{code}/calibrate     POST
+/ml/calibrate                   POST   (batch)
+/ml/calibration-matrix          GET
+/ml/jobs                        GET
+/ml/jobs/{id}                   GET
+/ml/jobs/{id}                   DELETE
+```
+
+---
+
 ## [1.6.1] — Quality benchmark + gross-overdose escalation (2026-08-23)
 
 Проверка **насколько качественно система реально подбирает рецептуры**.

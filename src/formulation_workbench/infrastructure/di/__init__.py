@@ -37,7 +37,9 @@ from ..config import AppSettings, get_settings
 from ..db.connection import Database
 from ..db.repositories.session_scoped import ScopedAuditLogger, ScopedRecipeRepository
 from ..db.repositories.sqlalchemy_experiment_repository import ScopedExperimentRepository
+from ..ml.jobs import JobRegistry
 from ..ml.property_regressor import PropertyRegressor
+from ..notifications import AlertNotifier, build_notifier
 from ..regulatory import RegulatoryDataError, build_checker_from_data_dir
 
 if TYPE_CHECKING:
@@ -81,6 +83,8 @@ class Container:
     train_property_models: TrainPropertyModelsUseCase
     predict_properties: PredictPropertiesUseCase
     optimise_recipe: OptimiseRecipeUseCase
+    job_registry: JobRegistry
+    alert_notifier: AlertNotifier
 
     @classmethod
     async def build(cls, settings: AppSettings | None = None) -> Container:
@@ -104,6 +108,24 @@ class Container:
         audit_logger = ScopedAuditLogger(database)
         experiment_repository = ScopedExperimentRepository(database)
         property_regressor = PropertyRegressor(storage_dir=settings.model_dir)
+
+        # Alerts + async jobs — process-local resources, no external
+        # broker required.  See ``ml.jobs`` and ``notifications`` for
+        # the design notes.
+        alert_notifier = build_notifier(
+            webhook_url=settings.alert_webhook_url,
+            format=settings.alert_webhook_format,
+            min_severity=settings.alert_min_severity,
+        )
+        snapshot_path = (
+            settings.model_dir / "jobs.snapshot.json"
+            if settings.async_job_snapshot_enabled
+            else None
+        )
+        job_registry = JobRegistry(
+            snapshot_path=snapshot_path,
+            max_jobs=settings.async_job_max_records,
+        )
 
         # Load the CSV-backed regulatory tables when they exist; otherwise
         # fall back to the compiled snapshot inside RegulatoryComplianceChecker.
@@ -144,10 +166,18 @@ class Container:
             ),
             predict_properties=PredictPropertiesUseCase(recipe_repository, property_regressor),
             optimise_recipe=OptimiseRecipeUseCase(recipe_repository, property_regressor),
+            job_registry=job_registry,
+            alert_notifier=alert_notifier,
         )
 
     async def close(self) -> None:
         """Dispose of resources (database engine)."""
+        # Cancel any in-flight jobs first so they do not touch a
+        # torn-down database.
+        try:
+            await self.job_registry.shutdown()
+        except Exception:
+            logger.warning("job_registry_shutdown_failed", exc_info=True)
         await self.database.close()
 
     async def __aenter__(self) -> Container:  # pragma: no cover — trivial

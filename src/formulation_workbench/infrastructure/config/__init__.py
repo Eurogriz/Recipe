@@ -81,6 +81,21 @@ class AppSettings(BaseSettings):
     rate_limit_enabled: bool = True
     rate_limit_per_minute: int = 120
 
+    # ---- Alerts / notifications ---------------------------------------------
+    # When ``alert_webhook_url`` is empty, alerts fall back to structured
+    # log lines (LoggingNotifier).  Set the URL to a Slack incoming
+    # webhook (``https://hooks.slack.com/...``) or any generic HTTP
+    # endpoint that accepts JSON.
+    alert_webhook_url: str = ""
+    alert_webhook_format: Literal["slack", "generic"] = "slack"
+    alert_min_severity: Literal["info", "warning", "critical"] = "warning"
+
+    # ---- Async jobs ---------------------------------------------------------
+    # Hard ceiling on the in-memory job registry.  Old terminal jobs
+    # are evicted first (LRU on ``created_at``) once we exceed this.
+    async_job_max_records: int = 500
+    async_job_snapshot_enabled: bool = True
+
     # ---- Validation ----------------------------------------------------------
     @field_validator("encryption_key_hex")
     @classmethod

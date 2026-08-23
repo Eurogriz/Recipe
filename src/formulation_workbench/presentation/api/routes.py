@@ -44,6 +44,10 @@ from .schemas import (
     BatchAnalysisRequest,
     BatchCostLineOut,
     BatchCostOut,
+    CalibrationBatchOut,
+    CalibrationBatchRequest,
+    CalibrationMatrixOut,
+    CalibrationMatrixRowOut,
     CalibrationOut,
     CalibrationRequest,
     CatalogStats,
@@ -51,6 +55,8 @@ from .schemas import (
     CostRequest,
     CreateRecipeRequest,
     DeviationOut,
+    DriftAlertOut,
+    DriftAlertRequest,
     DriftCheckOut,
     DriftCheckRequest,
     DriftFullOut,
@@ -62,6 +68,8 @@ from .schemas import (
     ExperimentPlanIn,
     FeatureImpactOutBase,
     HealthResponse,
+    JobRecordOut,
+    JobsListOut,
     MassBalanceOut,
     ModelMetadataOut,
     OptimisationRequestIn,
@@ -1222,6 +1230,371 @@ async def pareto_optimise(
         ],
         generations=result.generations,
     )
+
+
+# ---------------------------------------------------------------------------
+# ML — batch calibration + coverage matrix
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/calibrate",
+    response_model=CalibrationBatchOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Calibrate isotonic + interval bounds for many models in one call",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_VALIDATION},
+)
+async def calibrate_models_batch(
+    payload: CalibrationBatchRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> CalibrationBatchOut:
+    from ...infrastructure.ml.calibration import CalibrationError
+
+    calibrated: list[CalibrationOut] = []
+    skipped: dict[str, str] = {}
+
+    for entry in payload.entries:
+        code = entry.property_code
+        raw = [s.raw_prediction for s in entry.samples]
+        actual = [s.actual for s in entry.samples]
+        lowers = [s.lower for s in entry.samples if s.lower is not None]
+        uppers = [s.upper for s in entry.samples if s.upper is not None]
+        include_interval = len(lowers) == len(entry.samples) and len(uppers) == len(entry.samples)
+        try:
+            bundle = container.property_regressor.calibrate(
+                code,
+                raw_predictions=raw,
+                actual_values=actual,
+                lowers=(lowers if include_interval else None),
+                uppers=(uppers if include_interval else None),
+                target_coverage=payload.target_coverage,
+            )
+        except CalibrationError as exc:
+            skipped[code] = str(exc)
+            continue
+
+        calibrated.append(
+            CalibrationOut(
+                property_code=bundle.property_code,
+                version=bundle.version,
+                n_samples=bundle.calibration_n,
+                has_isotonic=bundle.isotonic is not None,
+                has_interval=bundle.interval is not None,
+                empirical_coverage=(
+                    round(bundle.interval.empirical_coverage, 4)
+                    if bundle.interval is not None
+                    else None
+                ),
+                target_coverage=(
+                    bundle.interval.target_coverage if bundle.interval is not None else None
+                ),
+                factor=(round(bundle.interval.factor, 4) if bundle.interval is not None else None),
+                notes=list(bundle.notes),
+            )
+        )
+
+    return CalibrationBatchOut(calibrated=calibrated, skipped=skipped)
+
+
+@router.get(
+    "/ml/calibration-matrix",
+    response_model=CalibrationMatrixOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Coverage matrix across every registered model (model + calibration side-by-side)",
+    responses={**_UNAUTHORIZED},
+)
+async def calibration_matrix(
+    container: Annotated[Container, Depends(get_container)],
+) -> CalibrationMatrixOut:
+    rows: list[CalibrationMatrixRowOut] = []
+    n_calibrated = 0
+    n_under_covered = 0
+
+    for metadata in container.property_regressor.list_models():
+        bundle = container.property_regressor.get_calibration(metadata.property_code)
+        has_calibration = bundle is not None
+        has_iso = bool(bundle and bundle.isotonic)
+        has_interval = bool(bundle and bundle.interval)
+        target_cov: float | None = None
+        empirical_cov: float | None = None
+        factor: float | None = None
+        cal_n: int | None = None
+        gap: float | None = None
+        if bundle is not None:
+            n_calibrated += 1
+            cal_n = bundle.calibration_n
+            if bundle.interval is not None:
+                target_cov = bundle.interval.target_coverage
+                empirical_cov = round(bundle.interval.empirical_coverage, 4)
+                factor = round(bundle.interval.factor, 4)
+                gap = round(empirical_cov - target_cov, 4)
+                # More than 5 percentage points below target = under-covering.
+                if gap <= -0.05:
+                    n_under_covered += 1
+
+        rows.append(
+            CalibrationMatrixRowOut(
+                property_code=metadata.property_code,
+                model_version=metadata.version,
+                cv_mean_r2=round(metadata.cv_mean_r2, 4),
+                n_samples=metadata.n_samples,
+                has_calibration=has_calibration,
+                has_isotonic=has_iso,
+                has_interval=has_interval,
+                target_coverage=target_cov,
+                empirical_coverage=empirical_cov,
+                coverage_gap=gap,
+                factor=factor,
+                calibration_n=cal_n,
+            )
+        )
+
+    return CalibrationMatrixOut(
+        rows=rows,
+        n_models=len(rows),
+        n_calibrated=n_calibrated,
+        n_under_covered=n_under_covered,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — drift + alert dispatch
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/models/{property_code}/drift-full/alert",
+    response_model=DriftAlertOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Run per-feature drift and dispatch an alert when severe drift is detected",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_VALIDATION},
+)
+async def drift_full_alert(
+    property_code: str,
+    payload: DriftAlertRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> DriftAlertOut:
+    from ...infrastructure.ml.drift import (
+        DriftLevel,
+        compare_feature_matrices,
+    )
+    from ...infrastructure.ml.features import FEATURE_NAMES
+    from ...infrastructure.notifications import Alert
+
+    reference = container.property_regressor.get_training_vectors(property_code)
+    if reference is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={property_code!r}",
+        )
+    if any(len(row) != len(FEATURE_NAMES) for row in payload.current_vectors):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"every current_vectors row must have {len(FEATURE_NAMES)} entries",
+        )
+
+    reports = compare_feature_matrices(
+        reference, payload.current_vectors, feature_names=list(FEATURE_NAMES)
+    )
+    order = {DriftLevel.NO_DRIFT: 0, DriftLevel.MODERATE_DRIFT: 1, DriftLevel.SEVERE_DRIFT: 2}
+    worst = DriftLevel.NO_DRIFT
+    for report in reports:
+        if order[report.level] > order[worst]:
+            worst = report.level
+
+    accepted_levels = {"no_drift", "moderate_drift", "severe_drift"}
+    if payload.dispatch_min_level not in accepted_levels:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"dispatch_min_level must be one of {sorted(accepted_levels)}",
+        )
+    threshold = order[DriftLevel(payload.dispatch_min_level)]
+
+    dispatched = False
+    reason = "below-threshold"
+    if order[worst] >= threshold:
+        top = sorted(
+            reports,
+            key=lambda r: (order[r.level], r.psi, r.ks_statistic),
+            reverse=True,
+        )[:5]
+        alert = Alert(
+            kind="ml.drift",
+            severity="critical" if worst == DriftLevel.SEVERE_DRIFT else "warning",
+            title=f"Feature drift detected for {property_code}",
+            summary=(
+                f"Worst level: {worst.value}. "
+                f"{len(reports)} features compared "
+                f"({len(payload.current_vectors)} current vs "
+                f"{len(reference)} reference samples)."
+            ),
+            fields={
+                "property_code": property_code,
+                "worst_level": worst.value,
+                "n_reference": len(reference),
+                "n_current": len(payload.current_vectors),
+                "top_features": [
+                    {
+                        "feature": r.feature_name,
+                        "level": r.level.value,
+                        "psi": round(r.psi, 4),
+                        "ks": round(r.ks_statistic, 4),
+                    }
+                    for r in top
+                ],
+                **payload.context,
+            },
+        )
+        dispatched = await container.alert_notifier.notify(alert)
+        reason = "dispatched" if dispatched else "notifier-rejected"
+
+    return DriftAlertOut(
+        property_code=property_code,
+        worst_level=worst.value,
+        reports=[
+            DriftReportOut(
+                feature_name=r.feature_name,
+                psi=round(r.psi, 6),
+                ks_statistic=round(r.ks_statistic, 6),
+                ks_p_value=(round(r.ks_p_value, 6) if r.ks_p_value is not None else None),
+                level=r.level.value,
+                n_reference=r.n_reference,
+                n_current=r.n_current,
+            )
+            for r in reports
+        ],
+        alert_dispatched=dispatched,
+        dispatch_reason=reason,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — async training + job registry
+# ---------------------------------------------------------------------------
+def _job_to_out(record: Any) -> JobRecordOut:
+    return JobRecordOut(
+        id=record.id,
+        kind=record.kind,
+        status=record.status,
+        created_at=record.created_at,
+        started_at=record.started_at,
+        finished_at=record.finished_at,
+        duration_seconds=record.duration_seconds,
+        metadata=dict(record.metadata),
+        result=record.result,
+        error=record.error,
+    )
+
+
+@router.post(
+    "/ml/train/async",
+    response_model=JobRecordOut,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Submit a non-blocking training job; poll /ml/jobs/{job_id} for status",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN},
+)
+async def train_models_async(
+    payload: TrainModelsRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> JobRecordOut:
+    from ...application.use_cases.ml_train import TrainPropertyModelsCommand
+
+    async def _run() -> dict[str, Any]:
+        result = await container.train_property_models.execute(
+            TrainPropertyModelsCommand(
+                recipe_ids=tuple(payload.recipe_ids),
+                property_codes=tuple(payload.property_codes),
+            )
+        )
+        return {
+            "trained": [
+                {
+                    "property_code": m.property_code,
+                    "version": m.version,
+                    "n_samples": m.n_samples,
+                    "cv_mean_r2": round(m.cv_mean_r2, 4),
+                    "cv_std_r2": round(m.cv_std_r2, 4),
+                    "fingerprint": m.fingerprint,
+                }
+                for m in result.trained
+            ],
+            "skipped": dict(result.skipped),
+        }
+
+    record = await container.job_registry.submit(
+        kind="ml.train",
+        coro_factory=_run,
+        metadata={
+            "recipe_ids": list(payload.recipe_ids),
+            "property_codes": list(payload.property_codes),
+        },
+    )
+    return _job_to_out(record)
+
+
+@router.get(
+    "/ml/jobs",
+    response_model=JobsListOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="List recent ML jobs (most recent first, up to 100)",
+    responses={**_UNAUTHORIZED},
+)
+async def list_jobs(
+    container: Annotated[Container, Depends(get_container)],
+    status_filter: str | None = Query(
+        default=None,
+        alias="status",
+        description="Filter by status: queued|running|succeeded|failed|cancelled",
+    ),
+    kind: str | None = Query(default=None, description="Filter by job kind (e.g. ml.train)."),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> JobsListOut:
+    records = container.job_registry.list(
+        status=status_filter,  # type: ignore[arg-type]
+        kind=kind,
+        limit=limit,
+    )
+    return JobsListOut(jobs=[_job_to_out(r) for r in records])
+
+
+@router.get(
+    "/ml/jobs/{job_id}",
+    response_model=JobRecordOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Fetch a single job by id",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_job(
+    job_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> JobRecordOut:
+    record = container.job_registry.get(job_id)
+    if record is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Job not found")
+    return _job_to_out(record)
+
+
+@router.delete(
+    "/ml/jobs/{job_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Cancel a queued or running job (no-op for terminal jobs)",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def cancel_job(
+    job_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> None:
+    ok = await container.job_registry.cancel(job_id)
+    if not ok:
+        # Distinguish "unknown id" (404) from "already-terminal" (409).
+        if container.job_registry.get(job_id) is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Job not found")
+        raise HTTPException(status.HTTP_409_CONFLICT, "Job is already in a terminal state")
 
 
 __all__ = ["router"]
