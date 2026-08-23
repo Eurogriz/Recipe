@@ -65,6 +65,11 @@ class AppSettings(BaseSettings):
     # ---- Observability -------------------------------------------------------
     metrics_enabled: bool = True
     otlp_endpoint: str = ""  # e.g. http://otel-collector:4317
+    otel_service_name: str = "formulation-workbench"
+
+    # ---- Rate limiting -------------------------------------------------------
+    rate_limit_enabled: bool = True
+    rate_limit_per_minute: int = 120
 
     # ---- Validation ----------------------------------------------------------
     @field_validator("encryption_key_hex")

@@ -41,11 +41,11 @@ def setup_i18n(locale: str = DEFAULT_LOCALE) -> None:
     except FileNotFoundError:
         _translator = gettext.NullTranslations()
 
-    # Install in builtins as `_`
+    # Install in builtins as `_` / `_n` so Babel-extracted strings work.
     import builtins
 
-    builtins._ = _translator.gettext
-    builtins._n = _translator.ngettext
+    setattr(builtins, "_", _translator.gettext)  # noqa: B010
+    setattr(builtins, "_n", _translator.ngettext)  # noqa: B010
 
 
 def _(message: str) -> str:

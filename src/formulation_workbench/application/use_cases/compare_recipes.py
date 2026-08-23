@@ -67,12 +67,13 @@ class CompareRecipesUseCase:
             recipes.append(recipe)
 
         # Build comparison rows
-        composition_rows = self._build_composition_rows(recipes)
-        properties_rows = self._build_properties_rows(recipes)
-        process_rows = self._build_process_rows(recipes)
+        recipes_tuple = tuple(recipes)
+        composition_rows = self._build_composition_rows(recipes_tuple)
+        properties_rows = self._build_properties_rows(recipes_tuple)
+        process_rows = self._build_process_rows(recipes_tuple)
 
         return ComparisonResult(
-            recipes=tuple(recipes),
+            recipes=recipes_tuple,
             composition_rows=composition_rows,
             properties_rows=properties_rows,
             process_rows=process_rows,

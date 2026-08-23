@@ -33,7 +33,7 @@ from ..models import (
 )
 
 if TYPE_CHECKING:
-    from ..ports.recipe_repository import RecipeRepository  # noqa: F401
+    from ....application.ports.recipe_repository import RecipeRepository  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +205,7 @@ class SqlAlchemyRecipeRepository:
                     tolerance_percent=comp.tolerance_percent,
                     order_in_stage=0,  # TODO: add order to Component
                     notes=comp.notes,
-                    is_predicted=comp.is_predicted,
+                    is_predicted=getattr(comp, "is_predicted", False),
                 )
                 stage_model.components.append(comp_model)
             model.stages.append(stage_model)
@@ -276,7 +276,7 @@ class SqlAlchemyRecipeRepository:
                     tolerance_percent=comp.tolerance_percent,
                     order_in_stage=0,
                     notes=comp.notes,
-                    is_predicted=comp.is_predicted,
+                    is_predicted=getattr(comp, "is_predicted", False),
                 )
                 stage_model.components.append(comp_model)
             model.stages.append(stage_model)

@@ -198,7 +198,7 @@ class SettingsService:
 
     def list_overrides(self) -> list[ComponentOverride]:
         """List all overrides."""
-        result = []
+        result: list[ComponentOverride] = []
         for comp_props in self._settings.component_overrides.values():
             result.extend(comp_props.values())
         return result

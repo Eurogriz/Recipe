@@ -7,6 +7,67 @@
 
 ---
 
+## [1.1.1] — Hardening pass 2 (2026-08-23)
+
+Второй раунд production-grade доработок поверх 1.1.0.
+
+### Added
+
+- **Security headers middleware** (`SecurityHeadersMiddleware`): CSP,
+  HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy,
+  Permissions-Policy, COOP/CORP. Специальная релаксация только для
+  `/docs`, `/redoc`, `/docs/oauth2-redirect`.
+- **In-process rate limiter** (`RateLimitMiddleware`): sliding-window,
+  per-token или per-IP, exempt для `/health` и `/metrics`, отдаёт
+  корректные `Retry-After` / `X-RateLimit-*` заголовки. Настраивается
+  через `FW_RATE_LIMIT_ENABLED` / `FW_RATE_LIMIT_PER_MINUTE`.
+- **RequestContextMiddleware** на structlog: связывает `request_id`,
+  `method`, `path` через `contextvars`, эмитит один JSON-лог на запрос,
+  ловит unhandled exceptions и превращает их в чистый 500.
+- **OpenTelemetry bootstrap** (`infrastructure/observability/`): при
+  установленном `FW_OTLP_ENDPOINT` включаются FastAPI + SQLAlchemy
+  instrumentors, отправка спанов через OTLP/gRPC (extra
+  `[observability]`).
+- **Alembic integration tests** (`tests/integration/test_migrations.py`):
+  `alembic upgrade head` создаёт все ожидаемые таблицы; схема,
+  собранная миграциями, эквивалентна схеме от `Base.metadata.create_all`.
+- **PostgreSQL support**: новый extra `[postgres]` (`asyncpg` + `psycopg`);
+  профиль `postgres` в `docker-compose.yml`; отдельная работа CI
+  `postgres-integration` поднимает Postgres 16 как service container
+  и прогоняет миграции + smoke API против него.
+- **`.env.example`** пополнен `FW_RATE_LIMIT_*` и `FW_OTLP_ENDPOINT`.
+
+### Changed
+
+- **Logging**: единая `ProcessorFormatter` — теперь и наши
+  `logger.info(..., extra={...})`, и логи uvicorn/SQLAlchemy рендерятся
+  одинаково (JSON в prod, ConsoleRenderer в dev). `sqlalchemy.engine`
+  подавлен до WARNING по умолчанию.
+- **Alembic env.py**: URL берётся из `FW_DATABASE_URL` или `-x sqlalchemy.url=...`,
+  SQLite-URLs автоматически нормализуются к `sqlite+aiosqlite://`.
+- **mypy включён в CI как blocking**, используется прогрессивная
+  строгость: `domain.*`, `application.ports/dto.*`, `infrastructure.config.*`
+  проходят `disallow_untyped_defs`. Остальные модули типизированы, но
+  без обязательности новых аннотаций.
+- **CONTRIBUTING.md** переписан под новую структуру и процесс релиза.
+
+### Fixed
+
+- `SqlAlchemyRecipeRepository` больше не падал бы на `comp.is_predicted`
+  (домен не имеет этого атрибута) — используем `getattr(..., False)`.
+- `CompareRecipesUseCase` передавал `list` туда, где ожидался `tuple`.
+- Кривой type-only import из `..ports.recipe_repository` в SQLAlchemy-репо.
+- `i18n` — `builtins._` / `builtins._n` через `setattr` (mypy-safe).
+
+### Metrics after 1.1.1
+
+- **161 тестов проходят** (было 152), coverage **74.07 %**.
+- `ruff check` clean, `ruff format --check` clean.
+- `bandit` clean (0 low/medium/high).
+- `mypy src/formulation_workbench` clean (63 файла).
+
+---
+
 ## [1.1.0] — Headless production-grade service (2026-08-23)
 
 Значительный релиз, приводящий систему к настоящему production-grade

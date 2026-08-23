@@ -45,5 +45,29 @@ services:
     cap_drop:
       - ALL
 
+  # -------------------------------------------------------------------------
+  # Optional PostgreSQL backend. Enable with:
+  #   docker compose --profile postgres up --build
+  # then set FW_DATABASE_URL=postgresql+asyncpg://formulation:formulation@postgres:5432/formulation
+  # -------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["postgres"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: formulation
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-formulation}
+      POSTGRES_DB: formulation
+    ports:
+      - "5432:5432"
+    volumes:
+      - formulation-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U formulation"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   formulation-data:
+  formulation-pg:

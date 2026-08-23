@@ -1,180 +1,128 @@
 # Contributing to Formulation Workbench
 
-**Версия документа:** 1.0.0
-**Дата:** 2026-06-24
+> Document version: 1.1.0 · 2026-08-23
 
-Спасибо за интерес к проекту! Это **проприетарное** приложение, но мы приветствуем вклад в формате pull requests от утверждённых контрибьюторов.
-
----
-
-## 🏗️ Code Style
-
-### Python
-- **Версия:** Python 3.11+
-- **Линтер:** ruff (запускается через pre-commit)
-- **Форматтер:** ruff-format
-- **Type hints:** обязательны для всех публичных API; mypy --strict для production-кода
-- **Docstrings:** Google-style для классов и публичных методов
-
-### Naming Conventions
-- Классы: `PascalCase`
-- Функции/переменные: `snake_case`
-- Константы: `UPPER_SNAKE_CASE`
-- Приватные: `_leading_underscore`
-- Type aliases: `PascalCase`
-
-### Imports
-- `from __future__ import annotations` для forward references
-- `isort`-compatible (ruff handles)
-- Никаких звёздочных импортов
-
-## 🧪 Testing
-
-### Coverage
-- **Минимум:** 85% для production-кода
-- Domain layer должен быть **100%** покрыт
-- Каждый PR должен поддерживать или увеличивать coverage
-
-### Test Structure
-```
-tests/
-├── unit/                ← быстрые, без I/O
-│   ├── domain/          ← entity, value object, domain service tests
-│   └── application/     ← use case tests с mock-репозиториями
-├── integration/         ← реальная БД (in-memory SQLite), внешние сервисы
-│   ├── db/
-│   └── pdf/
-└── e2e/                 ← полный стек, требует display server
-    └── qt/
-```
-
-### Property-Based Testing
-- Используем `hypothesis` для value objects (CAS, ISBN, MassPercent)
-- Минимум 100 примеров на property
-
-## 📝 Commit Messages
-
-Следуем [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-### Types
-- `feat`: новая функциональность
-- `fix`: bugfix
-- `docs`: только документация
-- `style`: форматирование (не меняет логику)
-- `refactor`: рефакторинг (не новая функциональность, не bugfix)
-- `perf`: улучшение производительности
-- `test`: добавление/исправление тестов
-- `chore`: build/CI/tools
-- `revert`: откат коммита
-
-### Scopes
-- `domain`, `application`, `infrastructure`, `presentation`
-- `db`, `pdf`, `ml`, `i18n`, `ui`
-- `ci`, `build`, `docs`, `tests`
-
-### Examples
-```
-feat(domain): add VerificationStatus value object
-
-- Add VerificationStatus enum with state transitions
-- Add VerificationRules domain service
-- Add property tests for state transitions
-
-Closes #42
-```
-
-## 🔀 Pull Request Process
-
-1. **Создайте feature branch** от `main`:
-   ```bash
-   git checkout -b feat/my-feature
-   ```
-
-2. **Реализуйте изменения** с тестами (coverage не должен падать)
-
-3. **Убедитесь что pre-commit проходит**:
-   ```bash
-   pre-commit run --all-files
-   ```
-
-4. **Запустите тесты**:
-   ```bash
-   pytest
-   ```
-
-5. **Убедитесь что mypy strict проходит**:
-   ```bash
-   mypy src/
-   ```
-
-6. **Обновите документацию** (если меняется публичный API)
-
-7. **Обновите CHANGELOG.md** (в секции "Unreleased")
-
-8. **Создайте PR** с описанием:
-   - Что изменилось
-   - Почему
-   - Как тестировалось
-   - Связанные issues
-
-9. **Дождитесь ревью** (минимум 1 approval от maintainer)
-
-## 🐛 Bug Reports
-
-Используйте GitHub Issues. Включите:
-- Версию приложения
-- ОС и версию
-- Шаги для воспроизведения
-- Ожидаемое поведение
-- Фактическое поведение
-- Логи (если есть)
-- Скриншоты (если UI-related)
-
-## 📚 Документация
-
-- **Public API docstrings:** обязательны (Google-style)
-- **ADRs:** для каждого значимого архитектурного решения — `docs/adr/NNNN-title.md`
-- **CHANGELOG.md:** обновляется при каждом PR
-- **README/ARCHITECTURE:** обновляются при изменении архитектуры
-
-## 🔒 Security
-
-- **Не коммитьте** секреты, ключи, пароли
-- **Все SQL** — только через SQLAlchemy (параметризованные запросы)
-- **Пароли** — только Argon2id (passlib)
-- **Внешние данные** — всегда валидируйте через Pydantic
-
-## 📜 License
-
-Все контрибуции подпадают под проприетарную лицензию проекта.
-
-## 🤝 Code Review Guidelines
-
-Ревьюер проверяет:
-- [ ] Код соответствует архитектурным слоям (Clean Architecture)
-- [ ] Domain не зависит от инфраструктуры
-- [ ] Все edge cases покрыты тестами
-- [ ] Type hints полные (mypy --strict passes)
-- [ ] Pre-commit hooks проходят
-- [ ] Coverage не упал
-- [ ] Документация обновлена
-- [ ] Нет "магических" значений без обоснования
-- [ ] Нет фабрикаций данных (особенно для рецептур!)
-
-## 🆘 Getting Help
-
-- Архитектурные вопросы → [ARCHITECTURE.md](ARCHITECTURE.md) или ADRs
-- Domain knowledge (ЛКМ) → задать в `#tech-support` Slack
-- Tooling issues → создать GitHub Issue
+Thanks for your interest! This is a **proprietary** project, but contributions
+via pull requests from approved contributors are welcome.
 
 ---
 
-**Спасибо за вклад!** 🙏
+## 1. Environment setup
+
+```bash
+git clone https://github.com/Eurogriz/Recipe.git
+cd Recipe
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pre-commit install
+```
+
+Optional extras: `[postgres]`, `[sqlcipher]`, `[ml]`, `[observability]`,
+`[desktop]`.
+
+Run the API locally:
+
+```bash
+formulation-workbench init-db
+formulation-workbench serve --reload   # http://localhost:8000/docs
+```
+
+## 2. Code style
+
+- **Python 3.10+** (CI covers 3.10 / 3.11 / 3.12).
+- **Ruff** for linting *and* formatting (`make format`).
+- **MyPy** with progressive strictness (`make type-check`). The strict list
+  is declared in `pyproject.toml` under `[[tool.mypy.overrides]]` and grows
+  every release — new modules should be added to it.
+- **Docstrings**: Google-style for public classes and methods.
+- **Type hints**: required on every new function / method signature.
+- **Naming**: `PascalCase` classes, `snake_case` functions and variables,
+  `UPPER_SNAKE_CASE` constants.
+- **Error suffix**: new exception classes end with `Error`. The domain
+  layer keeps historical `…Violation` names for backwards compatibility.
+
+## 3. Repository layout
+
+```
+src/formulation_workbench/
+├── domain/          # pure Python — no framework, no I/O
+├── application/     # use cases (CQRS), ports, DTOs
+├── infrastructure/  # SQLAlchemy, ReportLab, OTEL, DI, config, logging
+└── presentation/    # Typer CLI, FastAPI app, one-shot commands
+```
+
+**Dependency rule** — inward only:
+
+- `domain` depends on stdlib only.
+- `application` depends on `domain`.
+- `infrastructure` depends on `domain` + `application` (implements ports).
+- `presentation` depends on `application` (uses cases via the DI container).
+
+## 4. Testing
+
+```bash
+make test            # unit + integration + security + coverage
+pytest -m unit       # only unit tests
+pytest -m api        # only FastAPI tests
+pytest -k middleware # match by name
+```
+
+- Every new module ships with at least a smoke test.
+- Bugfixes must include a regression test.
+- API changes require an integration test in
+  `tests/integration/test_api*.py`.
+- Coverage gate is 60 % (real level currently ~74 %).
+
+## 5. Migrations
+
+- SQLAlchemy models live in `src/formulation_workbench/infrastructure/db/models.py`.
+- Any schema change must be followed by:
+
+  ```bash
+  alembic revision --autogenerate -m "describe change"
+  ```
+
+- Review the generated file: prune noise, add data migrations if needed.
+- `tests/integration/test_migrations.py` asserts that the schema produced
+  by migrations equals the schema produced by ORM metadata. This test **will
+  fail** until you commit the new revision.
+
+## 6. Configuration & secrets
+
+- All runtime configuration is loaded via `AppSettings` from environment
+  variables prefixed with `FW_` (see `.env.example`).
+- Never check in real secrets. Use `.env` locally (git-ignored) and a
+  proper secret manager in production.
+- Adding a new setting: extend `AppSettings`, add a documented default in
+  `.env.example`, add a validation test in
+  `tests/unit/infrastructure/test_config.py`.
+
+## 7. Commit / PR conventions
+
+- Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+  Common types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `ci`,
+  `perf`. Breaking changes: append `!` (e.g. `feat!:`).
+- Fill in the PR template checklist honestly — CI enforces most of it.
+- Keep PRs focused. Cross-layer refactors should be split.
+
+## 8. Release process
+
+Tag a version (`v1.2.0`) on `main`. GitHub Actions (`release.yml`) will:
+
+1. build signed `sdist` + `wheel` with SLSA provenance;
+2. build and push a multi-arch OCI image to `ghcr.io/eurogriz/recipe`;
+3. sign the image with **cosign** (keyless);
+4. attach SBOM + provenance to the GitHub release;
+5. generate release notes automatically.
+
+Pre-tag checklist:
+
+- [ ] `CHANGELOG.md` updated with the new version.
+- [ ] Version bumped in `src/formulation_workbench/__init__.py` and
+      `pyproject.toml`.
+- [ ] `make lint && make type-check && make test && make sbom` all pass.
+
+## 9. Security
+
+See [`SECURITY.md`](SECURITY.md) for how to report vulnerabilities and
+what the hardened baseline covers.

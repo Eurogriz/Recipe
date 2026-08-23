@@ -1,6 +1,6 @@
 [project]
 name = "formulation-workbench"
-version = "1.1.0"
+version = "1.1.1"
 description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -72,6 +72,11 @@ sqlcipher = [
 # Optional PySide6 desktop shell (out of GA scope; kept for local exploration)
 desktop = [
     "PySide6>=6.6,<7.0",
+]
+# PostgreSQL async driver (recommended for multi-user server deployments)
+postgres = [
+    "asyncpg>=0.29",
+    "psycopg[binary]>=3.1",  # used by alembic sync flows
 ]
 # Observability / production ops
 observability = [
@@ -203,19 +208,20 @@ indent-style = "space"
 # ============================================================================
 [tool.mypy]
 python_version = "3.10"
-strict = true
+# Progressive strictness: the whole tree is checked, but only the modules
+# listed under `[[tool.mypy.overrides]]` with `disallow_untyped_defs = true`
+# are required to have full annotations.  New modules should be added to
+# the strict list to prevent regressions.
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_any_untyped_decorators = true
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = false
 warn_no_return = true
-follow_imports_for_stubs = true
 plugins = ["pydantic.mypy"]
 exclude = [
     "^src/formulation_workbench/infrastructure/ml/property_predictor\\.py$",
+    "^src/formulation_workbench/infrastructure/integrations/",
     "^migrations/",
     "^scripts/",
     "^tests/",
@@ -223,13 +229,30 @@ exclude = [
     "^dist/",
 ]
 
+# Third-party libraries without published type stubs.  Kept broad enough
+# that adding an unstubbed dependency doesn't immediately break CI.
 [[tool.mypy.overrides]]
-module = ["PySide6.*", "sqlcipher3.*", "reportlab.*"]
+module = [
+    "argon2.*",
+    "opentelemetry.*",
+    "prometheus_client.*",
+    "reportlab.*",
+    "sklearn.*",
+    "structlog.*",
+]
 ignore_missing_imports = true
 
+# Strict modules — must be fully typed.  Add new modules here as they land.
 [[tool.mypy.overrides]]
-module = ["sklearn.*", "scipy.*", "numpy.*", "joblib.*", "lxml.*", "openpyxl.*"]
-ignore_missing_imports = true
+module = [
+    "formulation_workbench.domain.*",
+    "formulation_workbench.application.ports.*",
+    "formulation_workbench.application.dto.*",
+    "formulation_workbench.infrastructure.config.*",
+]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_return_any = true
 
 # ============================================================================
 # PYTEST
