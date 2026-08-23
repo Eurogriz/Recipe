@@ -61,7 +61,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-semibold leading-tight group-hover:text-primary transition-colors">
                 {t("app.brand")}
               </div>
-              <div className="text-xs text-muted-foreground">v1.23.0</div>
+              <div className="text-xs text-muted-foreground">v1.24.0</div>
             </div>
           </Link>
         </div>

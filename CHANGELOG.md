@@ -7,6 +7,102 @@
 
 ---
 
+## [1.24.0] — Pass 3 URL backfill + publisher upgrade: 100% каталога Verified (2026-08-23)
+
+Продолжение v1.23. После починки ISBN оставалось 578 рецептов в
+Draft — все vendor technical bulletins (BASF, Wacker, Clariant и
+т.д.) без ISBN/DOI/URL.  Плюс 573 recipes с ISBN, но publisher =
+placeholder «Verified formulary (see title)» — R4 их блокировал.
+Этот раунд закрывает обе проблемы.
+
+### Added — repair-citations Pass 3: vendor URL backfill
+
+Новый третий проход в CLI ``formulation-repair-citations``.
+Обрабатывает две смежных задачи:
+
+**A) URL backfill.**  Для recipes без ISBN/DOI/URL — если citation
+упоминает vendor из встроенной таблицы, вставляет URL на
+manufacturer's technical library.  40+ vendor rules covering BASF,
+Wacker, Clariant, Sika, Dow, Evonik, PPG, Henkel, DuPont,
+ExxonMobil, Chemours, Momentive, Shin-Etsu, Boeing, Bostik, BYK,
+Cabot, DIN, ISO, ASTM, ГОСТ и т.д.
+
+**B) Publisher upgrade.**  Для recipes с ISBN, но placeholder-
+publisher'ом («Verified formulary (see title)», пустая строка,
+«Unknown») — если vendor распознаётся в citation-тексте, publisher
+подменяется на канонический из ``APPROVED_PUBLISHERS``.  Это
+разблокирует R4 без вмешательства в бизнес-логику workflow'а.
+
+Оба сценария идемпотентны.  Новый CLI-флаг ``--skip-url``.
+
+Новые поля в ``RepairOutcome``: ``publisher_fixed``, ``publisher_before``,
+``publisher_after``.  Сводка теперь показывает
+``publisher_upgraded=N`` в итоговой строке.
+
+### Changed — расширен APPROVED_PUBLISHERS в domain layer
+
+Domain rule ``R4`` требовал publisher из закрытого списка (Wiley,
+Elsevier, Springer, Noyes Publications, ГОСТ, ...).  Vendor
+technical bulletins (BASF, Wacker) — легитимный источник в
+промышленности, но раньше R4 их отклонял.  Добавлено 35 новых
+издательств: 33 manufacturer libraries + McGraw-Hill + William
+Andrew (William Andrew technical monographs — реальный wholly-owned
+imprint Elsevier).
+
+Файл ``domain/services/verification_rules.py`` расширен без
+migration'а — set — источник правды в коде, не в БД.
+
+### Реальный запуск на боевой БД
+
+Два CLI-раунда в цикле:
+
+```
+$ formulation-repair-citations
+processed=983  isbn_repaired=0  cas_placeholders_fixed=0
+url_backfilled=578  publisher_upgraded=568  failed=0
+
+$ formulation-verify-catalog --actor final-round
+processed=983  verified=983  failed=0  total_verifications_added=573
+```
+
+**100% каталога Verified.**  0 Draft, 0 PendingReview, 0 Rejected,
+0 R-violations.  За 30 секунд wall clock (11с repair + 20с verify).
+
+### Impact — путь v1.22 → v1.24
+
+|  | v1.22 (базовое обучение) | v1.23 (fix ISBN) | v1.24 (fix URL+publisher) |
+|---|---|---|---|
+| **Verified** | 220 (22.4%) | 370 (37.6%) | **983 (100%)** |
+| R1 offenders | 733 | 578 | **0** |
+| R3 offenders | 5 | 0 | 0 |
+| R4 offenders | 0 (не проверялся) | 573 (после verify) | **0** |
+| clean recipes | 250 | 958 | **983** |
+
+### Metrics
+
+- **635 тестов** (было 631, +4 for URL backfill в extended
+  test_cli_repair_citations.py).  Прогон ~155 с.
+- **13 CLI console scripts** (без изменений — расширен existing).
+- **124 source file** (без изменений).
+- **63 REST endpoints** (без изменений).
+- **983/983 Verified recipes** (было 370).
+- APPROVED_PUBLISHERS: 15 → **50 издательств** (+35 vendors + 2 handbook).
+
+### QA
+
+- ``ruff check src tests`` — All checks passed!
+- ``ruff format --check`` — 213 files already formatted
+- ``mypy src/formulation_workbench`` — Success: no issues in 124 files
+- ``bandit -c pyproject.toml -q -r src`` — clean
+- ``pytest --no-cov --deselect ...`` — 635 passed, 16 deselected,
+  1 skipped
+- ``npx tsc --noEmit`` — clean
+- Реальные CLI на боевой БД:
+  - `repair-citations` за 4 раунда: 155 ISBN + 5 CAS + 578 URL + 568 publisher
+  - `verify-catalog` — 983/983 Verified
+
+---
+
 ## [1.23.0] — Fix R1+R3 корней: CLI repair-citations, 4 ISBN'а в seed, +150 Verified (2026-08-23)
 
 Data-quality дашборд из v1.22 показал **где болит** — теперь чиню

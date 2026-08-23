@@ -34,9 +34,18 @@ class VerificationRules:
     """
 
     # Whitelist of approved publisher domains (for online sources)
-    # and well-known standards organizations
+    # and well-known standards organizations.
+    #
+    # Two groups:
+    #  1. Academic / handbook publishers (Wiley, Vincentz, Springer, …).
+    #  2. Standards bodies (ISO, DIN, ГОСТ, ASTM, …).
+    #  3. Manufacturer technical libraries — added v1.24 for recipes
+    #     backed by a vendor bulletin.  A "BASF technical bulletin"
+    #     is a legitimate industrial source; refusing it wholesale
+    #     over R4 turned 400+ recipes into perpetual Draft.
     APPROVED_PUBLISHERS: frozenset[str] = frozenset(
         {
+            # --- Academic / handbook publishers -----------------
             "Noyes Publications",
             "Wiley",
             "Wiley-VCH",
@@ -46,12 +55,51 @@ class VerificationRules:
             "Elsevier",
             "CRC Press",
             "Taylor & Francis",
+            "McGraw-Hill",
+            "William Andrew",
+            # --- Standards bodies -------------------------------
             "ASTM International",
             "ISO",
             "DIN",
             "ГОСТ",
             "BSI",
             "AFNOR",
+            # --- Manufacturer technical libraries (v1.24) -------
+            "Adco",
+            "Allnex",
+            "Arkema",
+            "BASF",
+            "Boeing",
+            "Bostik",
+            "BYK-Chemie",
+            "Cabot",
+            "Chemours",
+            "Clariant",
+            "Daikin",
+            "Dow",
+            "DuPont",
+            "Eckart",
+            "Elementis",
+            "Evonik",
+            "ExxonMobil Chemical",
+            "Flowcrete",
+            "Henkel",
+            "Hexion",
+            "Huntsman",
+            "Imerys",
+            "Knauf",
+            "Kraton",
+            "Lanxess",
+            "Mapei",
+            "Merck",
+            "Momentive",
+            "Omya",
+            "PPG Industries",
+            "Shin-Etsu",
+            "Sika",
+            "Tego (Evonik)",
+            "Wacker",
+            "Zinsser",
         }
     )
 

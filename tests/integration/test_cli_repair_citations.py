@@ -76,7 +76,7 @@ def test_isbn13_checksum_matches_known_values() -> None:
 
 def test_repair_citation_leaves_valid_isbn_alone() -> None:
     """Idempotency guard — a Citation that already has an isbn must
-    not be rebuilt (returns None)."""
+    come back unchanged (identity), with all flags False."""
     from formulation_workbench.domain.value_objects.isbn import Isbn
 
     cite = Citation(
@@ -86,7 +86,11 @@ def test_repair_citation_leaves_valid_isbn_alone() -> None:
         publisher="Noyes Publications",
         isbn=Isbn("9780815511502"),
     )
-    assert _repair_citation(cite) is None
+    result, isbn_fixed, url_fixed, url_added, *_ = _repair_citation(cite)
+    assert result is cite  # identity — never rebuilt
+    assert isbn_fixed is False
+    assert url_fixed is False
+    assert url_added == ""
 
 
 def test_repair_citation_extracts_from_title() -> None:
@@ -96,11 +100,74 @@ def test_repair_citation_extracts_from_title() -> None:
         year=2017,
         publisher="Wiley",
     )
-    repaired = _repair_citation(cite)
-    assert repaired is not None
-    assert repaired.isbn is not None
-    # Original book — same first 12 digits.
-    assert repaired.isbn.value.replace("-", "").startswith("978111883620")
+    result, isbn_fixed, url_fixed, _url, *_ = _repair_citation(cite)
+    assert isbn_fixed is True
+    # URL not added because ISBN was found first.
+    assert url_fixed is False
+    assert result.isbn is not None
+    assert result.isbn.value.replace("-", "").startswith("978111883620")
+
+
+def test_repair_citation_installs_vendor_url_when_no_isbn() -> None:
+    """New in v1.24: when no identifier is available, install a vendor
+    portal URL so R1 stops blocking the recipe."""
+    cite = Citation(
+        authors="BASF technical bulletin",
+        title="BASF technical bulletin, Acronal 3D acrylic (2019)",
+        year=2019,
+        publisher="Verified formulary (see title)",
+    )
+    result, isbn_fixed, url_fixed, url_added, *_ = _repair_citation(cite)
+    assert isbn_fixed is False
+    assert url_fixed is True
+    assert "basf.com" in url_added
+    assert result.url == url_added
+
+
+def test_repair_citation_prefers_isbn_over_url() -> None:
+    """When both an ISBN (in title) and a vendor match are present,
+    the ISBN wins — it's a stronger identifier."""
+    cite = Citation(
+        authors="A",
+        title="BASF handbook. Vincentz Network 2014. ISBN: 978-3-86630-650-2.",
+        year=2014,
+        publisher="Vincentz Network",
+    )
+    result, isbn_fixed, url_fixed, _url, *_ = _repair_citation(cite)
+    assert isbn_fixed is True
+    assert url_fixed is False
+    assert result.isbn is not None
+    # url is unchanged from the input (None here) — pass 3 must not
+    # install a vendor URL when pass 1 already produced an identifier.
+    assert not result.url
+
+
+def test_repair_citation_no_vendor_match_leaves_url_empty() -> None:
+    """If no vendor rule matches, don't install a bogus URL."""
+    cite = Citation(
+        authors="Unknown Company",
+        title="Internal recipe from the lab",
+        year=2020,
+        publisher="Unknown",
+    )
+    result, isbn_fixed, url_fixed, url_added, *_ = _repair_citation(cite)
+    assert isbn_fixed is False
+    assert url_fixed is False
+    assert url_added == ""
+    assert result is cite
+
+
+def test_repair_citation_skip_url_flag_honoured() -> None:
+    """--skip-url must prevent pass 3 from firing even for a vendor."""
+    cite = Citation(
+        authors="BASF technical bulletin",
+        title="BASF technical bulletin, Acronal (2019)",
+        year=2019,
+        publisher="see title",
+    )
+    result, _isbn, url_fixed, _u, *_ = _repair_citation(cite, do_url=False)
+    assert url_fixed is False
+    assert result is cite
 
 
 # --------------------------------------------------------------------------- fixtures
@@ -297,10 +364,10 @@ async def test_skip_flags_narrow_the_work(tmp_path: Path) -> None:
         await container.close()
 
 
-async def test_both_skips_reject(tmp_path: Path) -> None:
-    """--skip-isbn + --skip-cas leaves nothing to do — exit 1."""
+async def test_all_skips_reject(tmp_path: Path) -> None:
+    """--skip-isbn + --skip-cas + --skip-url leaves nothing to do — exit 1."""
     await _fresh_env(tmp_path)
-    rc = await _main_async(["--skip-isbn", "--skip-cas"])
+    rc = await _main_async(["--skip-isbn", "--skip-cas", "--skip-url"])
     assert rc == 1
 
 

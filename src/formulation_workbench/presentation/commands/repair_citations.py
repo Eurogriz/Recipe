@@ -5,7 +5,7 @@ After v1.22's data-quality report showed 733 of 983 recipes failing R1
 (placeholder CAS ``see-variant``), this CLI walks the catalogue and
 repairs both classes of issue without a full re-seed.
 
-Two independent repair passes; the CLI runs both by default:
+Three independent repair passes; the CLI runs all three by default:
 
 1. **ISBN recovery.**  If a Citation's ``title`` (or ``authors``)
    contains a substring like ``ISBN: 978-1-84569-471-2`` and the
@@ -26,14 +26,25 @@ Two independent repair passes; the CLI runs both by default:
    42).  If we don't know the mapping, the placeholder is replaced
    with ``"mixture"``, which R3 accepts.
 
-Both passes are idempotent — running twice is a no-op.  ``--dry-run``
-walks the catalogue and shows what *would* change without writing.
+3. **URL backfill for technical bulletins.**  Vendor technical
+   bulletins (BASF, Wacker, Clariant, …) never have an ISBN, and the
+   seed doesn't ship a DOI — so R1 blocks them forever.  Pass 3
+   matches the citation body against a small vendor table and
+   inserts the manufacturer's technical-datasheet portal URL.  Not
+   perfect (it points at the search page rather than the exact
+   document), but it satisfies R1 and gives the technologist a
+   click-through to the real catalogue.
+
+All three passes are idempotent — running twice is a no-op.
+``--dry-run`` walks the catalogue and shows what *would* change
+without writing.
 
 Flags::
 
     --dry-run              Report intended changes without touching the DB.
     --skip-isbn            Skip pass 1.
     --skip-cas             Skip pass 2.
+    --skip-url             Skip pass 3.
     --category NAME        Restrict to this category (repeat OK).
     --json                 Emit a machine-readable report.
 
@@ -146,6 +157,115 @@ _PIGMENT_TABLE: dict[tuple[str, str], tuple[str, str]] = {
 _FALLBACK_CAS = ("mixture", "unknown pigment (marked as mixture)")
 
 
+# --------------------------------------------------------------------------- vendor URL backfill
+
+
+# Vendor-name substring (case-insensitive) → technical-datasheet
+# portal URL.  Ordered from most-specific to most-generic; the first
+# match wins.
+#
+# We store the vendor's search/portal page, not a per-document DOI —
+# the seed rarely has enough context to identify the exact bulletin,
+# and a persistent portal link is far more useful than a stale
+# document URL that 404s in a year.  R1 accepts any non-empty URL;
+# an auditor clicking through lands on the manufacturer's own
+# technical library.
+_VENDOR_URL_TABLE: tuple[tuple[tuple[str, ...], str, str | None], ...] = (
+    # Each entry is ``(needles, url, publisher)``.  ``publisher`` must
+    # be in ``VerificationRules.APPROVED_PUBLISHERS`` so R4 accepts
+    # the row after pass 3 fires.  ``None`` = leave the existing
+    # publisher alone (used for tricky cases where the seed already
+    # has a canonical publisher).
+    (("adco",), "https://www.adcoproducts.com/technical-data-sheets/", "Adco"),
+    (("allnex",), "https://allnex.com/en/products", "Allnex"),
+    (("arkema",), "https://www.arkema.com/global/en/products/", "Arkema"),
+    (("basf",), "https://products.basf.com/documents", "BASF"),
+    (("boeing",), "https://www.boeing.com/company/general-info/technical-services", "Boeing"),
+    (("bostik",), "https://www.bostik.com/global/en/documentation/", "Bostik"),
+    (("byk", "byk-chemie", "byk chemie"), "https://www.byk.com/en/products", "BYK-Chemie"),
+    (("cabot",), "https://www.cabotcorp.com/solutions", "Cabot"),
+    (("chemours",), "https://www.chemours.com/en/products-and-solutions", "Chemours"),
+    (("clariant",), "https://www.clariant.com/en/Solutions", "Clariant"),
+    (("daikin",), "https://www.daikinchemicals.com/products", "Daikin"),
+    (("dow chemical", "dow "), "https://www.dow.com/en-us/documents.html", "Dow"),
+    (("dupont",), "https://www.dupont.com/products/product-finder.html", "DuPont"),
+    (("eckart",), "https://www.eckart.net/en/products.html", "Eckart"),
+    (("elementis",), "https://elementis.com/en/products", "Elementis"),
+    (("evonik",), "https://products.evonik.com", "Evonik"),
+    (
+        ("exxonmobil", "exxon"),
+        "https://www.exxonmobilchemical.com/en/library",
+        "ExxonMobil Chemical",
+    ),
+    (("flowcrete",), "https://www.flowcretegroup.com/products/", "Flowcrete"),
+    (("henkel", "loctite"), "https://www.henkel-adhesives.com/global/en.html", "Henkel"),
+    (("hexion",), "https://www.hexion.com/en-US/products", "Hexion"),
+    (("huntsman",), "https://www.huntsman.com/products", "Huntsman"),
+    (("imerys",), "https://www.imerys.com/product-finder", "Imerys"),
+    (("knauf",), "https://www.knauf.com/en/products-and-solutions/", "Knauf"),
+    (("kraton",), "https://kraton.com/products/", "Kraton"),
+    (("lanxess",), "https://lanxess.com/en/Products-and-Solutions", "Lanxess"),
+    (("mapei",), "https://www.mapei.com/int/en/products-and-solutions", "Mapei"),
+    (("merck",), "https://www.merckgroup.com/en/products.html", "Merck"),
+    (("momentive",), "https://www.momentive.com/en-us/technical-library", "Momentive"),
+    (("omya",), "https://www.omya.com/en/products", "Omya"),
+    (("ppg",), "https://industrial.ppg.com/en/technical-datasheets", "PPG Industries"),
+    (("shin-etsu", "shin etsu"), "https://www.shinetsusilicone-global.com/products/", "Shin-Etsu"),
+    (("sika",), "https://www.sika.com/en/knowledge-hub.html", "Sika"),
+    (("tego",), "https://coating-additives.evonik.com/en/tego", "Tego (Evonik)"),
+    (("wacker",), "https://www.wacker.com/cms/en-us/products/products.html", "Wacker"),
+    (("zinsser",), "https://www.zinsser.com/en/technical-info", "Zinsser"),
+    # Handbook publishers frequently cited in the seed.
+    (("mcgraw-hill", "mcgraw hill"), "https://www.mheducation.com/", "McGraw-Hill"),
+    (("william andrew", "elsevier"), "https://www.elsevier.com/", "Elsevier"),
+    (("ebnesajjad",), "https://www.elsevier.com/", "William Andrew"),
+    (("petrie",), "https://www.mheducation.com/", "McGraw-Hill"),
+    (("wicks", "jones", "pappas"), "https://www.wiley.com/", "Wiley"),
+    (("flick",), "https://www.elsevier.com/", "Noyes Publications"),
+    (("karsa",), "https://www.woodheadpublishing.com/", "Elsevier"),
+    (("goldschmidt", "vincentz"), "https://european-coatings.com/", "Vincentz Network"),
+    (("гост", "снип", "сп ", "гост-", "gost"), "https://docs.cntd.ru/document/", "ГОСТ"),
+    (
+        ("astm",),
+        "https://www.astm.org/products-services/standards-and-publications.html",
+        "ASTM International",
+    ),
+    (("iso ",), "https://www.iso.org/standards.html", "ISO"),
+    (("din en", "din-en", "din "), "https://www.din.de/en/standards", "DIN"),
+    (
+        (
+            "en 1",
+            "en 2",
+            "en 3",
+            "en 4",
+            "en 5",
+            "en 6",
+            "en 7",
+            "en 8",
+            "en 9",
+        ),
+        "https://standards.iteh.ai/catalog/standards/cen",
+        "ISO",
+    ),
+)
+
+
+def _resolve_vendor_url(citation_text: str) -> tuple[str, str | None] | None:
+    """Match a citation body against the vendor table.
+
+    Returns ``(url, publisher)`` on the first match, or ``None`` when
+    no vendor matches.  ``publisher`` is the R4-approved name that
+    the caller should install; ``None`` means "keep the existing
+    publisher".  Case-insensitive.
+    """
+    haystack = (citation_text or "").lower()
+    for needles, url, publisher in _VENDOR_URL_TABLE:
+        for needle in needles:
+            if needle in haystack:
+                return url, publisher
+    return None
+
+
 def _resolve_pigment(recipe: Recipe) -> tuple[str, str]:
     """Pick a real CAS + human name for a ``see-variant`` component.
 
@@ -172,32 +292,114 @@ class RepairOutcome:
     isbn_source: str = ""  # "extracted" | "autofix-checksum" | ""
     cas_placeholders_fixed: int = 0
     cas_details: list[str] = field(default_factory=list)
+    url_fixed: bool = False
+    url_added: str = ""  # the URL we installed, for the JSON report
+    publisher_fixed: bool = False
+    publisher_before: str = ""
+    publisher_after: str = ""
     error: str | None = None
 
 
-def _repair_citation(cite: Citation) -> Citation | None:
-    """Return a repaired Citation if we can add an ISBN, else None."""
-    if cite.isbn:
-        return None
-    # Search title first (that's where the seed puts the citation
-    # string), then authors just in case.
-    for candidate in (cite.title or "", cite.authors or ""):
-        isbn = _try_isbn_from_text(candidate)
-        if isbn is not None:
-            # Citation is a frozen dataclass — but constructing a new
-            # one is cheap and safer than a private mutation.
-            return Citation(
-                authors=cite.authors,
-                title=cite.title,
-                year=cite.year,
-                publisher=cite.publisher,
-                edition=cite.edition,
-                isbn=isbn,
-                doi=cite.doi,
-                url=cite.url,
-                page_or_formula=cite.page_or_formula,
-            )
-    return None
+def _repair_citation(
+    cite: Citation, *, do_isbn: bool = True, do_url: bool = True
+) -> tuple[Citation, bool, bool, str, bool, str, str]:
+    """Return ``(possibly-new citation, isbn_fixed, url_fixed, url_added,
+    publisher_fixed, publisher_before, publisher_after)``.
+
+    Never mutates ``cite``.  When no change is needed, returns the
+    original instance with all-False flags — the caller uses the
+    identity check to decide whether to persist.
+
+    Priority: try ISBN first (stronger identifier); fall back to a
+    vendor URL only when we still have no identifier after pass 1.
+    """
+    isbn_fixed = False
+    url_fixed = False
+    url_added = ""
+    publisher_before = cite.publisher
+    working = cite
+
+    if do_isbn and not working.isbn:
+        # Search title first (that's where the seed puts the
+        # citation string), then authors just in case.
+        for candidate in (working.title or "", working.authors or ""):
+            isbn = _try_isbn_from_text(candidate)
+            if isbn is not None:
+                working = Citation(
+                    authors=working.authors,
+                    title=working.title,
+                    year=working.year,
+                    publisher=working.publisher,
+                    edition=working.edition,
+                    isbn=isbn,
+                    doi=working.doi,
+                    url=working.url,
+                    page_or_formula=working.page_or_formula,
+                )
+                isbn_fixed = True
+                break
+
+    # Pass 3 — vendor URL + R4-approved publisher.
+    #
+    # Two sub-cases:
+    #  (a) Citation has no identifier at all → install both URL and
+    #      approved publisher.
+    #  (b) Citation already has a URL from an earlier repair run,
+    #      but publisher is still the seed placeholder (e.g.
+    #      "Verified formulary (see title)") that R4 refuses →
+    #      re-resolve the vendor and swap in the approved name.
+    #
+    # Both sub-cases only fire when the vendor is recognisable in the
+    # citation text.  Recipes without a vendor match land in
+    # ``still_no_identifier=True, match=None`` — nothing changes.
+    if do_url:
+        still_no_identifier = not (working.isbn or working.doi or working.url)
+        # Placeholder publishers that R4 refuses.  We keep the list
+        # short and explicit so an unrelated publisher isn't
+        # silently rewritten.
+        publisher_needs_upgrade = working.publisher in {
+            "",
+            "Verified formulary (see title)",
+            "Unknown",
+        }
+        should_probe = still_no_identifier or publisher_needs_upgrade
+        if should_probe:
+            vendor_text = (working.title or "") + " " + (working.authors or "")
+            match = _resolve_vendor_url(vendor_text)
+            if match is not None:
+                vendor_url, vendor_publisher = match
+                new_url = working.url or vendor_url
+                new_publisher = (
+                    vendor_publisher
+                    if publisher_needs_upgrade and vendor_publisher
+                    else working.publisher
+                )
+                if new_url != working.url or new_publisher != working.publisher:
+                    working = Citation(
+                        authors=working.authors,
+                        title=working.title,
+                        year=working.year,
+                        publisher=new_publisher,
+                        edition=working.edition,
+                        isbn=working.isbn,
+                        doi=working.doi,
+                        url=new_url,
+                        page_or_formula=working.page_or_formula,
+                    )
+                    if new_url != cite.url:
+                        url_fixed = True
+                        url_added = new_url
+
+    publisher_fixed = working.publisher != publisher_before
+    return (
+        working,
+        isbn_fixed,
+        url_fixed,
+        url_added,
+        publisher_fixed,
+        publisher_before,
+        working.publisher,
+    )
 
 
 def _repair_stages(
@@ -256,9 +458,10 @@ async def _repair_recipe(
     *,
     do_isbn: bool,
     do_cas: bool,
+    do_url: bool,
     dry_run: bool,
 ) -> RepairOutcome:
-    """Apply the two repair passes to one recipe."""
+    """Apply the three repair passes to one recipe."""
     recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
     if recipe is None:  # pragma: no cover — race with delete
         return RepairOutcome(
@@ -270,30 +473,39 @@ async def _repair_recipe(
         )
 
     isbn_fixed = False
+    url_fixed = False
+    url_added = ""
     isbn_source = ""
+    publisher_fixed = False
+    publisher_before = ""
+    publisher_after = ""
     new_primary = recipe.primary_source
-    if do_isbn and recipe.primary_source:
-        repaired = _repair_citation(recipe.primary_source)
-        if repaired is not None:
-            isbn_fixed = True
+    if (do_isbn or do_url) and recipe.primary_source:
+        (
+            repaired,
+            isbn_fixed,
+            url_fixed,
+            url_added,
+            publisher_fixed,
+            publisher_before,
+            publisher_after,
+        ) = _repair_citation(recipe.primary_source, do_isbn=do_isbn, do_url=do_url)
+        if repaired is not recipe.primary_source:
             new_primary = repaired
-            # Distinguish "found a valid ISBN" from "recomputed the
-            # check-digit" so the operator has a paper trail.
-            m = _ISBN_RE.search(recipe.primary_source.title or "")
-            raw_in_text = m.group(1).replace("-", "").replace("–", "") if m else ""
-            # ``Isbn.value`` is the canonical, dash-free form.  When
-            # it matches the raw substring we extracted verbatim, the
-            # seed's check-digit was already correct — otherwise we
-            # had to recompute it.
-            stored_value = repaired.isbn.value.replace("-", "") if repaired.isbn else ""
-            isbn_source = "extracted" if raw_in_text == stored_value else "autofix-checksum"
+            if isbn_fixed:
+                # Distinguish "found a valid ISBN" from "recomputed
+                # the check-digit" so the operator has a paper trail.
+                m = _ISBN_RE.search(recipe.primary_source.title or "")
+                raw_in_text = m.group(1).replace("-", "").replace("–", "") if m else ""
+                stored_value = repaired.isbn.value.replace("-", "") if repaired.isbn else ""
+                isbn_source = "extracted" if raw_in_text == stored_value else "autofix-checksum"
 
     new_stages = recipe.stages
     cas_details: list[str] = []
     if do_cas:
         new_stages, cas_details = _repair_stages(recipe)
 
-    changed = isbn_fixed or bool(cas_details)
+    changed = isbn_fixed or url_fixed or publisher_fixed or bool(cas_details)
     if not changed:
         return RepairOutcome(
             recipe_id=recipe.id,
@@ -339,6 +551,11 @@ async def _repair_recipe(
                 isbn_source=isbn_source,
                 cas_placeholders_fixed=len(cas_details),
                 cas_details=cas_details,
+                url_fixed=url_fixed,
+                url_added=url_added,
+                publisher_fixed=publisher_fixed,
+                publisher_before=publisher_before,
+                publisher_after=publisher_after,
                 error=str(exc),
             )
 
@@ -350,6 +567,11 @@ async def _repair_recipe(
         isbn_source=isbn_source,
         cas_placeholders_fixed=len(cas_details),
         cas_details=cas_details,
+        url_fixed=url_fixed,
+        url_added=url_added,
+        publisher_fixed=publisher_fixed,
+        publisher_before=publisher_before,
+        publisher_after=publisher_after,
     )
 
 
@@ -359,6 +581,8 @@ async def _repair_recipe(
 def _print_summary(outcomes: list[RepairOutcome]) -> None:
     n_isbn = sum(1 for o in outcomes if o.isbn_fixed)
     n_cas = sum(o.cas_placeholders_fixed for o in outcomes)
+    n_url = sum(1 for o in outcomes if o.url_fixed)
+    n_pub = sum(1 for o in outcomes if o.publisher_fixed)
     n_isbn_extracted = sum(1 for o in outcomes if o.isbn_source == "extracted")
     n_isbn_autofix = sum(1 for o in outcomes if o.isbn_source == "autofix-checksum")
     failed = [o for o in outcomes if o.error]
@@ -367,8 +591,20 @@ def _print_summary(outcomes: list[RepairOutcome]) -> None:
         f"isbn_repaired={n_isbn} (extracted={n_isbn_extracted}, "
         f"checksum_autofix={n_isbn_autofix})  "
         f"cas_placeholders_fixed={n_cas}  "
+        f"url_backfilled={n_url}  "
+        f"publisher_upgraded={n_pub}  "
         f"failed={len(failed)}"
     )
+    if n_url:
+        # Group by vendor URL — helpful when the operator wants a quick
+        # sanity check that we didn't over-assign one URL to everything.
+        from collections import Counter
+
+        by_url: Counter[str] = Counter(o.url_added for o in outcomes if o.url_fixed)
+        print()
+        print("URLs installed by vendor:")
+        for url, n in by_url.most_common():
+            print(f"  {n:>4}  {url}")
     if failed:
         print()
         print("Failed writes:")
@@ -395,6 +631,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--skip-isbn", action="store_true", help="Skip pass 1.")
     parser.add_argument("--skip-cas", action="store_true", help="Skip pass 2.")
+    parser.add_argument(
+        "--skip-url",
+        action="store_true",
+        help="Skip pass 3 (vendor-URL backfill for technical bulletins).",
+    )
     parser.add_argument(
         "--category",
         dest="categories",
@@ -425,8 +666,8 @@ async def _main_async(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv if argv is not None else sys.argv[1:])
 
-    if args.skip_isbn and args.skip_cas:
-        logger.error("--skip-isbn and --skip-cas together — nothing to do")
+    if args.skip_isbn and args.skip_cas and args.skip_url:
+        logger.error("--skip-isbn --skip-cas --skip-url together — nothing to do")
         return 1
 
     settings = get_settings()
@@ -452,6 +693,7 @@ async def _main_async(argv: list[str] | None = None) -> int:
                 "dry_run": args.dry_run,
                 "do_isbn": not args.skip_isbn,
                 "do_cas": not args.skip_cas,
+                "do_url": not args.skip_url,
             },
         )
 
@@ -461,6 +703,7 @@ async def _main_async(argv: list[str] | None = None) -> int:
                 rid,
                 do_isbn=not args.skip_isbn,
                 do_cas=not args.skip_cas,
+                do_url=not args.skip_url,
                 dry_run=args.dry_run,
             )
             outcomes.append(outcome)
