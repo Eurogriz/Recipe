@@ -23,6 +23,7 @@ from .middleware import (
     RateLimitMiddleware,
     RequestContextMiddleware,
     SecurityHeadersMiddleware,
+    SessionRefreshMiddleware,
 )
 from .routes import router
 
@@ -81,6 +82,10 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
             allow_headers=["*"],
         )
     app.add_middleware(SecurityHeadersMiddleware)
+    # Sliding refresh sits just under the request-context wrapper so
+    # its Set-Cookie header rides on the final response after the
+    # route handler has finished writing its own headers.
+    app.add_middleware(SessionRefreshMiddleware)
     app.add_middleware(RequestContextMiddleware)
 
     app.include_router(router)

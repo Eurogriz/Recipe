@@ -64,6 +64,34 @@ class Principal:
 _READ_SCOPE = "recipes:read"
 _WRITE_SCOPE = "recipes:write"
 
+# Personal API keys carry this prefix — checked BEFORE JWT/static
+# so a valid personal token wins even when a global bearer is
+# also configured.
+_API_KEY_PREFIX = "fw_"
+
+
+async def _try_api_key(request: Request, token: str) -> Principal | None:
+    """Look up ``token`` in the ``api_key`` table.
+
+    Returns ``None`` when the container is not yet wired (rare — only
+    during app-startup tests) or when the token is unknown / revoked /
+    expired / owned by a disabled user.
+    """
+    container = getattr(request.app.state, "container", None)
+    if container is None:
+        return None
+    repo = getattr(container, "api_key_repository", None)
+    if repo is None:
+        return None
+    user = await repo.authenticate(token)
+    if user is None:
+        return None
+    return Principal(
+        subject=f"user:{user.username}",
+        scopes=role_scopes(user.role),
+        mode="api_key",
+    )
+
 
 # ---------------------------------------------------------------------------
 # Minimal HS256 verifier (fallback when PyJWT is not installed)
@@ -177,39 +205,47 @@ async def get_principal(
 ) -> Principal:
     """Resolve the caller identity based on the current settings.
 
-    Supports three orthogonal auth modes:
+    Supports five orthogonal auth modes (probed in this order):
 
+    0. **Session cookie** (``fw_session``) — browser SPA login.
     1. **HTTP Basic** (``Authorization: Basic base64(user:pass)``) →
-       lookup in the ``user`` table; the user's role determines the
-       granted scopes (via :func:`role_scopes`).
-    2. **JWT Bearer** (``FW_JWT_SECRET`` set) → decode + trust claim
-       ``scope``/``scopes``.
-    3. **Static Bearer** (``FW_API_TOKEN`` set) — legacy 1.1.x
+       lookup in the ``user`` table; role → scopes.
+    2. **Personal API key** (``Authorization: Bearer fw_…``) →
+       looked up in ``api_key``; owner's role → scopes.
+    3. **JWT Bearer** (``FW_JWT_SECRET`` set, non-``fw_`` token) →
+       decode + trust ``scope``/``scopes`` claim.
+    4. **Static Bearer** (``FW_API_TOKEN`` set) — legacy 1.1.x
        compatibility, grants read+write.
 
     In open mode (no ``FW_API_TOKEN`` / ``FW_JWT_SECRET`` / users) —
     every request is an ``anonymous`` principal with all scopes.  The
     production invariants check refuses this configuration.
+
+    Rule: an explicit ``Authorization`` header always wins over any
+    session cookie.  The cookie only takes effect when the caller
+    sent no ``Authorization`` at all.  This means a browser tab that
+    happens to hold a stale session cookie cannot silently override
+    a scripted request that carries a fresh Basic/Bearer credential.
     """
-    # Session cookie takes highest priority — a signed-in browser
-    # should not need to re-negotiate on every request, and a stale
-    # cookie must not silently downgrade to another auth mode.
-    cookie_token = request.cookies.get(SESSION_COOKIE_NAME)
-    if cookie_token:
-        try:
-            payload = decode_session_token(cookie_token, settings)
-        except SessionTokenError as exc:
-            logger.debug("session_cookie_invalid", extra={"error": repr(exc)})
-            # Fall through: an invalid cookie should not block Basic /
-            # bearer callers.  Browsers usually resend the cookie
-            # unconditionally, so the ``/auth/logout`` endpoint is the
-            # canonical way to drop it.
-        else:
-            return Principal(
-                subject=f"user:{payload.subject}",
-                scopes=role_scopes(payload.role),
-                mode="session",
-            )
+    # If the caller sent no Authorization header at all, honour any
+    # valid session cookie.  Otherwise the explicit header wins and
+    # we skip the cookie path entirely.
+    if not authorization:
+        cookie_token = request.cookies.get(SESSION_COOKIE_NAME)
+        if cookie_token:
+            try:
+                payload = decode_session_token(cookie_token, settings)
+            except SessionTokenError as exc:
+                logger.debug("session_cookie_invalid", extra={"error": repr(exc)})
+                # Fall through to the open/token flow below.  An
+                # invalid cookie must not block anonymous access
+                # in dev mode nor a downstream token check.
+            else:
+                return Principal(
+                    subject=f"user:{payload.subject}",
+                    scopes=role_scopes(payload.role),
+                    mode="session",
+                )
 
     # Basic auth is tried next — it's the only mode backed by a real
     # user table with per-user roles.  Falls through when the header
@@ -219,6 +255,18 @@ async def get_principal(
         if principal is not None:
             return principal
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid basic credentials")
+
+    # Personal API keys (prefix ``fw_``) are checked BEFORE the
+    # open-mode fallback so a leaked/rotated token cannot silently
+    # be swallowed by a permissive dev config.  A malformed
+    # ``fw_``-prefixed bearer is always a hard 401.
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization.split(" ", 1)[1].strip()
+        if token.startswith(_API_KEY_PREFIX):
+            api_principal = await _try_api_key(request, token)
+            if api_principal is not None:
+                return api_principal
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid API key")
 
     if not settings.api_token and not settings.jwt_secret:
         # Development / test mode — allow everything, log at debug once.

@@ -531,6 +531,50 @@ export const ru: Dict = {
   "nav.login": "Войти",
   "nav.logout": "Выйти",
 
+  // navigation extra (v1.18)
+  "nav.apikeys": "API-ключи",
+
+  // personal API keys (v1.18)
+  "apikeys.title": "Мои API-ключи",
+  "apikeys.subtitle":
+    "Персональные токены доступа для внешних скриптов и CI. Наследуют роль пользователя. Хранится только SHA-256-хэш — оригинал показывается один раз при выпуске.",
+  "apikeys.need_login":
+    "Раздел доступен только для аутентифицированных пользователей. Войдите под своей учётной записью.",
+  "apikeys.loading": "Загружаем список ключей…",
+  "apikeys.empty":
+    "Пока нет ни одного ключа. Нажмите «Выпустить новый», чтобы создать первый.",
+  "apikeys.new": "Выпустить новый",
+  "apikeys.failed": "Не удалось: {msg}",
+  "apikeys.col.label": "Название",
+  "apikeys.col.prefix": "Префикс",
+  "apikeys.col.status": "Состояние",
+  "apikeys.col.created": "Выпущен",
+  "apikeys.col.last_used": "Последний вызов",
+  "apikeys.col.expires": "Истекает",
+  "apikeys.status.active": "активен",
+  "apikeys.status.revoked": "отозван",
+  "apikeys.status.expired": "истёк",
+  "apikeys.expires.never": "бессрочно",
+  "apikeys.revoke.button": "Отозвать",
+  "apikeys.revoke.confirm":
+    "Отозвать ключ «{label}»? Все скрипты, использующие его, перестанут работать немедленно.",
+  "apikeys.revoke.ok": "Ключ отозван.",
+  "apikeys.dialog.create": "Новый API-ключ",
+  "apikeys.dialog.cancel": "Отмена",
+  "apikeys.dialog.mint": "Выпустить",
+  "apikeys.dialog.creating": "Выпускаем…",
+  "apikeys.f.label": "Название (для чего этот ключ)",
+  "apikeys.f.expires": "Срок действия (необязательно)",
+  "apikeys.f.expires.hint":
+    "Оставьте пустым для бессрочного ключа. Формат — локальное время браузера.",
+  "apikeys.issued.title": "Ключ «{label}» выпущен",
+  "apikeys.issued.warning":
+    "Скопируйте токен сейчас — после закрытия этого окна восстановить его будет невозможно. Сервер хранит только хэш.",
+  "apikeys.issued.copy": "Скопировать",
+  "apikeys.issued.copied": "Скопировано",
+  "apikeys.issued.usage": "Использование в скриптах:",
+  "apikeys.issued.dismiss": "Я сохранил токен",
+
   // login page
   "login.title": "Вход в Formulation Workbench",
   "login.subtitle":

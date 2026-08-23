@@ -272,8 +272,11 @@ class AuditLogEntryModel(Base):
     __tablename__ = "audit_log_entry"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid_str)
-    recipe_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("recipe.id", ondelete="CASCADE"), nullable=False, index=True
+    # Nullable since 0006: auth events (Login/Logout/ApiKeyIssued) do
+    # not point at a specific recipe.  For every domain event this is
+    # populated exactly as before.
+    recipe_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("recipe.id", ondelete="CASCADE"), nullable=True, index=True
     )
     user_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
@@ -395,3 +398,38 @@ class ProductionFeatureVectorModel(Base):
     source: Mapped[str] = mapped_column(String(64), nullable=False, default="lab")
     features_json: Mapped[str] = mapped_column(Text, nullable=False)
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+
+# ==============================================================================
+# API Keys (personal access tokens per user)
+# ==============================================================================
+class ApiKeyModel(Base):
+    """One personal API token issued to a user.
+
+    Storage rule: the plaintext token is returned to the user *once*
+    at issuance, and only its SHA-256 digest is persisted here.  The
+    ``token_prefix`` field holds the first 8 characters (e.g.
+    ``fw_a1b2c3``) so operators can eyeball the audit log without
+    seeing the secret.
+
+    Revocation is soft (``revoked_at`` timestamp) — the row survives
+    so that historical audit entries referencing this key stay
+    resolvable.  Authentication treats ``revoked_at IS NOT NULL`` as
+    disabled.
+    """
+
+    __tablename__ = "api_key"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid_str)
+    user_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    label: Mapped[str] = mapped_column(String(128), nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(128), nullable=False, unique=True, index=True)
+    token_prefix: Mapped[str] = mapped_column(String(16), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_utc_now
+    )
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

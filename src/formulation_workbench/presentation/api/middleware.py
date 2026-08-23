@@ -216,10 +216,102 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return response
 
 
+# ---------------------------------------------------------------------------
+# Sliding session refresh
+# ---------------------------------------------------------------------------
+class SessionRefreshMiddleware(BaseHTTPMiddleware):
+    """Roll over the ``fw_session`` cookie when it's past half its TTL.
+
+    Keeps an actively-used browser session alive indefinitely, but
+    lets an idle session age out naturally.  The middleware reads
+    the cookie on every request; if it's still valid but "half
+    used", it computes a fresh signed token and rewrites the
+    ``Set-Cookie`` header on the outgoing response.
+
+    Runs late in the stack (added first → invoked last on the way
+    out) so the response headers are otherwise settled and we don't
+    step on ``/auth/logout``'s explicit ``delete_cookie``.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        super().__init__(app)
+
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
+        response = await call_next(request)
+
+        # Local import avoids a circular import chain through the app
+        # factory at module load time.
+        from .session_auth import (
+            DEFAULT_SESSION_TTL_SECONDS,
+            SESSION_COOKIE_NAME,
+            SessionTokenError,
+            decode_session_token,
+            issue_session_token,
+            needs_refresh,
+            session_cookie_is_secure,
+        )
+
+        raw = request.cookies.get(SESSION_COOKIE_NAME)
+        if not raw:
+            return response
+
+        # When the caller explicitly authenticated with a header
+        # (Basic / Bearer), the session cookie was ignored by
+        # ``get_principal`` — refreshing it here would be surprising
+        # and could revive a session the user meant to abandon.
+        if request.headers.get("authorization"):
+            return response
+
+        # The /auth/logout endpoint explicitly clears the cookie; if
+        # its Set-Cookie is already on the response we must not
+        # overwrite it with a refreshed token.
+        existing = response.headers.get("set-cookie", "")
+        if SESSION_COOKIE_NAME + "=" in existing:
+            return response
+
+        settings = request.app.state.settings
+
+        try:
+            payload = decode_session_token(raw, settings)
+        except SessionTokenError:
+            # Expired / bad signature — do nothing; the browser
+            # continues to hold a dead cookie, which the auth
+            # dependency already refused.
+            return response
+
+        if not needs_refresh(payload, ttl_seconds=DEFAULT_SESSION_TTL_SECONDS):
+            return response
+
+        new_token = issue_session_token(
+            subject=payload.subject,
+            role=payload.role,
+            settings=settings,
+            ttl_seconds=DEFAULT_SESSION_TTL_SECONDS,
+        )
+        response.set_cookie(
+            key=SESSION_COOKIE_NAME,
+            value=new_token,
+            max_age=DEFAULT_SESSION_TTL_SECONDS,
+            httponly=True,
+            secure=session_cookie_is_secure(settings),
+            samesite="lax",
+            path="/",
+        )
+        # Signal to the SPA that its "session expires in N min"
+        # display should update.  Small, opaque hint — no PII.
+        response.headers["x-session-refreshed"] = "1"
+        return response
+
+
 # Backwards-compatible export.
 with contextlib.suppress(NameError):
     __all__ = [
         "RateLimitMiddleware",
         "RequestContextMiddleware",
         "SecurityHeadersMiddleware",
+        "SessionRefreshMiddleware",
     ]

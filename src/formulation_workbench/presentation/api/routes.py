@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import PlainTextResponse
 
 from ... import __version__
@@ -39,6 +39,10 @@ from .auth import Principal, get_principal, require_admin, require_reader, requi
 from .dependencies import get_container, get_settings
 from .mappers import to_recipe
 from .schemas import (
+    ApiKeyCreateRequest,
+    ApiKeyIssuedOut,
+    ApiKeyOut,
+    ApiKeysListOut,
     AppInfo,
     ApplyLabResultsIn,
     ApplyLabResultsOut,
@@ -335,6 +339,171 @@ async def delete_user(
 
 
 # ---------------------------------------------------------------------------
+# Personal API keys
+# ---------------------------------------------------------------------------
+def _api_key_out(record: Any) -> ApiKeyOut:
+    return ApiKeyOut(
+        id=record.id,
+        user_id=record.user_id,
+        label=record.label,
+        token_prefix=record.token_prefix,
+        created_at=record.created_at.isoformat() if record.created_at else "",
+        last_used_at=(record.last_used_at.isoformat() if record.last_used_at else None),
+        expires_at=(record.expires_at.isoformat() if record.expires_at else None),
+        revoked_at=(record.revoked_at.isoformat() if record.revoked_at else None),
+        is_active=record.is_active,
+    )
+
+
+def _authorise_api_key_owner(principal: Principal, user_id: str, target_username: str) -> None:
+    """Ensure the caller owns the target user, unless they are Admin.
+
+    An Admin can manage anyone's keys (for offboarding / rotation);
+    non-admin users can only manage their own.  Anonymous / non-user
+    principals fall through to the ``*`` scope check made upstream
+    (they only reach this helper if they have some scope).
+    """
+    if principal.has_scope("*"):
+        return
+    caller_username = principal.subject.removeprefix("user:")
+    if caller_username != target_username:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "You can only manage your own API keys",
+        )
+
+
+@router.get(
+    "/users/{user_id}/api-keys",
+    response_model=ApiKeysListOut,
+    tags=["users"],
+    summary="List a user's personal API keys (owner or Admin)",
+)
+async def list_api_keys(
+    user_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
+) -> ApiKeysListOut:
+    user = await container.user_repository.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    _authorise_api_key_owner(principal, user_id, user.username)
+    keys = await container.api_key_repository.list_for_user(user_id)
+    return ApiKeysListOut(keys=[_api_key_out(k) for k in keys])
+
+
+@router.post(
+    "/users/{user_id}/api-keys",
+    response_model=ApiKeyIssuedOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["users"],
+    summary="Issue a personal API key (owner or Admin)",
+)
+async def create_api_key(
+    user_id: str,
+    payload: ApiKeyCreateRequest,
+    request: Request,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
+) -> ApiKeyIssuedOut:
+    """Mint a fresh token.
+
+    The plaintext value is returned exactly once — clients MUST
+    persist it themselves.  Only the SHA-256 digest is stored, so
+    even the DBA cannot recover it.
+    """
+    from datetime import datetime
+
+    from ...infrastructure.db.repositories.api_keys import ApiKeyError
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
+
+    user = await container.user_repository.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    _authorise_api_key_owner(principal, user_id, user.username)
+
+    expires_at: datetime | None = None
+    if payload.expires_at:
+        try:
+            expires_at = datetime.fromisoformat(payload.expires_at.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_CONTENT, f"Bad expires_at: {exc}"
+            ) from exc
+
+    try:
+        issued = await container.api_key_repository.create(
+            user_id=user_id, label=payload.label, expires_at=expires_at
+        )
+    except ApiKeyError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    await container.auth_event_logger.log(
+        AuthEvent(
+            action="ApiKeyIssued",
+            actor_label=principal.subject,
+            user_id=user_id,
+            ip_address=request.client.host if request.client else None,
+            changes={
+                "key_id": issued.record.id,
+                "label": issued.record.label,
+                "token_prefix": issued.record.token_prefix,
+                "target_user": user.username,
+            },
+        )
+    )
+
+    return ApiKeyIssuedOut(
+        **_api_key_out(issued.record).model_dump(),
+        plaintext=issued.plaintext,
+    )
+
+
+@router.delete(
+    "/users/{user_id}/api-keys/{key_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["users"],
+    summary="Revoke a personal API key (owner or Admin)",
+)
+async def revoke_api_key(
+    user_id: str,
+    key_id: str,
+    request: Request,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
+) -> None:
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
+
+    user = await container.user_repository.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    _authorise_api_key_owner(principal, user_id, user.username)
+
+    record = await container.api_key_repository.get(key_id)
+    if record is None or record.user_id != user_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "API key not found")
+
+    ok = await container.api_key_repository.revoke(key_id)
+    if not ok:  # pragma: no cover — race with concurrent delete
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "API key not found")
+
+    await container.auth_event_logger.log(
+        AuthEvent(
+            action="ApiKeyRevoked",
+            actor_label=principal.subject,
+            user_id=user_id,
+            ip_address=request.client.host if request.client else None,
+            changes={
+                "key_id": key_id,
+                "label": record.label,
+                "token_prefix": record.token_prefix,
+                "target_user": user.username,
+            },
+        )
+    )
+
+
+# ---------------------------------------------------------------------------
 # Session auth (browser login-flow)
 # ---------------------------------------------------------------------------
 @router.post(
@@ -345,6 +514,7 @@ async def delete_user(
 )
 async def auth_login(
     payload: LoginRequest,
+    request: Request,
     response: Response,
     settings: Annotated[AppSettings, Depends(get_settings)],
     container: Annotated[Container, Depends(get_container)],
@@ -356,7 +526,14 @@ async def auth_login(
     and, on success, issues a signed session cookie.  The cookie is
     ``HttpOnly`` and ``SameSite=Lax``; JavaScript never sees the
     token.
+
+    Every login attempt (successful or not) is written to the audit
+    log — successful ones as ``Login``, failures as ``LoginFailed``
+    with a ``{"reason": "bad_credentials"}`` payload.  An operator
+    can correlate a spike of failures to a probe by grouping on
+    ``actor_label`` and ``ip_address``.
     """
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
     from ...infrastructure.db.repositories.users import role_scopes
     from .session_auth import (
         DEFAULT_SESSION_TTL_SECONDS,
@@ -365,8 +542,17 @@ async def auth_login(
         session_cookie_is_secure,
     )
 
+    ip = request.client.host if request.client else None
     record = await container.user_repository.authenticate(payload.username, payload.password)
     if record is None:
+        await container.auth_event_logger.log(
+            AuthEvent(
+                action="LoginFailed",
+                actor_label=payload.username or "anonymous",
+                ip_address=ip,
+                changes={"reason": "bad_credentials"},
+            )
+        )
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
 
     token = issue_session_token(
@@ -387,6 +573,16 @@ async def auth_login(
     scopes = sorted(role_scopes(record.role))
     import time as _time
 
+    await container.auth_event_logger.log(
+        AuthEvent(
+            action="Login",
+            actor_label=f"user:{record.username}",
+            user_id=record.id,
+            ip_address=ip,
+            changes={"role": record.role, "mode": "session"},
+        )
+    )
+
     return LoginResponse(
         subject=f"user:{record.username}",
         role=record.role,
@@ -402,8 +598,11 @@ async def auth_login(
     summary="Clear the ``fw_session`` cookie",
 )
 async def auth_logout(
+    request: Request,
     response: Response,
     settings: Annotated[AppSettings, Depends(get_settings)],
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
 ) -> None:
     """Drop the browser session cookie.
 
@@ -411,7 +610,13 @@ async def auth_logout(
     cookie) still succeed.  Since the token is stateless we simply
     tell the browser to forget it; a stolen copy would remain valid
     until its ``exp`` claim passes.
+
+    Emits a ``Logout`` audit event only when a real session was
+    ended (i.e. the caller was authenticated via ``mode=='session'``
+    at the time of the call).  An anonymous logout is a no-op that
+    would only pollute the log.
     """
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
     from .session_auth import SESSION_COOKIE_NAME, session_cookie_is_secure
 
     response.delete_cookie(
@@ -421,6 +626,14 @@ async def auth_logout(
         secure=session_cookie_is_secure(settings),
         samesite="lax",
     )
+    if principal.mode == "session":
+        await container.auth_event_logger.log(
+            AuthEvent(
+                action="Logout",
+                actor_label=principal.subject,
+                ip_address=request.client.host if request.client else None,
+            )
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -7,6 +7,161 @@
 
 ---
 
+## [1.18.0] — Персональные API-ключи, скользящее продление сеансов, аудит auth-событий (2026-08-23)
+
+Раунд усиливает всю auth-поверхность, добавленную в v1.16 (роли) и
+v1.17 (сеансовые cookie). Три взаимосвязанные фичи:
+
+### Added — Персональные API-ключи
+
+CI, cron и лабораторные демоны раньше могли работать только через
+глобальный `FW_API_TOKEN` (легаси) или JWT — всё под одним
+subject'ом. Теперь у каждого пользователя есть личные токены.
+
+**Модель:**
+
+- Новая таблица `api_key` (миграция `0006`) с полями `user_id` (FK
+  на `user` с CASCADE), `label`, `token_hash` (SHA-256 hex, 64
+  символа), `token_prefix` (8 символов plaintext для отображения в
+  UI/логах), `created_at`, `last_used_at`, `expires_at`,
+  `revoked_at` (мягкое удаление).
+- Формат plaintext: `fw_<43-char-urlsafe-b64>` (32 байта энтропии
+  из `secrets.token_urlsafe`).
+- **Хранится только digest** — оригинал возвращается ровно один раз
+  при выпуске и невосстановим. Тот же трейд-офф, что у SSH
+  `authorized_keys`: потерял — выпусти новый.
+- Revocation soft (`revoked_at IS NOT NULL`) — audit-строки,
+  ссылающиеся на ключ, остаются разрешимыми.
+
+**Новый auth-mode `api_key`** в `get_principal`:
+
+- Bearer-токен с префиксом `fw_` ищется в таблице `api_key`.
+- Роль владельца → набор scopes (через `role_scopes()`).
+- Валидный ключ обновляет `last_used_at` (best-effort, не ломает
+  запрос).
+- Отклоняется если владелец `is_active=false`, ключ отозван или
+  истёк.
+- **Хард-401** для любого `fw_`-токена, не совпадающего ни с одной
+  строкой (не должен молча деградировать до static-bearer).
+
+**Endpoints (+3, всего 60):**
+
+- `GET /users/{id}/api-keys` — список (owner или Admin).
+- `POST /users/{id}/api-keys` `{label, expires_at?}` → 201 с
+  plaintext + метаданными (owner или Admin).
+- `DELETE /users/{id}/api-keys/{key_id}` → 204 (owner или Admin).
+
+Проверка «own-user-or-Admin» через `_authorise_api_key_owner()`:
+пользователь может управлять только своими ключами; Admin — чужими
+(для offboarding).
+
+**UI страница `/admin/api-keys`:**
+
+- Таблица label / prefix / status / created / last_used / expires.
+- Цветные бейджи: active / revoked / expired.
+- Диалог выпуска: label + опциональный `expires_at`.
+- Модальное окно «Ключ выпущен»: plaintext в read-only Input с
+  кнопкой Copy (Clipboard API), curl-пример, предупреждение
+  «скопируйте сейчас — восстановить невозможно».
+- Автоматически разрешает id текущего пользователя через
+  `/me` + `/users` (Admin fallback).
+
+### Added — Скользящее продление сеансов
+
+Cookie `fw_session` живёт 12 часов. При активном использовании UI
+внезапно выкидывал пользователя через 12 часов работы — плохо.
+Теперь новый `SessionRefreshMiddleware`:
+
+- На каждом ответе проверяет: если TTL cookie осталось меньше
+  половины (`SESSION_REFRESH_FRACTION = 0.5`), выпускает свежий
+  токен и переустанавливает cookie.
+- Заголовок `x-session-refreshed: 1` сигнализирует SPA, что можно
+  обновить «сеанс истекает через N минут».
+- Пропускает запросы с явным `Authorization` header (Basic/Bearer)
+  — не рефрешит cookie, которую пользователь не собирался
+  использовать.
+- Пропускает ответы, где уже есть `Set-Cookie: fw_session=` (не
+  перезаписывает `/auth/logout`'s clear).
+- Идеально: активный день → сессия жива весь день; пользователь
+  ушёл на 12 часов → аккуратно истекает.
+
+**Изменение приоритета `get_principal`**: явный `Authorization`
+теперь всегда побеждает cookie. Это была latent-баг: браузерная
+вкладка с сеансом alice могла перекрыть скриптовый запрос с
+Basic-auth root'а.
+
+### Added — Аудит auth-событий
+
+Audit_log_entry с v1.1.0 писал только доменные события. Теперь
+туда попадают и события аутентификации.
+
+**Пять новых action-verbs** (миграция `0006` расширила
+`ck_audit_action_valid`):
+
+- `Login` — успешный вход (subject, role, mode, ip_address).
+- `LoginFailed` — 401 при попытке (username как actor_label,
+  reason=bad_credentials, ip_address).
+- `Logout` — только при реальном выходе `mode=='session'` (не
+  анонимном).
+- `ApiKeyIssued` — с полями key_id, label, token_prefix, target_user.
+- `ApiKeyRevoked` — те же поля.
+
+**Инфраструктура:**
+
+- Новый `AuthEventLogger` в отдельной сессии — best-effort, ошибка
+  записи не ломает login.
+- `audit_log_entry.recipe_id` → **nullable** (миграция `0006`,
+  batch-alter): auth-события не привязаны к рецепту.
+- Соответственно `AuditLogRecord.recipe_id`, `AuditLogEntryOut`
+  тоже стали nullable.
+
+**UI:** страница `/admin/audit` уже читает эти события — просто
+работает через фильтр action. Цветовые badge-варианты расширены:
+Login → success, LoginFailed → destructive, Logout → info,
+ApiKeyIssued → warning, ApiKeyRevoked → destructive. Ссылка
+recipe_id корректно рисуется как «—» для строк без recipe.
+
+### Changed
+
+- `AppSettings.session_secret` (v1.17) — приоритет теперь используется
+  без изменений, но `SESSION_REFRESH_FRACTION` вынесен в конфиг
+  `session_auth.py` как экспортируемый именованный параметр.
+- `get_principal` docstring обновлён — 5 auth-режимов вместо 3, с
+  явной формулировкой правила «header wins over cookie».
+- `AuditLogRecord.recipe_id: str | None` вместо `str`.
+- Container получил `api_key_repository` и `auth_event_logger`.
+
+### Metrics
+
+- **568 тестов** (было 547, +21 новых: 10 API-keys + 8 session
+  refresh/auth events + 3 unit). Прогон ~146 с.
+- **60 REST endpoints** (было 57, +3: `/users/{id}/api-keys` list
+  /create /delete).
+- **11 UI-страниц** (было 10, +1: `/admin/api-keys`).
+- **121 source file** (было 119, +2: `db/repositories/api_keys.py`,
+  `db/repositories/auth_events.py`; `session_auth.py` расширен, а
+  не создан).
+- **505 i18n ключей** (было 471, +34 для API-keys RU+EN),
+  паритет 100%.
+- **6 миграций** (было 5, +1: `0006_api_keys_and_auth_events.py`).
+
+### QA
+
+- `ruff check src tests` — All checks passed!
+- `ruff format --check src tests` — 201 files already formatted
+- `mypy src/formulation_workbench` — Success: no issues in 119 files
+- `bandit -c pyproject.toml -q -r src` — clean
+- `pytest --no-cov --deselect tests/integration/test_regulatory_loader.py`
+  — 568 passed, 16 deselected, 1 skipped
+- `npx tsc --noEmit` (web) — clean
+- `npx next build` — 14 маршрутов (было 13), все ○ Static кроме
+  `/recipes/[id]` ƒ Dynamic
+- `alembic upgrade head` on fresh DB — миграция 0005 → 0006
+  успешна, api_key таблица создана, audit CHECK расширен,
+  индексы после batch-alter сохранены.
+
+---
+
 ## [1.17.0] — Bootstrap-CLI, сеансовые cookie, журнал аудита в UI (2026-08-23)
 
 Раунд закрывает три остатка roadmap-минимума: CLI для первого админа

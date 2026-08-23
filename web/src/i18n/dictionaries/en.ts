@@ -514,6 +514,50 @@ export const en: Dict = {
   "nav.login": "Log in",
   "nav.logout": "Log out",
 
+  // navigation extra (v1.18)
+  "nav.apikeys": "API keys",
+
+  // personal API keys (v1.18)
+  "apikeys.title": "My API keys",
+  "apikeys.subtitle":
+    "Personal access tokens for scripts and CI. Inherit the owner's role. Only the SHA-256 digest is stored — the plaintext is shown once at issuance.",
+  "apikeys.need_login":
+    "Available only to authenticated users. Sign in with your account first.",
+  "apikeys.loading": "Loading keys…",
+  "apikeys.empty":
+    "No keys yet. Click «Issue new» to mint your first one.",
+  "apikeys.new": "Issue new",
+  "apikeys.failed": "Failed: {msg}",
+  "apikeys.col.label": "Label",
+  "apikeys.col.prefix": "Prefix",
+  "apikeys.col.status": "Status",
+  "apikeys.col.created": "Issued",
+  "apikeys.col.last_used": "Last used",
+  "apikeys.col.expires": "Expires",
+  "apikeys.status.active": "active",
+  "apikeys.status.revoked": "revoked",
+  "apikeys.status.expired": "expired",
+  "apikeys.expires.never": "never",
+  "apikeys.revoke.button": "Revoke",
+  "apikeys.revoke.confirm":
+    "Revoke key «{label}»? Every script using it stops working immediately.",
+  "apikeys.revoke.ok": "Key revoked.",
+  "apikeys.dialog.create": "New API key",
+  "apikeys.dialog.cancel": "Cancel",
+  "apikeys.dialog.mint": "Issue",
+  "apikeys.dialog.creating": "Issuing…",
+  "apikeys.f.label": "Label (what this key is for)",
+  "apikeys.f.expires": "Expires at (optional)",
+  "apikeys.f.expires.hint":
+    "Leave empty for a key that never expires. Format is your browser's local time.",
+  "apikeys.issued.title": "Key «{label}» issued",
+  "apikeys.issued.warning":
+    "Copy the token now — it cannot be recovered after you close this dialog. The server stores only its hash.",
+  "apikeys.issued.copy": "Copy",
+  "apikeys.issued.copied": "Copied",
+  "apikeys.issued.usage": "Usage in scripts:",
+  "apikeys.issued.dismiss": "I've saved the token",
+
   // login page
   "login.title": "Sign in to Formulation Workbench",
   "login.subtitle":

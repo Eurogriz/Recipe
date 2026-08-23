@@ -40,7 +40,9 @@ from ...application.use_cases.verification_workflow import (
 )
 from ..config import AppSettings, get_settings
 from ..db.connection import Database
+from ..db.repositories.api_keys import ApiKeyRepository
 from ..db.repositories.audit_log import AuditLogRepository
+from ..db.repositories.auth_events import AuthEventLogger
 from ..db.repositories.production_vectors import ProductionVectorRepository
 from ..db.repositories.session_scoped import ScopedAuditLogger, ScopedRecipeRepository
 from ..db.repositories.sqlalchemy_experiment_repository import ScopedExperimentRepository
@@ -95,6 +97,8 @@ class Container:
     production_vector_repository: ProductionVectorRepository
     user_repository: UserRepository
     audit_log_repository: AuditLogRepository
+    api_key_repository: ApiKeyRepository
+    auth_event_logger: AuthEventLogger
     property_regressor: PropertyRegressor
     train_property_models: TrainPropertyModelsUseCase
     predict_properties: PredictPropertiesUseCase
@@ -126,6 +130,8 @@ class Container:
         production_vector_repository = ProductionVectorRepository(database)
         user_repository = UserRepository(database)
         audit_log_repository = AuditLogRepository(database)
+        api_key_repository = ApiKeyRepository(database)
+        auth_event_logger = AuthEventLogger(database)
         property_regressor = PropertyRegressor(storage_dir=settings.model_dir)
 
         # Alerts + async jobs — process-local resources, no external
@@ -166,6 +172,8 @@ class Container:
             production_vector_repository=production_vector_repository,
             user_repository=user_repository,
             audit_log_repository=audit_log_repository,
+            api_key_repository=api_key_repository,
+            auth_event_logger=auth_event_logger,
             create_recipe=CreateRecipeUseCase(recipe_repository, audit_logger),
             update_recipe=UpdateRecipeUseCase(recipe_repository, audit_logger),
             delete_recipe=DeleteRecipeUseCase(recipe_repository, audit_logger),

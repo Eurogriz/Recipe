@@ -1085,13 +1085,65 @@ class LoginResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Personal API keys
+# ---------------------------------------------------------------------------
+class ApiKeyCreateRequest(BaseModel):
+    """Payload for ``POST /users/{id}/api-keys``."""
+
+    label: str = Field(min_length=1, max_length=128, examples=["ci-runner"])
+    expires_at: str | None = Field(
+        default=None,
+        description="ISO-8601 timestamp; omit for a key that never expires.",
+    )
+
+
+class ApiKeyOut(BaseModel):
+    """Metadata-only view of one key (never carries the plaintext)."""
+
+    id: str
+    user_id: str
+    label: str
+    token_prefix: str
+    created_at: str
+    last_used_at: str | None = None
+    expires_at: str | None = None
+    revoked_at: str | None = None
+    is_active: bool
+
+
+class ApiKeyIssuedOut(ApiKeyOut):
+    """Response of ``POST /users/{id}/api-keys`` — includes the plaintext.
+
+    The ``plaintext`` field is returned exactly once, immediately
+    after issuance.  Clients MUST store it themselves; the server
+    persists only the SHA-256 digest and cannot recover the value.
+    """
+
+    plaintext: str = Field(
+        description=(
+            "The full token — returned once, never persisted in plaintext, never recoverable."
+        ),
+        examples=["fw_abc123deadbeef…"],
+    )
+
+
+class ApiKeysListOut(BaseModel):
+    keys: list[ApiKeyOut]
+
+
+# ---------------------------------------------------------------------------
 # Audit log
 # ---------------------------------------------------------------------------
 class AuditLogEntryOut(BaseModel):
-    """One row of the audit log rendered for the UI."""
+    """One row of the audit log rendered for the UI.
+
+    ``recipe_id`` is nullable since v1.18.0 to accommodate auth
+    events (Login/Logout/ApiKeyIssued/…) that don't reference a
+    specific recipe.
+    """
 
     id: str
-    recipe_id: str
+    recipe_id: str | None = None
     user_id: str | None = None
     actor_label: str
     action: str
@@ -1115,6 +1167,10 @@ class AuditLogPageOut(BaseModel):
 
 __all__ = [
     "AlertConfigOut",
+    "ApiKeyCreateRequest",
+    "ApiKeyIssuedOut",
+    "ApiKeyOut",
+    "ApiKeysListOut",
     "AppInfo",
     "ApplyLabResultsIn",
     "ApplyLabResultsOut",

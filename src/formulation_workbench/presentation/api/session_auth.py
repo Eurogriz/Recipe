@@ -49,6 +49,12 @@ SESSION_COOKIE_NAME = "fw_session"
 # 12 hours — long enough that a working day rarely re-authenticates,
 # short enough that a stolen cookie stops working overnight.
 DEFAULT_SESSION_TTL_SECONDS = 12 * 60 * 60
+# Sliding refresh: when a request arrives with a cookie whose
+# remaining lifetime is less than this fraction of the full TTL, the
+# server issues a fresh cookie carrying a new ``exp`` claim.  Keeps
+# an actively-used session alive indefinitely without ever making it
+# permanent (the moment the user goes idle, the cookie ages out).
+SESSION_REFRESH_FRACTION = 0.5
 
 
 class SessionTokenError(Exception):
@@ -180,12 +186,35 @@ def session_cookie_is_secure(settings: AppSettings) -> bool:
     return settings.environment != "development"
 
 
+def needs_refresh(
+    payload: SessionPayload,
+    *,
+    ttl_seconds: int = DEFAULT_SESSION_TTL_SECONDS,
+    fraction: float = SESSION_REFRESH_FRACTION,
+    now: int | None = None,
+) -> bool:
+    """Return True when a session token should be rolled over.
+
+    A token is considered stale (worth refreshing) when the remaining
+    lifetime drops below ``fraction`` of the full TTL — 50% by default.
+    Refresh below 100% but above 50% would burn CPU on every request;
+    refresh only at 0% (i.e. expiry) means the UI silently kicks the
+    user out mid-session.  Half is the well-worn middle ground.
+    """
+    current = int(now if now is not None else time.time())
+    remaining = payload.expires_at - current
+    threshold = int(ttl_seconds * fraction)
+    return remaining < threshold
+
+
 __all__ = [
     "DEFAULT_SESSION_TTL_SECONDS",
     "SESSION_COOKIE_NAME",
+    "SESSION_REFRESH_FRACTION",
     "SessionPayload",
     "SessionTokenError",
     "decode_session_token",
     "issue_session_token",
+    "needs_refresh",
     "session_cookie_is_secure",
 ]

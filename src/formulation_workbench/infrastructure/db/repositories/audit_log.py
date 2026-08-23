@@ -33,10 +33,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True, slots=True)
 class AuditLogRecord:
-    """Read-side representation of one ``audit_log_entry`` row."""
+    """Read-side representation of one ``audit_log_entry`` row.
+
+    ``recipe_id`` is nullable since v1.18.0 — auth events
+    (Login/Logout/ApiKeyIssued/…) have no recipe context.
+    """
 
     id: str
-    recipe_id: str
+    recipe_id: str | None
     user_id: str | None
     actor_label: str
     action: str

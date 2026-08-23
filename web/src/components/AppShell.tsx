@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Cpu,
   ExternalLink,
+  Key,
   LayoutDashboard,
   LogIn,
   LogOut,
@@ -39,6 +40,7 @@ const NAV = [
   { href: "/ml/jobs", labelKey: "nav.jobs", icon: Activity },
   { href: "/admin/users", labelKey: "nav.admin", icon: Shield },
   { href: "/admin/audit", labelKey: "nav.audit", icon: ClipboardList },
+  { href: "/admin/api-keys", labelKey: "nav.apikeys", icon: Key },
 ] as const;
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -57,7 +59,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-semibold leading-tight group-hover:text-primary transition-colors">
                 {t("app.brand")}
               </div>
-              <div className="text-xs text-muted-foreground">v1.17.0</div>
+              <div className="text-xs text-muted-foreground">v1.18.0</div>
             </div>
           </Link>
         </div>

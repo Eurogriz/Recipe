@@ -174,6 +174,17 @@ export const api = {
     }),
   logout: () => request<void>(`/auth/logout`, { method: "POST" }),
 
+  // personal API keys (v1.18)
+  listApiKeys: (userId: string) =>
+    request<ApiKeysListOut>(`/users/${userId}/api-keys`),
+  createApiKey: (userId: string, body: ApiKeyCreateBody) =>
+    request<ApiKeyIssuedOut>(`/users/${userId}/api-keys`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  revokeApiKey: (userId: string, keyId: string) =>
+    request<void>(`/users/${userId}/api-keys/${keyId}`, { method: "DELETE" }),
+
   // audit log (Admin only, v1.17)
   listAuditLog: (params?: {
     recipe_id?: string;
@@ -699,13 +710,41 @@ export interface LoginOut {
 // ---- Audit log -------------------------------------------------------------
 export interface AuditLogEntry {
   id: string;
-  recipe_id: string;
+  /** Nullable since v1.18 — auth events (Login/Logout/ApiKey…) have no recipe. */
+  recipe_id: string | null;
   user_id: string | null;
   actor_label: string;
   action: string;
   changes: Record<string, unknown> | null;
   timestamp: string;
   ip_address: string | null;
+}
+
+// ---- Personal API keys -----------------------------------------------------
+export interface ApiKey {
+  id: string;
+  user_id: string;
+  label: string;
+  token_prefix: string;
+  created_at: string;
+  last_used_at: string | null;
+  expires_at: string | null;
+  revoked_at: string | null;
+  is_active: boolean;
+}
+
+export interface ApiKeysListOut {
+  keys: ApiKey[];
+}
+
+export interface ApiKeyCreateBody {
+  label: string;
+  expires_at?: string | null;
+}
+
+/** The plaintext is returned exactly once — persist it or lose it. */
+export interface ApiKeyIssuedOut extends ApiKey {
+  plaintext: string;
 }
 
 export interface AuditLogPageOut {

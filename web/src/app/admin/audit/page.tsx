@@ -26,10 +26,23 @@ function actionBadgeVariant(
   action: string
 ): "success" | "warning" | "destructive" | "info" | "default" {
   const a = action.toLowerCase();
-  if (a === "created" || a === "cloned" || a === "verified") return "success";
-  if (a === "rejected" || a === "deleted") return "destructive";
-  if (a === "submitted" || a === "updated" || a === "propertymeasured")
+  if (a === "created" || a === "cloned" || a === "verified" || a === "login")
+    return "success";
+  if (
+    a === "rejected" ||
+    a === "deleted" ||
+    a === "loginfailed" ||
+    a === "apikeyrevoked"
+  )
+    return "destructive";
+  if (
+    a === "submitted" ||
+    a === "updated" ||
+    a === "propertymeasured" ||
+    a === "apikeyissued"
+  )
     return "warning";
+  if (a === "logout") return "info";
   return "default";
 }
 
@@ -225,13 +238,17 @@ export default function AuditLogPage() {
                       </Badge>
                     </TD>
                     <TD className="font-mono text-xs">
-                      <Link
-                        href={`/recipes/${e.recipe_id}`}
-                        className="text-primary hover:underline"
-                        onClick={(ev) => ev.stopPropagation()}
-                      >
-                        {e.recipe_id.slice(0, 8)}…
-                      </Link>
+                      {e.recipe_id ? (
+                        <Link
+                          href={`/recipes/${e.recipe_id}`}
+                          className="text-primary hover:underline"
+                          onClick={(ev) => ev.stopPropagation()}
+                        >
+                          {e.recipe_id.slice(0, 8)}…
+                        </Link>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </TD>
                     <TD className="text-xs text-muted-foreground max-w-md truncate">
                       {e.changes
