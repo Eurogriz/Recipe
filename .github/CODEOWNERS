@@ -1,0 +1,10 @@
+# Anything not otherwise matched is owned by the maintainers group.
+* @Eurogriz
+
+# Runtime / infra / security-sensitive paths — extra review.
+/src/formulation_workbench/infrastructure/db/       @Eurogriz
+/src/formulation_workbench/infrastructure/config/   @Eurogriz
+/src/formulation_workbench/presentation/api/        @Eurogriz
+/.github/workflows/                                 @Eurogriz
+/Dockerfile                                         @Eurogriz
+/pyproject.toml                                     @Eurogriz

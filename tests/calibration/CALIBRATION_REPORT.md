@@ -52,13 +52,15 @@
 
 **Recommendation:** Add explicit handling for common solvents:
 ```python
-DEFAULT_SOLIDS.update({
-    "mineral spirits": 0.0,
-    "xylene": 0.0,
-    "toluene": 0.0,
-    "acetone": 0.0,
-    "butyl acetate": 0.0,
-})
+DEFAULT_SOLIDS.update(
+    {
+        "mineral spirits": 0.0,
+        "xylene": 0.0,
+        "toluene": 0.0,
+        "acetone": 0.0,
+        "butyl acetate": 0.0,
+    }
+)
 ```
 
 ### 3. VOC — ❌ CRITICAL FIX NEEDED (98.07% error)
@@ -75,16 +77,18 @@ DEFAULT_SOLIDS.update({
 **Critical fix needed:**
 ```python
 # Add explicit VOC handling for ALL common solvents
-DEFAULT_VOC.update({
-    "mineral spirits": 1.0,
-    "xylene": 1.0,
-    "toluene": 1.0,
-    "acetone": 1.0,
-    "butyl acetate": 1.0,
-    "ethanol": 1.0,
-    "white spirit": 1.0,
-    "naphtha": 1.0,
-})
+DEFAULT_VOC.update(
+    {
+        "mineral spirits": 1.0,
+        "xylene": 1.0,
+        "toluene": 1.0,
+        "acetone": 1.0,
+        "butyl acetate": 1.0,
+        "ethanol": 1.0,
+        "white spirit": 1.0,
+        "naphtha": 1.0,
+    }
+)
 ```
 
 After this fix, re-run calibration. Expected improvement: from 98% to <15%.

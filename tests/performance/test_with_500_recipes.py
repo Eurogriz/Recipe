@@ -21,14 +21,13 @@ import sys
 import time
 from pathlib import Path
 
-
 # Performance thresholds (ms)
 PERF_THRESHOLDS = {
-    "import_500_recipes": 5000,      # < 5 sec
-    "search_query": 200,             # < 200 ms
-    "calculator_density": 50,        # < 50 ms per recipe
-    "calculator_pvc": 50,            # < 50 ms per recipe
-    "memory_per_recipe_kb": 100,     # < 100 KB per recipe in memory
+    "import_500_recipes": 5000,  # < 5 sec
+    "search_query": 200,  # < 200 ms
+    "calculator_density": 50,  # < 50 ms per recipe
+    "calculator_pvc": 50,  # < 50 ms per recipe
+    "memory_per_recipe_kb": 100,  # < 100 KB per recipe in memory
 }
 
 
@@ -117,9 +116,7 @@ class TestImportPerformance:
         elapsed_ms = (time.perf_counter() - start) * 1000
 
         threshold = PERF_THRESHOLDS["import_500_recipes"]
-        assert elapsed_ms < threshold, (
-            f"Import took {elapsed_ms:.0f}ms, threshold {threshold}ms"
-        )
+        assert elapsed_ms < threshold, f"Import took {elapsed_ms:.0f}ms, threshold {threshold}ms"
         print(f"\n✓ Import {len(recipes)} recipes: {elapsed_ms:.0f}ms (threshold: {threshold}ms)")
 
 
@@ -130,7 +127,9 @@ class TestCalculatorPerformance:
         """Density calculation should complete quickly for all recipes."""
         try:
             sys.path.insert(0, "src")
-            from infrastructure.calculators.rule_of_mixtures import RuleOfMixturesCalculator
+            from formulation_workbench.infrastructure.calculators.rule_of_mixtures import (
+                RuleOfMixturesCalculator,
+            )
         except ImportError:
             print("\n⚠ Skipping: calculator import failed")
             return
@@ -144,10 +143,12 @@ class TestCalculatorPerformance:
             try:
                 # Use the first stage's components
                 from src.domain.entities.recipe import (
-                    Component, CompositionStage, ProcessParams, ProductClass, Recipe
+                    Component,
+                    CompositionStage,
+                    ProductClass,
+                    Recipe,
                 )
                 from src.domain.value_objects.citation import Citation
-                from src.domain.value_objects.verification_status import VerificationStatus, VerificationState
 
                 components = tuple(
                     Component(
@@ -164,12 +165,14 @@ class TestCalculatorPerformance:
                     binder_type=r["metadata"]["binder_type"],
                     product_class=ProductClass(r["metadata"].get("product_class", "Standard")),
                     intended_use=r["metadata"]["intended_use"],
-                    stages=(CompositionStage(
-                        stage_number=1,
-                        name="Test",
-                        description="",
-                        components=components,
-                    ),),
+                    stages=(
+                        CompositionStage(
+                            stage_number=1,
+                            name="Test",
+                            description="",
+                            components=components,
+                        ),
+                    ),
                     primary_source=Citation(
                         authors="Test",
                         title="Test",
@@ -207,9 +210,12 @@ class TestSearchPerformance:
         index: dict[str, list[dict]] = {}
         for r in recipes:
             text = (
-                r["metadata"]["category"] + " "
-                + r["metadata"]["subcategory"] + " "
-                + r["metadata"]["binder_type"] + " "
+                r["metadata"]["category"]
+                + " "
+                + r["metadata"]["subcategory"]
+                + " "
+                + r["metadata"]["binder_type"]
+                + " "
                 + r["metadata"]["intended_use"]
             ).lower()
             for word in text.split():
@@ -242,7 +248,6 @@ class TestMemoryUsage:
         """Each recipe in memory should be < 100 KB."""
         recipes = load_all_seed_recipes()
         # Estimate: JSON size + Python dict overhead
-        import sys
 
         total_bytes = 0
         for r in recipes[:50]:  # Sample 50 recipes
@@ -254,9 +259,7 @@ class TestMemoryUsage:
         avg_kb = avg_bytes_per_recipe / 1024
 
         threshold = PERF_THRESHOLDS["memory_per_recipe_kb"]
-        assert avg_kb < threshold, (
-            f"Memory per recipe: {avg_kb:.1f} KB, threshold {threshold} KB"
-        )
+        assert avg_kb < threshold, f"Memory per recipe: {avg_kb:.1f} KB, threshold {threshold} KB"
         print(
             f"\n✓ Memory usage: {avg_kb:.1f} KB/recipe "
             f"(estimated for 500 recipes: {avg_kb * 500 / 1024:.1f} MB total)"
@@ -272,8 +275,12 @@ class TestCategoryCoverage:
         categories = {r["metadata"]["category"] for r in recipes}
 
         expected = {
-            "Лаки", "Краски", "Колеры и пигментные пасты",
-            "Клеи", "Герметики", "Мастики",
+            "Лаки",
+            "Краски",
+            "Колеры и пигментные пасты",
+            "Клеи",
+            "Герметики",
+            "Мастики",
             "Грунтовки, шпатлёвки, штукатурки, наливные полы",
             "Антикоррозионные покрытия, огнезащита, гидроизоляция",
         }
@@ -285,6 +292,7 @@ class TestCategoryCoverage:
         """Each category should have at least 30 recipes."""
         recipes = load_all_seed_recipes()
         from collections import Counter
+
         counts = Counter(r["metadata"]["category"] for r in recipes)
 
         for category, count in counts.items():

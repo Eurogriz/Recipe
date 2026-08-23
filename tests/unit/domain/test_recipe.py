@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from domain.entities.recipe import (
+from formulation_workbench.domain.entities.recipe import (
     Component,
     CompositionStage,
     InvalidRecipeError,
@@ -15,9 +15,11 @@ from domain.entities.recipe import (
     ProductClass,
     Recipe,
 )
-from domain.value_objects.citation import Citation
-from domain.value_objects.isbn import Isbn
-from domain.value_objects.verification_status import VerificationState, VerificationStatus
+from formulation_workbench.domain.value_objects.citation import Citation
+from formulation_workbench.domain.value_objects.isbn import Isbn
+from formulation_workbench.domain.value_objects.verification_status import (
+    VerificationState,
+)
 
 
 def make_valid_citation() -> Citation:

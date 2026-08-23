@@ -4,19 +4,21 @@ from __future__ import annotations
 
 import pytest
 
-from domain.entities.recipe import (
+from formulation_workbench.domain.entities.recipe import (
     Component,
     CompositionStage,
     ProcessParams,
     ProductClass,
     Recipe,
 )
-from domain.value_objects.citation import Citation
-from infrastructure.calculators.batch_calculator import BatchCalculator
-from infrastructure.calculators.hsp import HSP_DATABASE, HspCalculator
-from infrastructure.calculators.pvc_cpvc import PvcCpvcCalculator
-from infrastructure.calculators.rule_of_mixtures import RuleOfMixturesCalculator
-from infrastructure.calculators.tg_fox import TgCalculator
+from formulation_workbench.domain.value_objects.citation import Citation
+from formulation_workbench.infrastructure.calculators.batch_calculator import BatchCalculator
+from formulation_workbench.infrastructure.calculators.hsp import HSP_DATABASE, HspCalculator
+from formulation_workbench.infrastructure.calculators.pvc_cpvc import PvcCpvcCalculator
+from formulation_workbench.infrastructure.calculators.rule_of_mixtures import (
+    RuleOfMixturesCalculator,
+)
+from formulation_workbench.infrastructure.calculators.tg_fox import TgCalculator
 
 
 def make_standard_recipe() -> Recipe:
@@ -33,18 +35,67 @@ def make_standard_recipe() -> Recipe:
                 name="Mixing",
                 description="",
                 components=(
-                    Component(name="Water", cas_number="7732-18-5", function="vehicle", mass_percent=20.0),
-                    Component(name="Dispersant", cas_number="9003-04-7", function="dispersant", mass_percent=0.6),
-                    Component(name="Defoamer", cas_number="63148-62-9", function="defoamer", mass_percent=0.3),
-                    Component(name="Biocide", cas_number="26172-55-4", function="biocide", mass_percent=0.15),
-                    Component(name="Titanium dioxide", cas_number="13463-67-7", function="pigment", mass_percent=22.0),
-                    Component(name="Calcium carbonate", cas_number="1317-65-3", function="filler", mass_percent=8.0),
-                    Component(name="Talc", cas_number="14807-96-6", function="filler", mass_percent=4.0),
-                    Component(name="Acrylic emulsion", cas_number="mixture", function="binder", mass_percent=32.0),
-                    Component(name="Texanol", cas_number="25265-77-4", function="coalescent", mass_percent=1.5),
-                    Component(name="Thickener", cas_number="proprietary", function="thickener", mass_percent=0.8),
-                    Component(name="Propylene glycol", cas_number="57-55-6", function="antifreeze", mass_percent=2.0),
-                    # Sum should be ≈ 100% (let me check: 20 + 0.6 + 0.3 + 0.15 + 22 + 8 + 4 + 32 + 1.5 + 0.8 + 2 = 91.35)
+                    Component(
+                        name="Water", cas_number="7732-18-5", function="vehicle", mass_percent=28.65
+                    ),
+                    Component(
+                        name="Dispersant",
+                        cas_number="9003-04-7",
+                        function="dispersant",
+                        mass_percent=0.6,
+                    ),
+                    Component(
+                        name="Defoamer",
+                        cas_number="63148-62-9",
+                        function="defoamer",
+                        mass_percent=0.3,
+                    ),
+                    Component(
+                        name="Biocide",
+                        cas_number="26172-55-4",
+                        function="biocide",
+                        mass_percent=0.15,
+                    ),
+                    Component(
+                        name="Titanium dioxide",
+                        cas_number="13463-67-7",
+                        function="pigment",
+                        mass_percent=22.0,
+                    ),
+                    Component(
+                        name="Calcium carbonate",
+                        cas_number="1317-65-3",
+                        function="filler",
+                        mass_percent=8.0,
+                    ),
+                    Component(
+                        name="Talc", cas_number="14807-96-6", function="filler", mass_percent=4.0
+                    ),
+                    Component(
+                        name="Acrylic emulsion",
+                        cas_number="mixture",
+                        function="binder",
+                        mass_percent=32.0,
+                    ),
+                    Component(
+                        name="Texanol",
+                        cas_number="25265-77-4",
+                        function="coalescent",
+                        mass_percent=1.5,
+                    ),
+                    Component(
+                        name="Thickener",
+                        cas_number="proprietary",
+                        function="thickener",
+                        mass_percent=0.8,
+                    ),
+                    Component(
+                        name="Propylene glycol",
+                        cas_number="57-55-6",
+                        function="antifreeze",
+                        mass_percent=2.0,
+                    ),
+                    # Sum = 28.65 + 0.6 + 0.3 + 0.15 + 22 + 8 + 4 + 32 + 1.5 + 0.8 + 2 = 100.00
                 ),
                 process=ProcessParams(equipment="Disperser"),
             ),
@@ -101,8 +152,18 @@ class TestPvcCpvcCalculator:
         components = (
             Component(name="Water", cas_number="7732-18-5", function="vehicle", mass_percent=15.0),
             Component(name="Acrylic", cas_number="mixture", function="binder", mass_percent=20.0),
-            Component(name="Titanium dioxide", cas_number="13463-67-7", function="pigment", mass_percent=40.0),
-            Component(name="Calcium carbonate", cas_number="1317-65-3", function="filler", mass_percent=25.0),
+            Component(
+                name="Titanium dioxide",
+                cas_number="13463-67-7",
+                function="pigment",
+                mass_percent=40.0,
+            ),
+            Component(
+                name="Calcium carbonate",
+                cas_number="1317-65-3",
+                function="filler",
+                mass_percent=25.0,
+            ),
         )
         # Sum = 100
         recipe = Recipe(
@@ -143,8 +204,18 @@ class TestTgCalculator:
                     name="M",
                     description="",
                     components=(
-                        Component(name="Acrylic", cas_number="mixture", function="binder", mass_percent=50.0),
-                        Component(name="Polybutyl acrylate", cas_number="mixture", function="binder", mass_percent=50.0),
+                        Component(
+                            name="Acrylic",
+                            cas_number="mixture",
+                            function="binder",
+                            mass_percent=50.0,
+                        ),
+                        Component(
+                            name="Polybutyl acrylate",
+                            cas_number="mixture",
+                            function="binder",
+                            mass_percent=50.0,
+                        ),
                     ),
                 ),
             ),

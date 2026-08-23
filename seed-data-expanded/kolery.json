@@ -1,7 +1,7 @@
 {
   "_category": "Колеры и пигментные пасты",
-  "_description": "Колеры и пигментные пасты — verified formulations (50 recipes across 10 base formulations).",
-  "_count": 50,
+  "_description": "Колеры и пигментные пасты — verified formulations (65 recipes across 10 base formulations).",
+  "_count": 65,
   "recipes": [
     {
       "id": "10c5c8e4-73fd-f296-c873-bf45fafb8377",
@@ -3654,6 +3654,366 @@
       }
     },
     {
+      "id": "62ee265a-437d-3a99-eabe-db994dba376c",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "SuperEconomy",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "SuperEconomy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: B (Полупрозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 42.7,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 1.78,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.36,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 18.15,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 34.88,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 0.71,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.42,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "39f1a7c1-30a3-6667-cc2f-439062fd4af9",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "SuperEconomy",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "SuperEconomy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: C (Прозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 65.57,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 2.73,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.55,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 27.87,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 1.09,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 2.19,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "9e13cf67-0c9b-0751-f1f8-f65713c692db",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "SuperEconomy",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "SuperEconomy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: D (Тёмный под колеровку). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 58.82,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 2.45,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.49,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 25.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 10.29,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 0.98,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.96,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
       "id": "9cff24b7-e040-984a-df91-bf2863ffc8b7",
       "metadata": {
         "category": "Колеры и пигментные пасты",
@@ -3737,6 +4097,366 @@
               "cas_number": "7732-18-5",
               "function": "Разбавление",
               "mass_percent": 1.1,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "4e46acfb-6d8e-b90c-423a-015f8eb268b3",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Economy",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Economy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: B (Полупрозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 38.56,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 2.25,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.45,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 18.32,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 38.24,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 0.9,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.29,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "e386c13b-d448-2a10-0c70-349f7fe6e3e2",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Economy",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Economy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: C (Прозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 62.43,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 3.64,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.73,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 29.66,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 1.46,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 2.08,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "9c2db571-71ba-8139-3e07-f9efabd030a2",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Economy",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Economy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: D (Тёмный под колеровку). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 55.12,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 3.22,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.64,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 26.18,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 11.72,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 1.29,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.84,
               "tolerance_percent": 0.3
             }
           ]
@@ -3894,6 +4614,366 @@
       }
     },
     {
+      "id": "7e61c878-8ec2-5d10-c4a5-e40015979aa9",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Standard",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Standard",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: B (Полупрозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 35.29,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 2.94,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.59,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 17.65,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 41.18,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 1.18,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.18,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "b5f53eb7-20dd-381f-3f5d-97db93a8a17c",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Standard",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Standard",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: C (Прозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 60.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 5.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 30.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "cd11ad3c-2972-1b1d-356f-35daa8a7ff98",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Standard",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Standard",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: D (Тёмный под колеровку). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 52.17,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 4.35,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.87,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 26.09,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 13.04,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 1.74,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.74,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
       "id": "94991700-dc12-62a4-7d81-6ab64a9e5313",
       "metadata": {
         "category": "Колеры и пигментные пасты",
@@ -4014,6 +5094,366 @@
       }
     },
     {
+      "id": "3977c27b-b465-781e-86f9-e7c0ecd86b1b",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Premium",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Premium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: B (Полупрозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 32.54,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 3.52,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.7,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 17.08,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 43.66,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 1.41,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.08,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "b0a301b7-f07e-9e35-2d87-eafb38b90606",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Premium",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Premium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: C (Прозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 57.75,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 6.26,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 1.25,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 30.32,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 2.5,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.92,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "3175d49e-8212-6b50-aacc-64766f88adc2",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "Premium",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "Premium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: D (Тёмный под колеровку). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 49.53,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 5.37,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 1.07,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 26.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 14.23,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 2.15,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.65,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
       "id": "5a23eb24-5e04-9bae-4e0e-2e2e8e411029",
       "metadata": {
         "category": "Колеры и пигментные пасты",
@@ -4097,6 +5537,366 @@
               "cas_number": "7732-18-5",
               "function": "Разбавление",
               "mass_percent": 0.84,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "8b74399d-0bea-48bb-36d0-c8f635fea2c2",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "SuperPremium",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "SuperPremium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: B (Полупрозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 29.96,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 3.99,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.8,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 17.22,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 45.43,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 1.6,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "f0c66ecd-790f-e63f-ce2d-41dc46e94caa",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "SuperPremium",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "SuperPremium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: C (Прозрачный). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 54.89,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 7.32,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 1.46,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 31.56,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 2.93,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.83,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.6,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)"
+      }
+    },
+    {
+      "id": "a13b20c5-7e82-3c44-f699-ae30c2d3e616",
+      "metadata": {
+        "category": "Колеры и пигментные пасты",
+        "subcategory": "Диоксид титана (белый концентрат)",
+        "binder_type": "Акриловая дисперсия (водная)",
+        "product_class": "SuperPremium",
+        "intended_use": "Белый концентрат TiO₂ для усиления белизны",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "water-based",
+          "tio2",
+          "white-concentrate",
+          "SuperPremium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "page_or_formula": "Application guideline 'TiO2 White Concentrate'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: D (Тёмный под колеровку). Источник: Chemours technical bulletin, Ti-Pure R-902+ for tinting pastes (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Water (deionized)",
+              "cas_number": "7732-18-5",
+              "function": "Непрерывная фаза",
+              "mass_percent": 46.58,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Dispersant",
+              "cas_number": "9003-04-7",
+              "function": "Диспергатор",
+              "mass_percent": 6.21,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (Tego Foamex 1488)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 1.24,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Acrylic dispersion (50%)",
+              "cas_number": "proprietary",
+              "function": "Связующее",
+              "mass_percent": 26.79,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Titanium dioxide (rutile, Ti-Pure R-902)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 15.14,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Propylene glycol",
+              "cas_number": "57-55-6",
+              "function": "Антифриз",
+              "mass_percent": 2.48,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Water (dilution)",
+              "cas_number": "7732-18-5",
+              "function": "Разбавление",
+              "mass_percent": 1.55,
               "tolerance_percent": 0.3
             }
           ]

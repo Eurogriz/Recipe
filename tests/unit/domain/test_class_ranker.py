@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from domain.entities.recipe import (
+import pytest
+
+from formulation_workbench.domain.entities.recipe import (
     Component,
     CompositionStage,
     ProcessParams,
     ProductClass,
     Recipe,
 )
-from domain.services.class_ranker import ClassFactor, ClassRanker
-from domain.value_objects.citation import Citation
+from formulation_workbench.domain.services.class_ranker import ClassFactor, ClassRanker
+from formulation_workbench.domain.value_objects.citation import Citation
 
 
 def make_recipe(
@@ -20,7 +22,9 @@ def make_recipe(
     if components is None:
         components = (
             Component(name="Water", cas_number="7732-18-5", function="vehicle", mass_percent=30.0),
-            Component(name="Acrylic emulsion", cas_number="mixture", function="binder", mass_percent=40.0),
+            Component(
+                name="Acrylic emulsion", cas_number="mixture", function="binder", mass_percent=40.0
+            ),
             Component(
                 name="TiO2 rutile",
                 cas_number="13463-67-7",
@@ -35,10 +39,18 @@ def make_recipe(
                 mass_percent=2.0,
                 notes="hals",
             ),
-            Component(name="Defoamer", cas_number="63148-62-9", function="defoamer", mass_percent=0.5),
-            Component(name="Coalescent", cas_number="25265-77-4", function="coalescent", mass_percent=2.0),
-            Component(name="Biocide", cas_number="26172-55-4", function="biocide", mass_percent=0.5),
-            Component(name="Thickener", cas_number="proprietary", function="thickener", mass_percent=1.0),
+            Component(
+                name="Defoamer", cas_number="63148-62-9", function="defoamer", mass_percent=0.5
+            ),
+            Component(
+                name="Coalescent", cas_number="25265-77-4", function="coalescent", mass_percent=2.0
+            ),
+            Component(
+                name="Biocide", cas_number="26172-55-4", function="biocide", mass_percent=0.5
+            ),
+            Component(
+                name="Thickener", cas_number="proprietary", function="thickener", mass_percent=1.0
+            ),
             Component(name="Glycol", cas_number="57-55-6", function="antifreeze", mass_percent=4.0),
         )
 
@@ -140,7 +152,7 @@ class TestClassRanker:
     def test_invalid_weights_rejected(self) -> None:
         """Negative weights are rejected."""
         recipe = make_recipe()
-        with Exception:
+        with pytest.raises(Exception):  # noqa: B017 - ranker may raise ValueError or AssertionError
             ClassRanker.rank(
                 recipe,
                 weights={

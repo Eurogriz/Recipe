@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 import tempfile
 from pathlib import Path
@@ -22,7 +21,7 @@ def run_settings_tests() -> int:
     # Test 1: Basic persistence
     try:
         from src.application.services.settings_service import (
-            SettingsService, UserSettings, ComponentOverride
+            SettingsService,
         )
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -68,9 +67,7 @@ def run_settings_tests() -> int:
             assert source == "override"
 
             # Non-overridden value
-            value, source = service2.get_value_with_override(
-                "Unknown component", "density", 1.0
-            )
+            value, source = service2.get_value_with_override("Unknown component", "density", 1.0)
             assert value == 1.0  # Default
             assert source == "default"
 

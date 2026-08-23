@@ -1,0 +1,119 @@
+# Default values for formulation-workbench Helm chart.
+# Any of these can be overridden with `helm install -f my-values.yaml`
+# or `--set`.
+
+image:
+  repository: ghcr.io/eurogriz/recipe
+  tag: ""            # falls back to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+  pullSecrets: []    # ["ghcr-pull"]
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 2
+
+# Env-var overrides that end up in the ConfigMap.
+config:
+  FW_ENVIRONMENT: production
+  FW_LOG_LEVEL: INFO
+  FW_LOG_JSON: "true"
+  FW_METRICS_ENABLED: "true"
+  FW_RATE_LIMIT_ENABLED: "true"
+  FW_RATE_LIMIT_PER_MINUTE: "600"
+  FW_JWT_ALGORITHM: HS256
+
+# SECRET values.  Do NOT commit real values — provide them via `--set-file`
+# or by populating an ExternalSecret / SealedSecret.
+secret:
+  # Set to `existing` to reuse a pre-created secret named `existingName`.
+  create: true
+  existingName: ""
+  values:
+    FW_DATABASE_URL: "postgresql+asyncpg://formulation:CHANGEME@postgres:5432/formulation"
+    FW_JWT_SECRET: "CHANGEME"
+    FW_ENCRYPTION_KEY_HEX: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: /metrics
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: formulation.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+
+serviceAccount:
+  create: true
+  automountToken: false
+  annotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+probes:
+  startup:
+    failureThreshold: 30
+    periodSeconds: 2
+  readiness:
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  liveness:
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels: {}   # filled by templates

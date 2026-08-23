@@ -1,0 +1,3612 @@
+"""HTTP routes.
+
+The read endpoints are unauthenticated only when ``FW_API_TOKEN`` is
+empty (development).  Write endpoints (``POST``, ``PUT``, ``PATCH``,
+``DELETE``, verify/reject/submit) always require an authenticated
+principal (see :mod:`.auth`).
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import asdict
+from typing import Annotated, Any
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from fastapi.responses import PlainTextResponse
+
+from ... import __version__
+from ...application.dto.recipe_dto import RecipeSummaryDto
+from ...application.use_cases.assess_recipe import AssessRecipeQuery
+from ...application.use_cases.create_recipe import CreateRecipeCommand
+from ...application.use_cases.delete_recipe import DeleteRecipeCommand
+from ...application.use_cases.get_recipe import GetAllVersionsQuery, GetRecipeByIdQuery
+from ...application.use_cases.search_recipes import (
+    GetCatalogFacetsQuery,
+    GetCatalogStatisticsQuery,
+    SearchFilter,
+)
+from ...application.use_cases.update_recipe import UpdateRecipeCommand
+from ...application.use_cases.verification_workflow import (
+    CreateNewVersionCommand,
+    RejectRecipeCommand,
+    SubmitRecipeForReviewCommand,
+    VerifyRecipeCommand,
+)
+from ...domain.entities.recipe import InvalidRecipeError
+from ...domain.exceptions import DomainError
+from ...infrastructure.config import AppSettings
+from ...infrastructure.di import Container
+from .auth import Principal, get_principal, require_admin, require_reader, require_writer
+from .dependencies import get_container, get_settings
+from .mappers import to_recipe
+from .schemas import (
+    ApiKeyCreateRequest,
+    ApiKeyIssuedOut,
+    ApiKeyOut,
+    ApiKeysListOut,
+    AppInfo,
+    ApplyLabResultsIn,
+    ApplyLabResultsOut,
+    AuditLogEntryOut,
+    AuditLogPageOut,
+    BatchAnalysisOut,
+    BatchAnalysisRequest,
+    BatchCostLineOut,
+    BatchCostOut,
+    CalibrationBatchOut,
+    CalibrationBatchRequest,
+    CalibrationMatrixOut,
+    CalibrationMatrixRowOut,
+    CalibrationOut,
+    CalibrationRequest,
+    CatalogFacetsOut,
+    CatalogStats,
+    CategoryBreakdownOut,
+    CitationOut,
+    CompareComponentCellOut,
+    CompareComponentRowOut,
+    ComparePropertyCellOut,
+    ComparePropertyRowOut,
+    CompareRecipeHeaderOut,
+    CompareResultOut,
+    ComponentMatchOut,
+    ComponentOut,
+    CompositionStageOut,
+    CostLineOut,
+    CostRequest,
+    CreateNewVersionRequest,
+    CreateRecipeRequest,
+    DashboardSummaryOut,
+    DataQualityReportOut,
+    DeviationOut,
+    DriftAlertOut,
+    DriftAlertRequest,
+    DriftCheckOut,
+    DriftCheckRequest,
+    DriftFullOut,
+    DriftFullRequest,
+    DriftReportOut,
+    ErrorResponse,
+    ExperimentCompletionIn,
+    ExperimentOut,
+    ExperimentPlanIn,
+    FeatureImpactOutBase,
+    HealthResponse,
+    HeatmapRequest,
+    HeatmapResultOut,
+    JobRecordOut,
+    JobsListOut,
+    LoginRequest,
+    LoginResponse,
+    MassBalanceOut,
+    MeOut,
+    ModelMetadataOut,
+    OptimisationRequestIn,
+    OptimisationResultOut,
+    ParetoPointOut,
+    ParetoRequestIn,
+    ParetoResultOut,
+    PredictionsOut,
+    ProcessMeasuredIn,
+    ProcessParamsOut,
+    ProductionVectorIngestOut,
+    ProductionVectorIngestRequest,
+    ProductionVectorOut,
+    ProductionVectorsListOut,
+    PropertyPredictionOut,
+    RecentRecipeOut,
+    RecipeAssessmentOut,
+    RecipeCostOut,
+    RecipeDiffComponentChange,
+    RecipeDiffMetadataChange,
+    RecipeDiffOut,
+    RecipeFullOut,
+    RecipeSummary,
+    RecipeVersionOut,
+    RecipeVersionsOut,
+    RegulatoryFindingOut,
+    RegulatoryScanFindingOut,
+    RegulatoryScanOut,
+    RejectRequest,
+    RuleBreakdownOut,
+    RuleFindingOut,
+    SearchByComponentResultOut,
+    SearchResponse,
+    SensitivityPointOut,
+    SensitivityRequest,
+    SensitivityResultOut,
+    SimilarRecipeOut,
+    SimilarRecipesOut,
+    StoichiometryFindingOut,
+    StoichiometryOut,
+    SubmitReviewRequest,
+    TrainingResultOut,
+    TrainModelsRequest,
+    UpdateRecipeRequest,
+    UserCreateRequest,
+    UserOut,
+    UsersListOut,
+    UserUpdateRequest,
+    ValidationErrorResponse,
+    VerificationViolationOut,
+    VerifyRequest,
+)
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+
+# ---------------------------------------------------------------------------
+# Ops
+# ---------------------------------------------------------------------------
+@router.get(
+    "/health",
+    response_model=HealthResponse,
+    tags=["ops"],
+    summary="Liveness / readiness probe",
+    description="Always returns 200 when the process is up. No auth required.",
+)
+async def health(settings: Annotated[AppSettings, Depends(get_settings)]) -> HealthResponse:
+    return HealthResponse(version=__version__, environment=settings.environment)
+
+
+@router.get(
+    "/info",
+    response_model=AppInfo,
+    tags=["ops"],
+    summary="Build & runtime information",
+)
+async def app_info(settings: Annotated[AppSettings, Depends(get_settings)]) -> AppInfo:
+    import os
+    import platform
+    import sys
+    from urllib.parse import urlparse
+
+    from .schemas import AlertConfigOut
+
+    def _mask(url: str) -> str:
+        """Return ``scheme://host`` so the UI can confirm connectivity
+        without exposing the secret path segment of the webhook."""
+        if not url:
+            return ""
+        try:
+            parsed = urlparse(url)
+            if parsed.scheme and parsed.netloc:
+                return f"{parsed.scheme}://{parsed.netloc}"
+        except Exception:  # pragma: no cover — defensive
+            return "***"
+        return "***"
+
+    alert = AlertConfigOut(
+        webhook_configured=bool(settings.alert_webhook_url),
+        webhook_url_hint=_mask(settings.alert_webhook_url),
+        webhook_format=settings.alert_webhook_format,
+        min_severity=settings.alert_min_severity,
+    )
+
+    return AppInfo(
+        name="formulation-workbench",
+        version=__version__,
+        environment=settings.environment,
+        python=sys.version.split()[0],
+        platform=platform.platform(terse=True),
+        git_sha=os.environ.get("FW_GIT_SHA", "unknown"),
+        build_date=os.environ.get("FW_BUILD_DATE", "unknown"),
+        alert=alert,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Users, roles, self-identification
+# ---------------------------------------------------------------------------
+def _user_out(record) -> UserOut:  # type: ignore[no-untyped-def]
+    """Convert a repository UserRecord into the API DTO."""
+    return UserOut(
+        id=record.id,
+        username=record.username,
+        email=record.email,
+        role=record.role,
+        is_active=bool(record.is_active),
+        created_at=record.created_at.isoformat() if record.created_at else "",
+        last_login_at=(record.last_login_at.isoformat() if record.last_login_at else None),
+    )
+
+
+@router.get(
+    "/me",
+    response_model=MeOut,
+    tags=["ops"],
+    summary="Who am I? — returns the resolved principal + scopes",
+)
+async def whoami(
+    principal: Annotated[Principal, Depends(get_principal)],
+    container: Annotated[Container, Depends(get_container)],
+) -> MeOut:
+    """Handy for the UI to render "logged in as …" and hide admin
+    controls from non-admin users without having to guess.
+    """
+    role: str | None = None
+    if principal.subject.startswith("user:"):
+        username = principal.subject.removeprefix("user:")
+        record = await container.user_repository.get_by_username(username)
+        if record is not None:
+            role = record.role
+    return MeOut(
+        subject=principal.subject,
+        mode=principal.mode,
+        scopes=sorted(principal.scopes),
+        role=role,
+    )
+
+
+@router.get(
+    "/users",
+    response_model=UsersListOut,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="List all users (Admin only)",
+)
+async def list_users(
+    container: Annotated[Container, Depends(get_container)],
+) -> UsersListOut:
+    records = await container.user_repository.list_all(limit=500)
+    return UsersListOut(users=[_user_out(r) for r in records])
+
+
+@router.post(
+    "/users",
+    response_model=UserOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="Create a user (Admin only)",
+)
+async def create_user(
+    payload: UserCreateRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> UserOut:
+    from ...infrastructure.db.repositories.users import UnknownRoleError
+
+    try:
+        record = await container.user_repository.create(
+            username=payload.username,
+            password=payload.password,
+            role=payload.role,
+            email=payload.email,
+            is_active=payload.is_active,
+        )
+    except UnknownRoleError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except ValueError as exc:  # duplicate username or short password
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+    return _user_out(record)
+
+
+@router.put(
+    "/users/{user_id}",
+    response_model=UserOut,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="Update user attributes / role / password (Admin only)",
+)
+async def update_user(
+    user_id: str,
+    payload: UserUpdateRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> UserOut:
+    from ...infrastructure.db.repositories.users import UnknownRoleError
+
+    try:
+        # We only forward fields that were actually set — passing None
+        # explicitly on ``email`` clears it, which is a legitimate action.
+        kwargs: dict[str, object] = {}
+        if payload.email is not None or "email" in payload.model_fields_set:
+            kwargs["email"] = payload.email
+        if payload.role is not None:
+            kwargs["role"] = payload.role
+        if payload.is_active is not None:
+            kwargs["is_active"] = payload.is_active
+        if payload.new_password is not None:
+            kwargs["new_password"] = payload.new_password
+        record = await container.user_repository.update(user_id, **kwargs)  # type: ignore[arg-type]
+    except LookupError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    except UnknownRoleError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    return _user_out(record)
+
+
+@router.delete(
+    "/users/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="Delete a user (Admin only)",
+)
+async def delete_user(
+    user_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> None:
+    ok = await container.user_repository.delete(user_id)
+    if not ok:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+
+
+# ---------------------------------------------------------------------------
+# Personal API keys
+# ---------------------------------------------------------------------------
+def _api_key_out(record: Any) -> ApiKeyOut:
+    return ApiKeyOut(
+        id=record.id,
+        user_id=record.user_id,
+        label=record.label,
+        token_prefix=record.token_prefix,
+        created_at=record.created_at.isoformat() if record.created_at else "",
+        last_used_at=(record.last_used_at.isoformat() if record.last_used_at else None),
+        expires_at=(record.expires_at.isoformat() if record.expires_at else None),
+        revoked_at=(record.revoked_at.isoformat() if record.revoked_at else None),
+        is_active=record.is_active,
+    )
+
+
+def _authorise_api_key_owner(principal: Principal, user_id: str, target_username: str) -> None:
+    """Ensure the caller owns the target user, unless they are Admin.
+
+    An Admin can manage anyone's keys (for offboarding / rotation);
+    non-admin users can only manage their own.  Anonymous / non-user
+    principals fall through to the ``*`` scope check made upstream
+    (they only reach this helper if they have some scope).
+    """
+    if principal.has_scope("*"):
+        return
+    caller_username = principal.subject.removeprefix("user:")
+    if caller_username != target_username:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "You can only manage your own API keys",
+        )
+
+
+@router.get(
+    "/users/{user_id}/api-keys",
+    response_model=ApiKeysListOut,
+    tags=["users"],
+    summary="List a user's personal API keys (owner or Admin)",
+)
+async def list_api_keys(
+    user_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
+) -> ApiKeysListOut:
+    user = await container.user_repository.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    _authorise_api_key_owner(principal, user_id, user.username)
+    keys = await container.api_key_repository.list_for_user(user_id)
+    return ApiKeysListOut(keys=[_api_key_out(k) for k in keys])
+
+
+@router.post(
+    "/users/{user_id}/api-keys",
+    response_model=ApiKeyIssuedOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["users"],
+    summary="Issue a personal API key (owner or Admin)",
+)
+async def create_api_key(
+    user_id: str,
+    payload: ApiKeyCreateRequest,
+    request: Request,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
+) -> ApiKeyIssuedOut:
+    """Mint a fresh token.
+
+    The plaintext value is returned exactly once — clients MUST
+    persist it themselves.  Only the SHA-256 digest is stored, so
+    even the DBA cannot recover it.
+    """
+    from datetime import datetime
+
+    from ...infrastructure.db.repositories.api_keys import ApiKeyError
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
+
+    user = await container.user_repository.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    _authorise_api_key_owner(principal, user_id, user.username)
+
+    expires_at: datetime | None = None
+    if payload.expires_at:
+        try:
+            expires_at = datetime.fromisoformat(payload.expires_at.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_CONTENT, f"Bad expires_at: {exc}"
+            ) from exc
+
+    try:
+        issued = await container.api_key_repository.create(
+            user_id=user_id, label=payload.label, expires_at=expires_at
+        )
+    except ApiKeyError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    await container.auth_event_logger.log(
+        AuthEvent(
+            action="ApiKeyIssued",
+            actor_label=principal.subject,
+            user_id=user_id,
+            ip_address=request.client.host if request.client else None,
+            changes={
+                "key_id": issued.record.id,
+                "label": issued.record.label,
+                "token_prefix": issued.record.token_prefix,
+                "target_user": user.username,
+            },
+        )
+    )
+
+    return ApiKeyIssuedOut(
+        **_api_key_out(issued.record).model_dump(),
+        plaintext=issued.plaintext,
+    )
+
+
+@router.delete(
+    "/users/{user_id}/api-keys/{key_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["users"],
+    summary="Revoke a personal API key (owner or Admin)",
+)
+async def revoke_api_key(
+    user_id: str,
+    key_id: str,
+    request: Request,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
+) -> None:
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
+
+    user = await container.user_repository.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    _authorise_api_key_owner(principal, user_id, user.username)
+
+    record = await container.api_key_repository.get(key_id)
+    if record is None or record.user_id != user_id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "API key not found")
+
+    ok = await container.api_key_repository.revoke(key_id)
+    if not ok:  # pragma: no cover — race with concurrent delete
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "API key not found")
+
+    await container.auth_event_logger.log(
+        AuthEvent(
+            action="ApiKeyRevoked",
+            actor_label=principal.subject,
+            user_id=user_id,
+            ip_address=request.client.host if request.client else None,
+            changes={
+                "key_id": key_id,
+                "label": record.label,
+                "token_prefix": record.token_prefix,
+                "target_user": user.username,
+            },
+        )
+    )
+
+
+# ---------------------------------------------------------------------------
+# Session auth (browser login-flow)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/auth/login",
+    response_model=LoginResponse,
+    tags=["auth"],
+    summary="Log in with username + password; sets the ``fw_session`` cookie",
+)
+async def auth_login(
+    payload: LoginRequest,
+    request: Request,
+    response: Response,
+    settings: Annotated[AppSettings, Depends(get_settings)],
+    container: Annotated[Container, Depends(get_container)],
+) -> LoginResponse:
+    """Authenticate a user and start a browser session.
+
+    Unlike ``GET /me`` (which merely reports the current principal),
+    this endpoint verifies the password against the ``user`` table
+    and, on success, issues a signed session cookie.  The cookie is
+    ``HttpOnly`` and ``SameSite=Lax``; JavaScript never sees the
+    token.
+
+    Every login attempt (successful or not) is written to the audit
+    log — successful ones as ``Login``, failures as ``LoginFailed``
+    with a ``{"reason": "bad_credentials"}`` payload.  An operator
+    can correlate a spike of failures to a probe by grouping on
+    ``actor_label`` and ``ip_address``.
+    """
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
+    from ...infrastructure.db.repositories.users import role_scopes
+    from .session_auth import (
+        DEFAULT_SESSION_TTL_SECONDS,
+        SESSION_COOKIE_NAME,
+        issue_session_token,
+        session_cookie_is_secure,
+    )
+
+    ip = request.client.host if request.client else None
+    record = await container.user_repository.authenticate(payload.username, payload.password)
+    if record is None:
+        await container.auth_event_logger.log(
+            AuthEvent(
+                action="LoginFailed",
+                actor_label=payload.username or "anonymous",
+                ip_address=ip,
+                changes={"reason": "bad_credentials"},
+            )
+        )
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
+
+    token = issue_session_token(
+        subject=record.username,
+        role=record.role,
+        settings=settings,
+        ttl_seconds=DEFAULT_SESSION_TTL_SECONDS,
+    )
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=token,
+        max_age=DEFAULT_SESSION_TTL_SECONDS,
+        httponly=True,
+        secure=session_cookie_is_secure(settings),
+        samesite="lax",
+        path="/",
+    )
+    scopes = sorted(role_scopes(record.role))
+    import time as _time
+
+    await container.auth_event_logger.log(
+        AuthEvent(
+            action="Login",
+            actor_label=f"user:{record.username}",
+            user_id=record.id,
+            ip_address=ip,
+            changes={"role": record.role, "mode": "session"},
+        )
+    )
+
+    return LoginResponse(
+        subject=f"user:{record.username}",
+        role=record.role,
+        scopes=scopes,
+        expires_at=int(_time.time()) + DEFAULT_SESSION_TTL_SECONDS,
+    )
+
+
+@router.post(
+    "/auth/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["auth"],
+    summary="Clear the ``fw_session`` cookie",
+)
+async def auth_logout(
+    request: Request,
+    response: Response,
+    settings: Annotated[AppSettings, Depends(get_settings)],
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(get_principal)],
+) -> None:
+    """Drop the browser session cookie.
+
+    Idempotent — repeated calls (or calls from a client with no
+    cookie) still succeed.  Since the token is stateless we simply
+    tell the browser to forget it; a stolen copy would remain valid
+    until its ``exp`` claim passes.
+
+    Emits a ``Logout`` audit event only when a real session was
+    ended (i.e. the caller was authenticated via ``mode=='session'``
+    at the time of the call).  An anonymous logout is a no-op that
+    would only pollute the log.
+    """
+    from ...infrastructure.db.repositories.auth_events import AuthEvent
+    from .session_auth import SESSION_COOKIE_NAME, session_cookie_is_secure
+
+    response.delete_cookie(
+        key=SESSION_COOKIE_NAME,
+        path="/",
+        httponly=True,
+        secure=session_cookie_is_secure(settings),
+        samesite="lax",
+    )
+    if principal.mode == "session":
+        await container.auth_event_logger.log(
+            AuthEvent(
+                action="Logout",
+                actor_label=principal.subject,
+                ip_address=request.client.host if request.client else None,
+            )
+        )
+
+
+# ---------------------------------------------------------------------------
+# Audit log
+# ---------------------------------------------------------------------------
+@router.get(
+    "/audit-log",
+    response_model=AuditLogPageOut,
+    tags=["audit"],
+    dependencies=[Depends(require_admin)],
+    summary="List audit-log entries with optional filters (Admin only)",
+)
+async def list_audit_log(
+    container: Annotated[Container, Depends(get_container)],
+    recipe_id: str | None = Query(default=None, description="Filter by recipe UUID."),
+    actor: str | None = Query(default=None, description="Filter by ``actor_label`` (exact match)."),
+    action: str | None = Query(
+        default=None,
+        description="Filter by action verb (Created, Updated, Verified, …).",
+    ),
+    limit: int = Query(default=100, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> AuditLogPageOut:
+    """Read the audit log with paging.
+
+    The response includes the ``actions`` list only on the first page
+    (``offset=0``) so the UI can populate its filter dropdown without
+    an extra request.  Later pages skip it to keep the response tight.
+    """
+    page = await container.audit_log_repository.list_recent(
+        recipe_id=recipe_id, actor=actor, action=action, limit=limit, offset=offset
+    )
+    actions: list[str] = []
+    if offset == 0:
+        actions = await container.audit_log_repository.distinct_actions()
+    return AuditLogPageOut(
+        total=page.total,
+        limit=limit,
+        offset=offset,
+        entries=[
+            AuditLogEntryOut(
+                id=e.id,
+                recipe_id=e.recipe_id,
+                user_id=e.user_id,
+                actor_label=e.actor_label,
+                action=e.action,
+                changes=e.changes,
+                timestamp=e.timestamp.isoformat(),
+                ip_address=e.ip_address,
+            )
+            for e in page.entries
+        ],
+        actions=actions,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Recipes — read
+# ---------------------------------------------------------------------------
+_Responses = dict[int | str, dict[str, Any]]
+
+_UNAUTHORIZED: _Responses = {
+    status.HTTP_401_UNAUTHORIZED: {
+        "model": ErrorResponse,
+        "description": "Missing or invalid token",
+    },
+}
+_FORBIDDEN: _Responses = {
+    status.HTTP_403_FORBIDDEN: {"model": ErrorResponse, "description": "Insufficient scope"},
+}
+_NOT_FOUND: _Responses = {
+    status.HTTP_404_NOT_FOUND: {"model": ErrorResponse, "description": "Recipe not found"},
+}
+_VALIDATION: _Responses = {
+    status.HTTP_422_UNPROCESSABLE_CONTENT: {
+        "model": ValidationErrorResponse,
+        "description": "Invalid payload",
+    },
+}
+_CONFLICT: _Responses = {
+    status.HTTP_409_CONFLICT: {"model": ErrorResponse, "description": "State conflict"},
+}
+
+
+@router.get(
+    "/recipes",
+    response_model=SearchResponse,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Search / list recipes",
+    responses={**_UNAUTHORIZED},
+)
+async def list_recipes(
+    container: Annotated[Container, Depends(get_container)],
+    q: str = Query("", description="Free-text query."),
+    category: list[str] = Query(default_factory=list),
+    subcategory: list[str] = Query(
+        default_factory=list,
+        description=(
+            "Filter by subcategory (exact match).  Usually combined "
+            "with a single ``category`` so the UI's dropdown chain "
+            "surfaces only the subcategories that belong to the "
+            "chosen category."
+        ),
+    ),
+    product_class: list[str] = Query(default_factory=list),
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+) -> SearchResponse:
+    result = await container.search_recipes.execute(
+        SearchFilter(
+            text_query=q,
+            categories=tuple(category),
+            subcategories=tuple(subcategory),
+            product_classes=tuple(product_class),
+            limit=limit,
+            offset=offset,
+        )
+    )
+    items = [
+        RecipeSummary.model_validate(asdict(RecipeSummaryDto.from_recipe(r)))
+        for r in result.recipes
+    ]
+    return SearchResponse(
+        items=items,
+        total_count=result.total_count,
+        limit=result.limit,
+        offset=result.offset,
+        has_more=result.has_more,
+    )
+
+
+@router.get(
+    "/recipes/by-component",
+    response_model=SearchByComponentResultOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Reverse-composition search — every recipe containing this CAS, "
+        "sorted by mass-percent descending"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def recipes_by_component(
+    container: Annotated[Container, Depends(get_container)],
+    cas: str = Query(
+        min_length=1,
+        max_length=32,
+        description=(
+            "CAS number to look for.  Exact match — the CAS field of "
+            "each ``component`` row is compared verbatim."
+        ),
+    ),
+    min_mass_percent: float = Query(default=0.0, ge=0.0, le=100.0),
+    max_mass_percent: float = Query(default=100.0, ge=0.0, le=100.0),
+    category: str | None = Query(
+        default=None,
+        description="Optional pre-filter to narrow the scan.",
+    ),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> SearchByComponentResultOut:
+    """Answer «which recipes contain this CAS» in one round trip.
+
+    Sums mass-percent across all stages of the same recipe — a
+    recipe that mentions TiO2 both in stage 1 (grind base) and
+    stage 3 (topcoat) shows up once, with the total contribution.
+
+    Placed BEFORE ``/recipes/{recipe_id}`` in the router so the path
+    resolves as a fixed segment instead of being swallowed as a
+    ``recipe_id`` — FastAPI walks routes in registration order.
+    """
+    from ...application.use_cases.search_by_component import SearchByComponentQuery
+
+    result = await container.search_by_component.execute(
+        SearchByComponentQuery(
+            cas_number=cas,
+            min_mass_percent=min_mass_percent,
+            max_mass_percent=max_mass_percent,
+            category=category,
+            limit=limit,
+        )
+    )
+    return SearchByComponentResultOut(
+        cas_number=result.cas_number,
+        n_recipes=result.n_recipes,
+        matches=[
+            ComponentMatchOut(
+                recipe_id=m.recipe_id,
+                recipe_category=m.recipe_category,
+                recipe_subcategory=m.recipe_subcategory,
+                recipe_status=m.recipe_status,
+                total_mass_percent=m.total_mass_percent,
+                stage_names=list(m.stage_names),
+                n_stages=m.n_stages,
+            )
+            for m in result.matches
+        ],
+    )
+
+
+# --------------------------------------------------------------------------- compare
+
+
+_COMPARE_MAX_RECIPES = 4
+_COMPARE_DIFF_THRESHOLD_PERCENT = 0.1
+
+
+@router.get(
+    "/recipes/compare",
+    response_model=CompareResultOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Side-by-side compare of 2–4 recipes: components (CAS × recipe) "
+        "and ML property predictions (property × recipe)"
+    ),
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def recipes_compare(
+    container: Annotated[Container, Depends(get_container)],
+    ids: str = Query(
+        min_length=1,
+        max_length=256,
+        description=(
+            "Comma-separated recipe ids to compare, 2 to "
+            f"{_COMPARE_MAX_RECIPES}.  Order in the response follows "
+            "the order passed here."
+        ),
+    ),
+    diff_threshold: float = Query(
+        default=_COMPARE_DIFF_THRESHOLD_PERCENT,
+        ge=0.0,
+        le=100.0,
+        description=(
+            "Mass-percent delta above which a component row is "
+            "flagged as ``is_diff=true``.  UI uses this to highlight "
+            "meaningful deltas and ignore rounding noise."
+        ),
+    ),
+) -> CompareResultOut:
+    """Aggregate compare for the ``/compare`` UI page.
+
+    Bundles composition + ML predictions in one round-trip so the UI
+    doesn't need N×2 API calls (which used to be the workaround
+    before v1.26).  ML predictions come from the same regressor the
+    recipe-detail page uses; a recipe without a trained model for a
+    given property just gets ``None`` in its cell.
+
+    Deliberately cheap: ``get_recipe.execute`` per id (cached-ish
+    inside the repository), then a single ``predict_properties``
+    call per recipe.  For 4 recipes × 4 models this is 4 SQL + 4
+    ML calls, ~200 ms end-to-end on the seed catalogue.
+    """
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...application.use_cases.ml_predict import PredictPropertyQuery
+
+    id_list = [x.strip() for x in ids.split(",") if x.strip()]
+    if not 2 <= len(id_list) <= _COMPARE_MAX_RECIPES:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Compare requires 2..{_COMPARE_MAX_RECIPES} recipe ids, got {len(id_list)}",
+        )
+    if len(set(id_list)) != len(id_list):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "Compare recipe ids must be unique",
+        )
+
+    # Load every recipe up-front — a single missing id kills the
+    # request rather than silently returning a partial grid.
+    recipes = []
+    for rid in id_list:
+        recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=rid))
+        if recipe is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Recipe not found: {rid}")
+        recipes.append(recipe)
+
+    headers = [
+        CompareRecipeHeaderOut(
+            id=r.id,
+            category=r.category,
+            subcategory=r.subcategory,
+            binder_type=r.binder_type,
+            product_class=r.product_class.value,
+            status=r.status.state.value,
+            version=r.version,
+        )
+        for r in recipes
+    ]
+
+    # --- Build the CAS × recipe matrix ---------------------------------
+    #
+    # For each recipe: sum mass_percent across all stages of the same
+    # CAS (a recipe may mention TiO2 in two stages — we show the
+    # total).  We remember the FIRST occurrence's display name and
+    # stage number as the "canonical" pointer, so the UI can label
+    # the cell.
+    per_recipe_cas: list[dict[str, dict[str, Any]]] = []
+    for recipe in recipes:
+        cas_map: dict[str, dict[str, Any]] = {}
+        for stage in recipe.stages:
+            for comp in stage.components:
+                cas = comp.cas_number or ""
+                if not cas:
+                    continue
+                if cas not in cas_map:
+                    cas_map[cas] = {
+                        "mass_percent": 0.0,
+                        "stage_number": stage.stage_number,
+                        "display_name": comp.name,
+                    }
+                cas_map[cas]["mass_percent"] += float(comp.mass_percent)
+        per_recipe_cas.append(cas_map)
+
+    all_cas: set[str] = set()
+    for m in per_recipe_cas:
+        all_cas.update(m.keys())
+
+    # Pick a canonical display name — the first non-empty from any
+    # recipe.  Different recipes may spell the same CAS differently
+    # (TiO2 vs "Titanium dioxide" vs "Kronos 2310"); we surface the
+    # variants in the cell display_name but pick one for the row
+    # header.
+    canonical_name: dict[str, str] = {}
+    for cas in all_cas:
+        for m in per_recipe_cas:
+            if cas in m and m[cas]["display_name"]:
+                canonical_name[cas] = m[cas]["display_name"]
+                break
+        canonical_name.setdefault(cas, cas)
+
+    # Sort rows by max mass_percent across recipes DESC — the
+    # operator's eye lands on the dominant materials first.
+    def _row_max(cas: str) -> float:
+        return max(
+            (m[cas]["mass_percent"] for m in per_recipe_cas if cas in m),
+            default=0.0,
+        )
+
+    component_rows: list[CompareComponentRowOut] = []
+    for cas in sorted(all_cas, key=lambda c: -_row_max(c)):
+        cells = [
+            CompareComponentCellOut(
+                mass_percent=(m[cas]["mass_percent"] if cas in m else None),
+                stage_number=(m[cas]["stage_number"] if cas in m else None),
+                display_name=(m[cas]["display_name"] if cas in m else ""),
+            )
+            for m in per_recipe_cas
+        ]
+        present = [c.mass_percent for c in cells if c.mass_percent is not None]
+        # ``is_diff`` = at least one recipe missing the CAS, OR the
+        # spread across those that HAVE it exceeds the threshold.
+        row_diff = len(present) != len(recipes) or (
+            len(present) >= 2 and (max(present) - min(present)) > diff_threshold
+        )
+        component_rows.append(
+            CompareComponentRowOut(
+                cas_number=cas,
+                canonical_name=canonical_name[cas],
+                is_diff=row_diff,
+                cells=cells,
+            )
+        )
+
+    # --- Build the property × recipe matrix ----------------------------
+    per_recipe_predictions: list[dict[str, tuple[float, str]]] = []
+    for recipe in recipes:
+        try:
+            preds = await container.predict_properties.execute(
+                PredictPropertyQuery(recipe_id=recipe.id)
+            )
+        except Exception as exc:  # pragma: no cover — model I/O
+            logger.warning(
+                "compare_prediction_failed",
+                extra={"recipe_id": recipe.id, "error": str(exc)},
+            )
+            preds = []
+        prop_map: dict[str, tuple[float, str]] = {}
+        for p in preds or []:
+            prop_map[p.property_code] = (float(p.predicted_value), p.unit or "")
+        per_recipe_predictions.append(prop_map)
+
+    all_props: set[str] = set()
+    for pm in per_recipe_predictions:
+        all_props.update(pm.keys())
+
+    property_rows: list[ComparePropertyRowOut] = []
+    for prop in sorted(all_props):
+        prop_cells: list[ComparePropertyCellOut] = []
+        prop_values: list[float] = []
+        for pm in per_recipe_predictions:
+            if prop in pm:
+                v, u = pm[prop]
+                prop_values.append(v)
+                prop_cells.append(ComparePropertyCellOut(predicted_value=v, unit=u))
+            else:
+                prop_cells.append(ComparePropertyCellOut(predicted_value=None, unit=""))
+        # For properties: ``is_diff`` when the relative spread is >5%
+        # of the mean (rough rule of thumb — a 5% delta in gloss or
+        # viscosity matters, a 5% delta in R² noise does not).
+        prop_diff = False
+        if len(prop_values) >= 2:
+            mean = sum(prop_values) / len(prop_values)
+            spread = max(prop_values) - min(prop_values)
+            prop_diff = mean != 0 and abs(spread / mean) > 0.05
+        elif 0 < len(prop_values) < len(recipes):
+            # One recipe has a prediction, another doesn't — that's
+            # a diff worth flagging.
+            prop_diff = True
+        property_rows.append(
+            ComparePropertyRowOut(
+                property_code=prop,
+                is_diff=prop_diff,
+                cells=prop_cells,
+            )
+        )
+
+    return CompareResultOut(
+        recipes=headers,
+        components=component_rows,
+        properties=property_rows,
+        diff_threshold_percent=diff_threshold,
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}",
+    response_model=RecipeSummary,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeSummary:
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return RecipeSummary.model_validate(asdict(RecipeSummaryDto.from_recipe(recipe)))
+
+
+def _citation_to_out(citation: Any) -> CitationOut:
+    return CitationOut(
+        authors=citation.authors,
+        title=citation.title,
+        year=citation.year,
+        publisher=citation.publisher,
+        isbn=(str(citation.isbn) if citation.isbn else None),
+        doi=(str(citation.doi) if citation.doi else None),
+        url=getattr(citation, "url", "") or "",
+        page_or_formula=getattr(citation, "page_or_formula", "") or "",
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/full",
+    response_model=RecipeFullOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Full recipe payload including composition tree — used by the UI",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_recipe_full(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeFullOut:
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    stages_out = [
+        CompositionStageOut(
+            stage_number=stage.stage_number,
+            name=stage.name,
+            description=stage.description,
+            components=[
+                ComponentOut(
+                    name=c.name,
+                    cas_number=c.cas_number,
+                    function=c.function,
+                    mass_percent=c.mass_percent,
+                    tolerance_percent=c.tolerance_percent,
+                    inci_name=c.inci_name,
+                    manufacturer_reference=c.manufacturer_reference,
+                    notes=c.notes,
+                )
+                for c in stage.components
+            ],
+            process=(
+                ProcessParamsOut(
+                    equipment=stage.process.equipment,
+                    rotational_speed_rpm=stage.process.rotational_speed_rpm,
+                    peripheral_speed_m_per_s=stage.process.peripheral_speed_m_per_s,
+                    temperature_c=stage.process.temperature_c,
+                    duration_min=stage.process.duration_min,
+                )
+                if stage.process is not None
+                else None
+            ),
+        )
+        for stage in recipe.stages
+    ]
+
+    return RecipeFullOut(
+        id=recipe.id,
+        category=recipe.category,
+        subcategory=recipe.subcategory,
+        binder_type=recipe.binder_type,
+        product_class=recipe.product_class.value,
+        intended_use=recipe.intended_use,
+        finish=recipe.finish,
+        color=recipe.color,
+        status=recipe.status.state.value,
+        verification_count=recipe.status.verification_count,
+        verification_required=recipe.status.required_verifications,
+        version=recipe.version,
+        tags=list(recipe.tags),
+        stages=stages_out,
+        primary_source=_citation_to_out(recipe.primary_source),
+        cross_references=[_citation_to_out(c) for c in recipe.cross_references],
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/similar",
+    response_model=SimilarRecipesOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="List recipes with the most similar composition-feature vector",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_similar_recipes(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    top_k: int = Query(default=5, ge=1, le=50),
+    same_category_only: bool = Query(default=True),
+    min_similarity: float = Query(default=0.0, ge=-1.0, le=1.0),
+) -> SimilarRecipesOut:
+    from ...application.use_cases.similar_recipes import FindSimilarQuery
+
+    matches = await container.find_similar_recipes.execute(
+        FindSimilarQuery(
+            recipe_id=recipe_id,
+            top_k=top_k,
+            same_category_only=same_category_only,
+            min_similarity=min_similarity,
+        )
+    )
+    if matches is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return SimilarRecipesOut(
+        reference_recipe_id=recipe_id,
+        same_category_only=same_category_only,
+        matches=[
+            SimilarRecipeOut(
+                recipe_id=m.recipe_id,
+                category=m.category,
+                subcategory=m.subcategory,
+                binder_type=m.binder_type,
+                product_class=m.product_class,
+                similarity=round(m.similarity, 6),
+            )
+            for m in matches
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Version history + structured diff
+# ---------------------------------------------------------------------------
+@router.get(
+    "/recipes/{recipe_id}/versions",
+    response_model=RecipeVersionsOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Version history for a recipe (latest version first)",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_recipe_versions(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeVersionsOut:
+    versions = await container.get_recipe_versions.execute(GetAllVersionsQuery(recipe_id=recipe_id))
+    if not versions:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return RecipeVersionsOut(
+        recipe_id=recipe_id,
+        versions=[
+            RecipeVersionOut(
+                id=r.id,
+                version=r.version,
+                status=r.status.state.value,
+                verification_count=r.status.verification_count,
+                verification_required=r.status.required_verifications,
+                created_at=(r.created_at.isoformat() if r.created_at else ""),
+                created_by=r.created_by or "",
+            )
+            for r in versions
+        ],
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/diff",
+    response_model=RecipeDiffOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Structured diff between two versions of the same recipe",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def diff_recipe_versions(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    left: int = Query(
+        ...,
+        ge=1,
+        description="Left-hand version number (the 'from' side of the diff).",
+    ),
+    right: int = Query(
+        ...,
+        ge=1,
+        description="Right-hand version number (the 'to' side of the diff).",
+    ),
+) -> RecipeDiffOut:
+    if left == right:
+        return RecipeDiffOut(
+            recipe_id=recipe_id,
+            left_version=left,
+            right_version=right,
+            identical=True,
+        )
+
+    versions = await container.get_recipe_versions.execute(GetAllVersionsQuery(recipe_id=recipe_id))
+    if not versions:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    by_version = {r.version: r for r in versions}
+    if left not in by_version:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Version {left} not found (available: {sorted(by_version)})",
+        )
+    if right not in by_version:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Version {right} not found (available: {sorted(by_version)})",
+        )
+
+    lhs = by_version[left]
+    rhs = by_version[right]
+
+    metadata_changes: list[RecipeDiffMetadataChange] = []
+    for field in ("subcategory", "binder_type", "product_class", "intended_use", "finish", "color"):
+        lv = _pluck_meta(lhs, field)
+        rv = _pluck_meta(rhs, field)
+        if lv != rv:
+            metadata_changes.append(
+                RecipeDiffMetadataChange(field=field, from_value=lv, to_value=rv)
+            )
+
+    # Component-level: index by (stage_number, component_name).
+    def _index(recipe: Any) -> dict[tuple[int, str], Any]:
+        return {(s.stage_number, c.name): c for s in recipe.stages for c in s.components}
+
+    left_idx = _index(lhs)
+    right_idx = _index(rhs)
+    keys = sorted(set(left_idx) | set(right_idx))
+    component_changes: list[RecipeDiffComponentChange] = []
+    for stage_no, name in keys:
+        lc = left_idx.get((stage_no, name))
+        rc = right_idx.get((stage_no, name))
+        if lc is None and rc is not None:
+            component_changes.append(
+                RecipeDiffComponentChange(
+                    stage_number=stage_no,
+                    component_name=name,
+                    kind="added",
+                    from_value=None,
+                    to_value=round(rc.mass_percent, 4),
+                )
+            )
+        elif rc is None and lc is not None:
+            component_changes.append(
+                RecipeDiffComponentChange(
+                    stage_number=stage_no,
+                    component_name=name,
+                    kind="removed",
+                    from_value=round(lc.mass_percent, 4),
+                    to_value=None,
+                )
+            )
+        else:
+            assert lc is not None
+            assert rc is not None
+            if abs(lc.mass_percent - rc.mass_percent) > 1e-6:
+                component_changes.append(
+                    RecipeDiffComponentChange(
+                        stage_number=stage_no,
+                        component_name=name,
+                        kind="mass_changed",
+                        from_value=round(lc.mass_percent, 4),
+                        to_value=round(rc.mass_percent, 4),
+                    )
+                )
+            if lc.function != rc.function:
+                component_changes.append(
+                    RecipeDiffComponentChange(
+                        stage_number=stage_no,
+                        component_name=name,
+                        kind="function_changed",
+                        from_value=str(lc.function),
+                        to_value=str(rc.function),
+                    )
+                )
+
+    return RecipeDiffOut(
+        recipe_id=recipe_id,
+        left_version=left,
+        right_version=right,
+        metadata_changes=metadata_changes,
+        component_changes=component_changes,
+        identical=(not metadata_changes and not component_changes),
+    )
+
+
+def _pluck_meta(recipe: Any, field: str) -> str:
+    """Read one metadata field as a string, coping with enum-valued cols."""
+    value = getattr(recipe, field, "")
+    if hasattr(value, "value"):
+        value = value.value
+    return "" if value is None else str(value)
+
+
+# ---------------------------------------------------------------------------
+# Sensitivity analysis (what-if for one component's mass %)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/sensitivity",
+    response_model=SensitivityResultOut,
+    tags=["recipes", "ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Sweep one component's mass % and predict how properties respond",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def sensitivity_analysis(
+    recipe_id: str,
+    payload: SensitivityRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> SensitivityResultOut:
+    from ...application.use_cases.sensitivity_analysis import (
+        ComponentNotInRecipeError,
+        SensitivityQuery,
+    )
+
+    try:
+        result = await container.sensitivity_analysis.execute(
+            SensitivityQuery(
+                recipe_id=recipe_id,
+                component_name=payload.component_name,
+                min_percent=payload.min_percent,
+                max_percent=payload.max_percent,
+                steps=payload.steps,
+                property_codes=tuple(payload.property_codes),
+            )
+        )
+    except ComponentNotInRecipeError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    if result is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    return SensitivityResultOut(
+        recipe_id=result.recipe_id,
+        component_name=result.component_name,
+        baseline_percent=round(result.baseline_percent, 4),
+        min_percent=result.min_percent,
+        max_percent=result.max_percent,
+        steps=result.steps,
+        property_codes=list(result.property_codes),
+        points=[
+            SensitivityPointOut(
+                target_percent=round(p.target_percent, 4),
+                predictions={
+                    k: (round(v, 4) if v is not None else None) for k, v in p.predictions.items()
+                },
+                skipped=p.skipped,
+                skip_reason=p.skip_reason,
+            )
+            for p in result.points
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# 2D what-if heatmap (two components at once)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/sensitivity-heatmap",
+    response_model=HeatmapResultOut,
+    tags=["recipes", "ml"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Two-axis what-if heatmap: sweep two components on a grid, predict one property per cell"
+    ),
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def sensitivity_heatmap(
+    recipe_id: str,
+    payload: HeatmapRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> HeatmapResultOut:
+    from ...application.use_cases.sensitivity_analysis import ComponentNotInRecipeError
+    from ...application.use_cases.sensitivity_heatmap import HeatmapQuery
+
+    try:
+        result = await container.sensitivity_heatmap.execute(
+            HeatmapQuery(
+                recipe_id=recipe_id,
+                component_a=payload.component_a,
+                component_b=payload.component_b,
+                property_code=payload.property_code,
+                a_min=payload.a_min,
+                a_max=payload.a_max,
+                b_min=payload.b_min,
+                b_max=payload.b_max,
+                steps_a=payload.steps_a,
+                steps_b=payload.steps_b,
+            )
+        )
+    except ComponentNotInRecipeError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    if result is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    def _round(v: float | None) -> float | None:
+        return None if v is None else round(v, 4)
+
+    return HeatmapResultOut(
+        recipe_id=result.recipe_id,
+        component_a=result.component_a,
+        component_b=result.component_b,
+        property_code=result.property_code,
+        baseline_a=round(result.baseline_a, 4),
+        baseline_b=round(result.baseline_b, 4),
+        baseline_value=_round(result.baseline_value),
+        a_values=[round(a, 4) for a in result.a_values],
+        b_values=[round(b, 4) for b in result.b_values],
+        values=[[_round(v) for v in row] for row in result.values],
+        z_min=_round(result.z_min),
+        z_max=_round(result.z_max),
+    )
+
+
+# ---------------------------------------------------------------------------
+# CSV export
+# ---------------------------------------------------------------------------
+def _csv_escape(value: object) -> str:
+    """RFC-4180 minimal escaping: quote when the field contains a comma,
+    quote, or newline; double up embedded quotes."""
+    s = "" if value is None else str(value)
+    if any(c in s for c in (",", '"', "\n", "\r")):
+        return '"' + s.replace('"', '""') + '"'
+    return s
+
+
+@router.get(
+    "/recipes/{recipe_id}/export.csv",
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Download the recipe composition as CSV (one row per component)",
+    response_class=PlainTextResponse,
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def export_recipe_csv(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> PlainTextResponse:
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    rows: list[list[object]] = [
+        [
+            "recipe_id",
+            "recipe_version",
+            "category",
+            "subcategory",
+            "product_class",
+            "stage_number",
+            "stage_name",
+            "component_name",
+            "cas_number",
+            "function",
+            "mass_percent",
+            "tolerance_percent",
+            "manufacturer_reference",
+        ]
+    ]
+    for stage in recipe.stages:
+        for comp in stage.components:
+            rows.append(
+                [
+                    recipe.id,
+                    recipe.version,
+                    recipe.category,
+                    recipe.subcategory,
+                    recipe.product_class.value,
+                    stage.stage_number,
+                    stage.name,
+                    comp.name,
+                    comp.cas_number,
+                    comp.function,
+                    f"{comp.mass_percent:.4f}",
+                    f"{comp.tolerance_percent:.4f}",
+                    comp.manufacturer_reference or "",
+                ]
+            )
+
+    body = "\n".join(",".join(_csv_escape(cell) for cell in row) for row in rows) + "\n"
+    filename = f"recipe_{recipe.id[:16]}_v{recipe.version}.csv"
+    return PlainTextResponse(
+        content=body,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/export.pdf",
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Render the recipe technical card as a PDF (streamed, in-memory)",
+    responses={
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "PDF technical card of the recipe.",
+        },
+        **_UNAUTHORIZED,
+        **_NOT_FOUND,
+    },
+)
+async def export_recipe_pdf(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> Response:
+    from ...infrastructure.reporting import render_recipe_pdf_bytes
+
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    try:
+        pdf_bytes = render_recipe_pdf_bytes(recipe)
+    except ImportError as exc:  # pragma: no cover — reportlab is a hard dep
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "PDF renderer is not available (install 'reportlab').",
+        ) from exc
+
+    filename = f"recipe_{recipe.id[:16]}_v{recipe.version}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get(
+    "/catalog/export.csv",
+    tags=["recipes", "catalog"],
+    dependencies=[Depends(require_reader)],
+    summary="Download a summary CSV of every recipe in the catalog (no compositions)",
+    response_class=PlainTextResponse,
+    responses={**_UNAUTHORIZED},
+)
+async def export_catalog_csv(
+    container: Annotated[Container, Depends(get_container)],
+    category: list[str] = Query(default_factory=list),
+    limit: int = Query(default=5000, ge=1, le=10000),
+) -> PlainTextResponse:
+    result = await container.search_recipes.execute(
+        SearchFilter(categories=tuple(category), limit=limit, offset=0)
+    )
+    rows: list[list[object]] = [
+        [
+            "recipe_id",
+            "category",
+            "subcategory",
+            "binder_type",
+            "product_class",
+            "intended_use",
+            "status",
+            "verification_count",
+            "verification_required",
+            "version",
+        ]
+    ]
+    for recipe in result.recipes:
+        rows.append(
+            [
+                recipe.id,
+                recipe.category,
+                recipe.subcategory,
+                recipe.binder_type,
+                recipe.product_class.value,
+                recipe.intended_use,
+                recipe.status.state.value,
+                recipe.status.verification_count,
+                recipe.status.required_verifications,
+                recipe.version,
+            ]
+        )
+    body = "\n".join(",".join(_csv_escape(cell) for cell in row) for row in rows) + "\n"
+    return PlainTextResponse(
+        content=body,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": 'attachment; filename="catalog.csv"',
+        },
+    )
+
+
+@router.get(
+    "/catalog/export.pdf",
+    tags=["recipes", "catalog"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Render every recipe in the catalog (optionally filtered by category) "
+        "into a single multi-page PDF technical formulary"
+    ),
+    responses={
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "Multi-page PDF formulary of catalog recipes.",
+        },
+        **_UNAUTHORIZED,
+        **_NOT_FOUND,
+    },
+)
+async def export_catalog_pdf(
+    container: Annotated[Container, Depends(get_container)],
+    category: list[str] = Query(default_factory=list),
+    limit: int = Query(
+        default=50,
+        ge=1,
+        le=500,
+        description=(
+            "Hard cap on the number of recipes rendered.  Kept modest (default 50) "
+            "because ReportLab is CPU-bound and 500 pages takes seconds; use the "
+            "category filter to narrow the export."
+        ),
+    ),
+) -> Response:
+    from ...infrastructure.reporting import render_catalog_pdf_bytes
+
+    result = await container.search_recipes.execute(
+        SearchFilter(categories=tuple(category), limit=limit, offset=0)
+    )
+    if not result.recipes:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            "No recipes matched the requested filters.",
+        )
+
+    title = f"Recipe catalog — {', '.join(category)}" if category else "Recipe catalog"
+    try:
+        pdf_bytes = render_catalog_pdf_bytes(list(result.recipes), title=title)
+    except ImportError as exc:  # pragma: no cover
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "PDF renderer is not available (install 'reportlab').",
+        ) from exc
+
+    # HTTP header values must be latin-1 encodable — non-ASCII category
+    # names (e.g. Cyrillic) would blow up ``Response``.  Fall back to
+    # ASCII filename with RFC-5987 ``filename*`` for the localised name.
+    ascii_slug = _ascii_slug(category[0]) if category else ""
+    filename = "catalog.pdf" if not ascii_slug else f"catalog_{ascii_slug[:32]}.pdf"
+    disposition = f'attachment; filename="{filename}"'
+    if category:
+        from urllib.parse import quote
+
+        localised = f"catalog_{category[0]}.pdf"
+        disposition += f"; filename*=UTF-8''{quote(localised)}"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": disposition},
+    )
+
+
+def _ascii_slug(text: str) -> str:
+    """Reduce a category label to ASCII letters + digits for a filename."""
+    return "".join(ch if ch.isascii() and (ch.isalnum() or ch == "-") else "_" for ch in text)
+
+
+@router.get(
+    "/catalog/stats",
+    response_model=CatalogStats,
+    tags=["catalog"],
+    dependencies=[Depends(require_reader)],
+    responses={**_UNAUTHORIZED},
+)
+async def catalog_stats(
+    container: Annotated[Container, Depends(get_container)],
+) -> CatalogStats:
+    result = await container.catalog_stats.execute(GetCatalogStatisticsQuery())
+    return CatalogStats(
+        total=result.total,
+        by_status={s.value: n for s, n in result.by_status.items()},
+        by_category=result.by_category,
+        by_product_class=result.by_product_class,
+    )
+
+
+@router.get(
+    "/catalog/facets",
+    response_model=CatalogFacetsOut,
+    tags=["catalog"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Full facet snapshot for filter dropdowns — total counts by "
+        "category, subcategory, product_class, status"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def catalog_facets(
+    container: Annotated[Container, Depends(get_container)],
+) -> CatalogFacetsOut:
+    """Return every value the UI needs to build its filter widgets.
+
+    Fixes the historical bug where the recipes page inferred its
+    category dropdown from a single search page — which meant that
+    the user saw only whichever 1-2 categories happened to sort
+    first in that page.  Now the UI reads /catalog/facets once,
+    populates its dropdowns from the real totals, and pages the
+    result list independently.
+    """
+    result = await container.catalog_facets.execute(GetCatalogFacetsQuery())
+    return CatalogFacetsOut(
+        total=result.total,
+        by_category=result.by_category,
+        by_subcategory=result.by_subcategory,
+        by_product_class=result.by_product_class,
+        by_status=result.by_status,
+    )
+
+
+@router.get(
+    "/dashboard/summary",
+    response_model=DashboardSummaryOut,
+    tags=["ops"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "One-shot aggregate for the dashboard — catalog counts + "
+        "trained-model count + last 10 recipes + last 10 audit rows"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def dashboard_summary(
+    container: Annotated[Container, Depends(get_container)],
+) -> DashboardSummaryOut:
+    """Aggregated snapshot for the dashboard.
+
+    The previous dashboard fired **five** independent GETs on mount
+    (``/health``, ``/info``, ``/catalog/stats``, ``/ml/models``,
+    ``/ml/calibration-matrix``) — every one of them contending for
+    the same connection pool.  This endpoint bundles the essentials
+    into one round-trip and, as a bonus, guarantees the numbers are
+    internally consistent (no race where ``total`` and ``sum(by_category)``
+    disagree because a POST landed between two calls).
+    """
+    from ... import __version__
+    from ...application.use_cases.search_recipes import GetCatalogFacetsQuery
+
+    facets = await container.catalog_facets.execute(GetCatalogFacetsQuery())
+    recent = await container.recipe_repository.list_recent(limit=10)
+    audit_page = await container.audit_log_repository.list_recent(limit=10)
+    trained_models = len(container.property_regressor.list_models())
+
+    return DashboardSummaryOut(
+        version=__version__,
+        environment=container.settings.environment,
+        total_recipes=facets.total,
+        by_status=facets.by_status,
+        by_category=facets.by_category,
+        by_product_class=facets.by_product_class,
+        trained_models=trained_models,
+        recent_recipes=[
+            RecentRecipeOut(
+                id=r.id,
+                category=r.category,
+                subcategory=r.subcategory,
+                status=r.status.state.value,
+                product_class=r.product_class.value,
+                created_at=r.created_at.isoformat() if r.created_at else "",
+            )
+            for r in recent
+        ],
+        recent_audit=[
+            AuditLogEntryOut(
+                id=e.id,
+                recipe_id=e.recipe_id,
+                user_id=e.user_id,
+                actor_label=e.actor_label,
+                action=e.action,
+                changes=e.changes,
+                timestamp=e.timestamp.isoformat(),
+                ip_address=e.ip_address,
+            )
+            for e in audit_page.entries
+        ],
+    )
+
+
+@router.get(
+    "/dashboard/data-quality",
+    response_model=DataQualityReportOut,
+    tags=["ops", "assessment"],
+    dependencies=[Depends(require_reader)],
+    summary=("Catalogue-wide R-rule violation aggregate — powers the «Здоровье данных» page"),
+    responses={**_UNAUTHORIZED},
+)
+async def dashboard_data_quality(
+    container: Annotated[Container, Depends(get_container)],
+    sample_size: int = Query(
+        default=10,
+        ge=1,
+        le=50,
+        description="How many offender ids to return per rule bucket.",
+    ),
+    max_recipes: int | None = Query(
+        default=None,
+        ge=1,
+        le=100_000,
+        description=(
+            "Cap the enumeration.  Omit for whole-catalogue scans "
+            "(the default is safe up to a few thousand recipes)."
+        ),
+    ),
+) -> DataQualityReportOut:
+    """Walk the whole catalogue and report every R-rule violation.
+
+    Answers the operator's question "which rules are hurting me
+    most, and where should I start fixing" without a manual SQL
+    walk.  The rule table is sorted worst-first, so the top row is
+    always where the pain is.
+
+    Scans ``get_by_id`` per recipe rather than one bulk read —
+    keeps memory bounded on a 100k-row catalogue and lets us reuse
+    the exact same rule evaluator that the workflow-guard uses at
+    write time (no room for the report to drift from reality).
+    """
+    from ...application.use_cases.data_quality import DataQualityQuery
+
+    result = await container.data_quality.execute(
+        DataQualityQuery(sample_size=sample_size, max_recipes=max_recipes)
+    )
+    return DataQualityReportOut(
+        total_recipes=result.total_recipes,
+        n_clean=result.n_clean,
+        n_with_violations=result.n_with_violations,
+        verified_share=result.verified_share,
+        by_rule=[
+            RuleBreakdownOut(
+                rule=r.rule,
+                title=r.title,
+                n_recipes=r.n_recipes,
+                by_category=r.by_category,
+                sample_recipe_ids=r.sample_recipe_ids,
+            )
+            for r in result.by_rule
+        ],
+        by_category=[
+            CategoryBreakdownOut(
+                category=c.category,
+                n_total=c.n_total,
+                n_clean=c.n_clean,
+                n_with_violations=c.n_with_violations,
+                n_verified=c.n_verified,
+                n_draft=c.n_draft,
+                top_rules=c.top_rules,
+            )
+            for c in result.by_category
+        ],
+        by_status=result.by_status,
+    )
+
+
+@router.get(
+    "/catalog/regulatory-scan",
+    response_model=RegulatoryScanOut,
+    tags=["catalog", "assessment"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Bulk REACH/Annex XVII scan over the catalog — one row per "
+        "offending recipe, sorted errors-first"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def regulatory_scan(
+    container: Annotated[Container, Depends(get_container)],
+    limit: int = Query(default=500, ge=1, le=5000),
+    category: str | None = Query(default=None),
+    min_severity: str = Query(default="warning", pattern=r"^(warning|error)$"),
+) -> RegulatoryScanOut:
+    from ...application.use_cases.regulatory_scan import RegulatoryScanQuery
+
+    result = await container.regulatory_scan.execute(
+        RegulatoryScanQuery(limit=limit, category=category, min_severity=min_severity)
+    )
+    return RegulatoryScanOut(
+        n_scanned=result.n_scanned,
+        n_offending=result.n_offending,
+        findings=[
+            RegulatoryScanFindingOut(
+                recipe_id=f.recipe_id,
+                category=f.category,
+                subcategory=f.subcategory,
+                status=f.status,
+                total_findings=f.total_findings,
+                errors=f.errors,
+                warnings=f.warnings,
+                top_substances=list(f.top_substances),
+            )
+            for f in result.findings
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Recipes — write
+# ---------------------------------------------------------------------------
+def _recipe_summary(recipe) -> RecipeSummary:  # type: ignore[no-untyped-def]
+    return RecipeSummary.model_validate(asdict(RecipeSummaryDto.from_recipe(recipe)))
+
+
+@router.post(
+    "/recipes",
+    response_model=RecipeSummary,
+    status_code=status.HTTP_201_CREATED,
+    tags=["recipes"],
+    summary="Create a new recipe",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_VALIDATION},
+)
+async def create_recipe(
+    payload: CreateRecipeRequest,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    try:
+        recipe = to_recipe(payload)
+    except (InvalidRecipeError, DomainError, ValueError) as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    created = await container.create_recipe.execute(
+        CreateRecipeCommand(recipe=recipe, actor=principal.subject)
+    )
+    return _recipe_summary(created)
+
+
+@router.put(
+    "/recipes/{recipe_id}",
+    response_model=RecipeSummary,
+    tags=["recipes"],
+    summary="Replace an existing recipe",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT, **_VALIDATION},
+)
+async def replace_recipe(
+    recipe_id: str,
+    payload: UpdateRecipeRequest,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    existing = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if existing is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    try:
+        recipe = to_recipe(payload, recipe_id=recipe_id)
+    except (InvalidRecipeError, DomainError, ValueError) as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    try:
+        updated = await container.update_recipe.execute(
+            UpdateRecipeCommand(recipe=recipe, actor=principal.subject)
+        )
+    except ValueError as exc:
+        # Verified recipes cannot be updated directly.
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+    return _recipe_summary(updated)
+
+
+@router.delete(
+    "/recipes/{recipe_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["recipes"],
+    summary="Delete (soft or hard) a recipe",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def delete_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+    hard: bool = Query(False, description="If true, physically remove; otherwise mark rejected."),
+) -> None:
+    existing = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if existing is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    await container.delete_recipe.execute(
+        DeleteRecipeCommand(recipe_id=recipe_id, actor=principal.subject, hard_delete=hard)
+    )
+
+
+# ---------------------------------------------------------------------------
+# Verification workflow
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/submit-review",
+    response_model=RecipeSummary,
+    tags=["workflow"],
+    summary="Submit a Draft recipe for peer review",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT},
+)
+async def submit_for_review(
+    recipe_id: str,
+    payload: SubmitReviewRequest,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    try:
+        result = await container.submit_for_review.execute(
+            SubmitRecipeForReviewCommand(
+                recipe_id=recipe_id,
+                actor=payload.actor or principal.subject,
+                comment=payload.comment,
+            )
+        )
+    except ValueError as exc:
+        if "not found" in str(exc).lower():
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+    return _recipe_summary(result)
+
+
+@router.post(
+    "/recipes/{recipe_id}/verify",
+    response_model=RecipeSummary,
+    tags=["workflow"],
+    summary="Add one peer verification to a recipe",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT},
+)
+async def verify_recipe(
+    recipe_id: str,
+    payload: VerifyRequest,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    try:
+        result = await container.verify_recipe.execute(
+            VerifyRecipeCommand(
+                recipe_id=recipe_id,
+                verifier=payload.verifier or principal.subject,
+                source_citation_id=payload.source_citation_id,
+                comment=payload.comment,
+            )
+        )
+    except ValueError as exc:
+        if "not found" in str(exc).lower():
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+    return _recipe_summary(result)
+
+
+@router.post(
+    "/recipes/{recipe_id}/reject",
+    response_model=RecipeSummary,
+    tags=["workflow"],
+    summary="Reject a recipe (auditor / admin)",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def reject_recipe(
+    recipe_id: str,
+    payload: RejectRequest,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    try:
+        result = await container.reject_recipe.execute(
+            RejectRecipeCommand(
+                recipe_id=recipe_id, actor=payload.actor or principal.subject, reason=payload.reason
+            )
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    return _recipe_summary(result)
+
+
+@router.post(
+    "/recipes/{recipe_id}/new-version",
+    response_model=RecipeSummary,
+    status_code=status.HTTP_201_CREATED,
+    tags=["recipes", "workflow"],
+    summary=("Fork a new Draft version from a Verified recipe (old version stays immutable)"),
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT},
+)
+async def create_new_recipe_version(
+    recipe_id: str,
+    payload: CreateNewVersionRequest,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    try:
+        result = await container.create_new_version.execute(
+            CreateNewVersionCommand(
+                recipe_id=recipe_id,
+                actor=payload.actor or principal.subject,
+                change_summary=payload.change_summary,
+            )
+        )
+    except ValueError as exc:
+        if "not found" in str(exc).lower():
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+    return _recipe_summary(result)
+
+
+@router.post(
+    "/recipes/{recipe_id}/clone",
+    response_model=RecipeSummary,
+    status_code=status.HTTP_201_CREATED,
+    tags=["recipes"],
+    dependencies=[Depends(require_writer)],
+    summary=(
+        "Duplicate any recipe into a fresh Draft (unlike new-version, works "
+        "on Draft/Rejected/PendingReview sources and does not set previous_version_id)"
+    ),
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def clone_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    from ...application.use_cases.clone_recipe import (
+        CloneRecipeCommand,
+        RecipeNotFoundError,
+    )
+
+    try:
+        cloned = await container.clone_recipe.execute(
+            CloneRecipeCommand(source_recipe_id=recipe_id, actor=principal.subject)
+        )
+    except RecipeNotFoundError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    return _recipe_summary(cloned)
+
+
+@router.get(
+    "/recipes/{recipe_id}/assessment",
+    response_model=RecipeAssessmentOut,
+    tags=["recipes", "assessment"],
+    dependencies=[Depends(require_reader)],
+    summary="Full technological + bibliographic quality assessment",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def assess_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeAssessmentOut:
+    assessment = await container.assess_recipe.execute(AssessRecipeQuery(recipe_id=recipe_id))
+    if assessment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return RecipeAssessmentOut(
+        recipe_id=recipe_id,
+        score=assessment.score,
+        maturity=assessment.maturity.value,
+        findings=[
+            RuleFindingOut(
+                rule_id=f.rule_id,
+                severity=f.severity.value,
+                message=f.message,
+                reference=f.reference,
+            )
+            for f in assessment.findings
+        ],
+        verification_violations=[
+            VerificationViolationOut(rule=v.rule, message=v.message)
+            for v in assessment.verification_violations
+        ],
+        regulatory_findings=[
+            RegulatoryFindingOut(
+                rule_id=r.rule_id,
+                severity=r.severity.value,
+                substance=r.substance,
+                cas_number=r.cas_number,
+                message=r.message,
+                reference=r.reference,
+            )
+            for r in assessment.regulatory_findings
+        ],
+        stoichiometry=(
+            StoichiometryOut(
+                detected_system=assessment.stoichiometry.detected_system,
+                reactive_equivalents_per_100g=assessment.stoichiometry.reactive_equivalents,
+                co_reactive_equivalents_per_100g=assessment.stoichiometry.co_reactive_equivalents,
+                ratio_reactive_to_co=assessment.stoichiometry.ratio_reactive_to_co,
+                recommended_ratio_low=assessment.stoichiometry.recommended_ratio_low,
+                recommended_ratio_high=assessment.stoichiometry.recommended_ratio_high,
+                is_balanced=assessment.stoichiometry.is_balanced,
+                findings=[
+                    StoichiometryFindingOut(
+                        rule_id=f.rule_id,
+                        severity=f.severity.value,
+                        message=f.message,
+                        reference=f.reference,
+                    )
+                    for f in assessment.stoichiometry.findings
+                ],
+            )
+            if assessment.stoichiometry is not None
+            else None
+        ),
+        summary=assessment.summary(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Cost
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/cost",
+    response_model=RecipeCostOut,
+    tags=["recipes", "cost"],
+    dependencies=[Depends(require_reader)],
+    summary="Calculate per-kg / per-litre cost for a supplied price list",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def cost_recipe(
+    recipe_id: str,
+    payload: CostRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeCostOut:
+    from ...application.use_cases.calculate_cost import CalculateRecipeCostCommand
+    from ...domain.value_objects.cost import InvalidPriceError, Price
+
+    prices: dict[str, Price] = {}
+    for item in payload.prices:
+        try:
+            prices[item.component_name] = Price(
+                amount=item.amount, currency=item.currency, unit=item.unit
+            )
+        except InvalidPriceError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    cost = await container.calculate_cost.execute(
+        CalculateRecipeCostCommand(recipe_id=recipe_id, prices=prices)
+    )
+    if cost is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    return RecipeCostOut(
+        recipe_id=recipe_id,
+        currency=cost.currency,
+        cost_per_kg=round(cost.total_cost_per_kg, 6),
+        cost_per_litre=(round(cost.total_cost_per_litre, 6) if cost.total_cost_per_litre else None),
+        priced_fraction=cost.priced_fraction,
+        lines=[
+            CostLineOut(
+                component_name=ln.component_name,
+                mass_percent=ln.mass_percent,
+                unit_price_amount=(ln.unit_price.amount if ln.unit_price else None),
+                unit_price_currency=(ln.unit_price.currency if ln.unit_price else None),
+                unit_price_unit=(ln.unit_price.unit if ln.unit_price else None),
+                cost_per_kg_recipe=ln.cost_per_kg_recipe,
+            )
+            for ln in cost.lines
+        ],
+        missing_prices=list(cost.missing_prices),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Experiments
+# ---------------------------------------------------------------------------
+@router.post(
+    "/experiments",
+    response_model=ExperimentOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["experiments"],
+    dependencies=[Depends(require_writer)],
+    summary="Plan a new experiment against a recipe version",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_VALIDATION},
+)
+async def plan_experiment(
+    payload: ExperimentPlanIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> ExperimentOut:
+    from ...domain.entities.experiment import ExperimentRun
+
+    run = ExperimentRun(
+        recipe_id=payload.recipe_id,
+        recipe_version=payload.recipe_version,
+        title=payload.title,
+        hypothesis=payload.hypothesis,
+        operator=payload.operator,
+    )
+    await container.experiment_repository.save(run)
+    return _experiment_out(run)
+
+
+@router.get(
+    "/experiments/{experiment_id}",
+    response_model=ExperimentOut,
+    tags=["experiments"],
+    dependencies=[Depends(require_reader)],
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_experiment(
+    experiment_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> ExperimentOut:
+    run = await container.experiment_repository.get_by_id(experiment_id)
+    if run is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Experiment not found")
+    return _experiment_out(run)
+
+
+@router.post(
+    "/experiments/{experiment_id}/complete",
+    response_model=ExperimentOut,
+    tags=["experiments"],
+    dependencies=[Depends(require_writer)],
+    summary="Record batch + measured properties, compute verdict",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT, **_VALIDATION},
+)
+async def complete_experiment(
+    experiment_id: str,
+    payload: ExperimentCompletionIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> ExperimentOut:
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...domain.entities.experiment import BatchInfo, InvalidExperimentError, MeasuredValue
+
+    run = await container.experiment_repository.get_by_id(experiment_id)
+    if run is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Experiment not found")
+    # Backfill target_properties from the recipe if the experiment was
+    # planned without them (which we allow for free-form exploratory runs).
+    if not run.target_properties:
+        recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=run.recipe_id))
+        if recipe is not None:
+            run = run.__class__(  # type: ignore[misc]
+                recipe_id=run.recipe_id,
+                recipe_version=run.recipe_version,
+                id=run.id,
+                title=run.title,
+                hypothesis=run.hypothesis,
+                status=run.status,
+                target_properties=recipe.target_properties,
+                operator=run.operator,
+                created_at=run.created_at,
+            )
+    try:
+        completed = run.complete(
+            BatchInfo(
+                batch_number=payload.batch.batch_number,
+                target_mass_kg=payload.batch.target_mass_kg,
+                actual_mass_kg=payload.batch.actual_mass_kg,
+                lot_numbers=payload.batch.lot_numbers,
+                equipment_used=payload.batch.equipment_used,
+            ),
+            tuple(
+                MeasuredValue(
+                    property_code=m.property_code,
+                    value=m.value,
+                    unit=m.unit,
+                    operator=m.operator,
+                    notes=m.notes,
+                )
+                for m in payload.measured_properties
+            ),
+        )
+    except InvalidExperimentError as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+
+    await container.experiment_repository.save(completed)
+    return _experiment_out(completed)
+
+
+@router.post(
+    "/experiments/{experiment_id}/apply",
+    response_model=ApplyLabResultsOut,
+    tags=["experiments"],
+    dependencies=[Depends(require_writer)],
+    summary="Apply lab results to the recipe (annotate / branch / promote)",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT},
+)
+async def apply_lab_results(
+    experiment_id: str,
+    payload: ApplyLabResultsIn,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> ApplyLabResultsOut:
+    from ...application.use_cases.apply_lab_results import (
+        ApplyLabResultsCommand,
+        ApplyLabResultsError,
+        ApplyMode,
+    )
+
+    try:
+        mode = ApplyMode(payload.mode)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    try:
+        result = await container.apply_lab_results.execute(
+            ApplyLabResultsCommand(
+                experiment_id=experiment_id,
+                actor=payload.actor or principal.subject,
+                mode=mode,
+                change_note=payload.change_note,
+            )
+        )
+    except ApplyLabResultsError as exc:
+        # Distinguish 404 vs 409.
+        detail = str(exc)
+        if "not found" in detail.lower():
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, detail) from exc
+
+    return ApplyLabResultsOut(
+        original_recipe_id=result.original_recipe_id,
+        resulting_recipe_id=result.resulting_recipe_id,
+        verdict=result.verdict.value,
+        mode=result.mode.value,
+        deviations=[
+            DeviationOut(
+                property_code=d.property_code,
+                target_value=d.target_value,
+                measured_value=d.measured_value,
+                unit=d.unit,
+            )
+            for d in result.deviations
+        ],
+    )
+
+
+def _experiment_out(run) -> ExperimentOut:  # type: ignore[no-untyped-def]
+    return ExperimentOut(
+        id=run.id,
+        recipe_id=run.recipe_id,
+        recipe_version=run.recipe_version,
+        title=run.title,
+        status=run.status.value,
+        verdict=run.verdict.value if run.verdict is not None else None,
+        operator=run.operator,
+        measured_properties=[
+            ProcessMeasuredIn(
+                property_code=mv.property_code,
+                value=mv.value,
+                unit=mv.unit,
+                operator=mv.operator,
+                notes=mv.notes,
+            )
+            for mv in run.measured_properties
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — training + prediction + registry
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/train",
+    response_model=TrainingResultOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Train / retrain per-property regressors from experiment data",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN},
+)
+async def train_models(
+    payload: TrainModelsRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> TrainingResultOut:
+    from ...application.use_cases.ml_train import TrainPropertyModelsCommand
+
+    try:
+        result = await container.train_property_models.execute(
+            TrainPropertyModelsCommand(
+                recipe_ids=tuple(payload.recipe_ids),
+                property_codes=tuple(payload.property_codes),
+            )
+        )
+    except Exception as exc:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
+    return TrainingResultOut(
+        trained=[_model_metadata_out(m) for m in result.trained],
+        skipped=result.skipped,
+    )
+
+
+def _model_metadata_out(m: Any) -> ModelMetadataOut:
+    """Serialise a :class:`ModelMetadata` into the API DTO."""
+    return ModelMetadataOut(
+        property_code=m.property_code,
+        version=m.version,
+        n_samples=m.n_samples,
+        n_features=m.n_features,
+        feature_names=list(m.feature_names),
+        cv_mean_r2=round(m.cv_mean_r2, 4),
+        cv_std_r2=round(m.cv_std_r2, 4),
+        training_recipe_ids=list(m.training_recipe_ids),
+        algorithm=m.algorithm,
+        fingerprint=m.fingerprint,
+        holdout_r2=(round(m.holdout_r2, 4) if m.holdout_r2 is not None else None),
+        holdout_mae=(round(m.holdout_mae, 4) if m.holdout_mae is not None else None),
+        holdout_size=m.holdout_size,
+    )
+
+
+@router.get(
+    "/ml/models",
+    response_model=list[ModelMetadataOut],
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="List regression models currently registered",
+    responses={**_UNAUTHORIZED},
+)
+async def list_models(
+    container: Annotated[Container, Depends(get_container)],
+) -> list[ModelMetadataOut]:
+    return [_model_metadata_out(m) for m in container.property_regressor.list_models()]
+
+
+@router.get(
+    "/recipes/{recipe_id}/predict",
+    response_model=PredictionsOut,
+    tags=["ml", "recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Predict property values for a recipe using trained models",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def predict_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    property_code: list[str] = Query(default_factory=list),
+    explain_top_k: int = Query(
+        0,
+        ge=0,
+        le=10,
+        description=(
+            "If > 0, attach SHAP-style attributions for the top-k features driving each prediction."
+        ),
+    ),
+) -> PredictionsOut:
+    from ...application.use_cases.ml_predict import PredictPropertyQuery
+
+    result = await container.predict_properties.execute(
+        PredictPropertyQuery(
+            recipe_id=recipe_id,
+            property_codes=tuple(property_code),
+            explain_top_k=(explain_top_k or None),
+        )
+    )
+    if result is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return PredictionsOut(
+        recipe_id=recipe_id,
+        predictions=[
+            PropertyPredictionOut(
+                property_code=p.property_code,
+                predicted_value=p.predicted_value,
+                model_version=p.model_version,
+                model_cv_r2=p.model_cv_r2,
+                unit=p.unit,
+                lower_bound=p.lower_bound,
+                upper_bound=p.upper_bound,
+                interval_alpha=p.interval_alpha,
+                top_features=[
+                    FeatureImpactOutBase(
+                        feature_name=fi.feature_name,
+                        contribution=round(fi.contribution, 6),
+                        baseline_value=round(fi.baseline_value, 6),
+                        global_importance=round(fi.global_importance, 6),
+                    )
+                    for fi in p.top_features
+                ],
+            )
+            for p in result
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Batch analysis
+# ---------------------------------------------------------------------------
+@router.post(
+    "/experiments/{experiment_id}/batch-report",
+    response_model=BatchAnalysisOut,
+    tags=["experiments", "cost"],
+    dependencies=[Depends(require_reader)],
+    summary="Batch-level cost + mass balance + regulatory report",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def batch_report(
+    experiment_id: str,
+    payload: BatchAnalysisRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> BatchAnalysisOut:
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...domain.services.batch_analysis import analyse_batch
+    from ...domain.value_objects.cost import InvalidPriceError, Price
+
+    run = await container.experiment_repository.get_by_id(experiment_id)
+    if run is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Experiment not found")
+    if run.batch is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Experiment has no batch data — complete it first.",
+        )
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=run.recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    prices: dict[str, Price] = {}
+    for item in payload.prices:
+        try:
+            prices[item.component_name] = Price(
+                amount=item.amount, currency=item.currency, unit=item.unit
+            )
+        except InvalidPriceError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    report = analyse_batch(recipe, run.batch, prices)
+    return BatchAnalysisOut(
+        experiment_id=experiment_id,
+        recipe_id=recipe.id,
+        cost=BatchCostOut(
+            batch_number=report.cost.batch_number,
+            currency=report.cost.currency,
+            total_cost=round(report.cost.total_cost, 6),
+            priced_fraction=report.cost.priced_fraction,
+            lines=[
+                BatchCostLineOut(
+                    component_name=ln.component_name,
+                    mass_kg=round(ln.mass_kg, 6),
+                    lot_number=ln.lot_number,
+                    cost=(round(ln.cost, 6) if ln.cost is not None else None),
+                )
+                for ln in report.cost.lines
+            ],
+            missing_prices=list(report.cost.missing_prices),
+        ),
+        mass_balance=MassBalanceOut(
+            batch_number=report.mass_balance.batch_number,
+            target_mass_kg=report.mass_balance.target_mass_kg,
+            actual_mass_kg=report.mass_balance.actual_mass_kg,
+            yield_percent=(
+                round(report.mass_balance.yield_percent, 3)
+                if report.mass_balance.yield_percent is not None
+                else None
+            ),
+            is_within_tolerance=report.mass_balance.is_within_tolerance,
+        ),
+        regulatory_findings=[
+            RegulatoryFindingOut(
+                rule_id=r.rule_id,
+                severity=r.severity.value,
+                substance=r.substance,
+                cas_number=r.cas_number,
+                message=r.message,
+                reference=r.reference,
+            )
+            for r in report.regulatory.findings
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — optimisation & drift
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/optimise",
+    response_model=OptimisationResultOut,
+    tags=["ml", "recipes"],
+    dependencies=[Depends(require_writer)],
+    summary="Inverse-search: adjust the recipe to hit property targets",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_VALIDATION},
+)
+async def optimise_recipe(
+    recipe_id: str,
+    payload: OptimisationRequestIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> OptimisationResultOut:
+    from ...application.use_cases.optimise_recipe import (
+        OptimiseRecipeCommand,
+        RecipeNotFoundError,
+    )
+    from ...infrastructure.ml.optimiser import ComponentBounds, PropertyTarget
+
+    try:
+        result = await container.optimise_recipe.execute(
+            OptimiseRecipeCommand(
+                recipe_id=recipe_id,
+                targets=tuple(
+                    PropertyTarget(
+                        property_code=t.property_code,
+                        target_value=t.target_value,
+                        tolerance=t.tolerance,
+                        direction=t.direction,
+                        weight=t.weight,
+                    )
+                    for t in payload.targets
+                ),
+                bounds=tuple(
+                    ComponentBounds(
+                        component_name=b.component_name,
+                        min_percent=b.min_percent,
+                        max_percent=b.max_percent,
+                    )
+                    for b in payload.bounds
+                ),
+                max_iterations=payload.max_iterations,
+                population_size=payload.population_size,
+                seed=payload.seed,
+            )
+        )
+    except RecipeNotFoundError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    except RuntimeError as exc:  # scipy missing
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
+
+    return OptimisationResultOut(
+        base_recipe_id=result.base_recipe_id,
+        optimised_mass_percent={k: round(v, 4) for k, v in result.optimised_mass_percent.items()},
+        predicted_values={k: round(v, 4) for k, v in result.predicted_values.items()},
+        final_loss=round(result.final_loss, 6),
+        converged=result.converged,
+        iterations_used=result.iterations_used,
+        notes=list(result.notes),
+    )
+
+
+@router.post(
+    "/ml/models/{property_code}/drift",
+    response_model=DriftCheckOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="PSI + KS drift check against the model's training distribution",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def drift_check(
+    property_code: str,
+    payload: DriftCheckRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> DriftCheckOut:
+    from ...infrastructure.ml.drift import compare_distributions
+    from ...infrastructure.ml.features import FEATURE_NAMES
+
+    training_vectors = container.property_regressor.get_training_vectors(payload.property_code)
+    if training_vectors is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={payload.property_code!r}",
+        )
+
+    # We currently receive a flat list of *target* values; the drift
+    # test is per-feature.  For a target-value distribution we compare
+    # against the historical measured targets by convention (index 0
+    # of the last column is not stored; so we just compare the caller
+    # sample to the *first* feature — mass_percent_vehicle — as a smoke
+    # test).  Real callers can extend this to full-vector comparison.
+    reference_first_feature = [row[0] for row in training_vectors if row]
+    report = compare_distributions(
+        reference_first_feature,
+        payload.current_values,
+        feature_name=FEATURE_NAMES[0],
+    )
+    return DriftCheckOut(
+        property_code=payload.property_code,
+        reports=[
+            DriftReportOut(
+                feature_name=report.feature_name,
+                psi=round(report.psi, 6),
+                ks_statistic=round(report.ks_statistic, 6),
+                ks_p_value=(round(report.ks_p_value, 6) if report.ks_p_value is not None else None),
+                level=report.level.value,
+                n_reference=report.n_reference,
+                n_current=report.n_current,
+            )
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — drift-full, calibrate, pareto
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/models/{property_code}/drift-full",
+    response_model=DriftFullOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Per-feature drift across all model inputs",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def drift_full(
+    property_code: str,
+    payload: DriftFullRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> DriftFullOut:
+    from ...infrastructure.ml.drift import (
+        DriftLevel,
+        compare_feature_matrices,
+    )
+    from ...infrastructure.ml.features import FEATURE_NAMES
+
+    reference = container.property_regressor.get_training_vectors(property_code)
+    if reference is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={property_code!r}",
+        )
+    if any(len(row) != len(FEATURE_NAMES) for row in payload.current_vectors):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"every current_vectors row must have {len(FEATURE_NAMES)} entries",
+        )
+
+    reports = compare_feature_matrices(
+        reference, payload.current_vectors, feature_names=list(FEATURE_NAMES)
+    )
+    # Aggregate worst level for a quick banner in the UI.
+    order = {DriftLevel.NO_DRIFT: 0, DriftLevel.MODERATE_DRIFT: 1, DriftLevel.SEVERE_DRIFT: 2}
+    worst = DriftLevel.NO_DRIFT
+    for report in reports:
+        if order[report.level] > order[worst]:
+            worst = report.level
+
+    return DriftFullOut(
+        property_code=property_code,
+        reports=[
+            DriftReportOut(
+                feature_name=r.feature_name,
+                psi=round(r.psi, 6),
+                ks_statistic=round(r.ks_statistic, 6),
+                ks_p_value=(round(r.ks_p_value, 6) if r.ks_p_value is not None else None),
+                level=r.level.value,
+                n_reference=r.n_reference,
+                n_current=r.n_current,
+            )
+            for r in reports
+        ],
+        worst_level=worst.value,
+    )
+
+
+@router.get(
+    "/ml/models/{property_code}/drift-from-catalog",
+    response_model=DriftFullOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Per-feature drift comparing the model's training snapshot against "
+        "current catalog or logged production feature vectors"
+    ),
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def drift_from_catalog(
+    property_code: str,
+    container: Annotated[Container, Depends(get_container)],
+    limit: int = Query(
+        default=100,
+        ge=5,
+        le=1000,
+        description="How many samples to pull for the current distribution.",
+    ),
+    category: str | None = Query(
+        default=None,
+        description="Restrict the catalog sample to recipes in this category.",
+    ),
+    source: str = Query(
+        default="catalog",
+        description=(
+            "Where to pull the 'current' distribution from: 'catalog' (recipe "
+            "compositions) or 'production' (ingested production_feature_vector rows)."
+        ),
+    ),
+) -> DriftFullOut:
+    """Convenience endpoint: no client-side feature engineering needed.
+
+    ``source='catalog'`` — the historical behaviour; extracts feature
+    vectors from the current recipes in the catalog.  ``source='production'``
+    reads from ``production_feature_vector`` — the operational
+    monitoring path (needs prior ``POST /ml/production-vectors``).
+    """
+    from ...infrastructure.ml.drift import (
+        DriftLevel,
+        compare_feature_matrices,
+    )
+    from ...infrastructure.ml.features import FEATURE_NAMES, to_vector
+
+    reference = container.property_regressor.get_training_vectors(property_code)
+    if reference is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={property_code!r}",
+        )
+
+    if source == "production":
+        samples = await container.production_vector_repository.list_recent(limit=limit)
+        if not samples:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                "No production feature vectors ingested yet — POST /ml/production-vectors first.",
+            )
+        # Reject rows with a wrong feature width rather than silently truncating.
+        for s in samples:
+            if len(s.features) != len(FEATURE_NAMES):
+                raise HTTPException(
+                    status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    (
+                        f"production sample {s.id} has {len(s.features)} features, "
+                        f"expected {len(FEATURE_NAMES)}"
+                    ),
+                )
+        current_vectors = [s.features for s in samples]
+    elif source == "catalog":
+        catalog = await container.recipe_repository.find_by_criteria(
+            category=category,
+            limit=limit,
+            offset=0,
+        )
+        if not catalog:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                "No recipes in the catalog to compare against.",
+            )
+        current_vectors = [to_vector(r) for r in catalog]
+    else:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"unknown source={source!r}; use 'catalog' or 'production'",
+        )
+
+    reports = compare_feature_matrices(
+        reference, current_vectors, feature_names=list(FEATURE_NAMES)
+    )
+    order = {
+        DriftLevel.NO_DRIFT: 0,
+        DriftLevel.MODERATE_DRIFT: 1,
+        DriftLevel.SEVERE_DRIFT: 2,
+    }
+    worst = DriftLevel.NO_DRIFT
+    for report in reports:
+        if order[report.level] > order[worst]:
+            worst = report.level
+
+    return DriftFullOut(
+        property_code=property_code,
+        reports=[
+            DriftReportOut(
+                feature_name=r.feature_name,
+                psi=round(r.psi, 6),
+                ks_statistic=round(r.ks_statistic, 6),
+                ks_p_value=(round(r.ks_p_value, 6) if r.ks_p_value is not None else None),
+                level=r.level.value,
+                n_reference=r.n_reference,
+                n_current=r.n_current,
+            )
+            for r in reports
+        ],
+        worst_level=worst.value,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Production feature-vector telemetry (drift monitoring input)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/production-vectors",
+    response_model=ProductionVectorIngestOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary=(
+        "Ingest one or more production feature vectors (used by "
+        "drift-from-catalog?source=production)"
+    ),
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_VALIDATION},
+)
+async def ingest_production_vectors(
+    payload: ProductionVectorIngestRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> ProductionVectorIngestOut:
+    """Two modes per item, chosen by whether ``features`` is provided:
+
+    - ``features`` present → the caller has already computed the
+      37-column vector (e.g. an integration reading composition from
+      SAP); we store it verbatim.
+    - ``features`` omitted → we fetch the current recipe for the
+      supplied ``recipe_id`` and extract the vector server-side.  This
+      keeps a plant IT team out of feature-engineering business.
+    """
+    from ...infrastructure.ml.features import FEATURE_NAMES, to_vector
+
+    rows: list[tuple[str, list[float], str, str]] = []
+    skipped: dict[str, str] = {}
+    for i, item in enumerate(payload.items):
+        if item.features is not None:
+            if len(item.features) != len(FEATURE_NAMES):
+                skipped[f"item#{i}"] = (
+                    f"features has length {len(item.features)}, expected {len(FEATURE_NAMES)}"
+                )
+                continue
+            rows.append((item.recipe_id, list(item.features), item.source, item.notes))
+            continue
+
+        recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=item.recipe_id))
+        if recipe is None:
+            skipped[f"item#{i}"] = f"recipe not found: {item.recipe_id}"
+            continue
+        rows.append((item.recipe_id, to_vector(recipe), item.source, item.notes))
+
+    if not rows:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"no valid items to ingest (skipped: {skipped})",
+        )
+
+    ids = await container.production_vector_repository.add_many(rows)
+    return ProductionVectorIngestOut(accepted=len(ids), ids=ids, skipped=skipped)
+
+
+@router.get(
+    "/ml/production-vectors",
+    response_model=ProductionVectorsListOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="List the most recently ingested production feature vectors",
+    responses={**_UNAUTHORIZED},
+)
+async def list_production_vectors(
+    container: Annotated[Container, Depends(get_container)],
+    recipe_id: str | None = Query(default=None),
+    source: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+) -> ProductionVectorsListOut:
+    total = await container.production_vector_repository.count()
+    samples = await container.production_vector_repository.list_recent(
+        recipe_id=recipe_id, source=source, limit=limit
+    )
+    return ProductionVectorsListOut(
+        total=total,
+        samples=[
+            ProductionVectorOut(
+                id=s.id,
+                recipe_id=s.recipe_id,
+                recorded_at=s.recorded_at.isoformat(),
+                source=s.source,
+                features=s.features,
+                notes=s.notes,
+            )
+            for s in samples
+        ],
+    )
+
+
+@router.post(
+    "/ml/models/{property_code}/calibrate",
+    response_model=CalibrationOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Fit isotonic + interval calibration for a trained model",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_VALIDATION},
+)
+async def calibrate_model(
+    property_code: str,
+    payload: CalibrationRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> CalibrationOut:
+    from ...infrastructure.ml.calibration import CalibrationError
+
+    raw = [s.raw_prediction for s in payload.samples]
+    actual = [s.actual for s in payload.samples]
+    lowers = [s.lower for s in payload.samples if s.lower is not None]
+    uppers = [s.upper for s in payload.samples if s.upper is not None]
+    include_interval = len(lowers) == len(payload.samples) and len(uppers) == len(payload.samples)
+
+    try:
+        bundle = container.property_regressor.calibrate(
+            property_code,
+            raw_predictions=raw,
+            actual_values=actual,
+            lowers=(lowers if include_interval else None),
+            uppers=(uppers if include_interval else None),
+            target_coverage=payload.target_coverage,
+        )
+    except CalibrationError as exc:
+        # 404 when there's no matching model, 422 otherwise.
+        if "No model" in str(exc):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    return CalibrationOut(
+        property_code=bundle.property_code,
+        version=bundle.version,
+        n_samples=bundle.calibration_n,
+        has_isotonic=bundle.isotonic is not None,
+        has_interval=bundle.interval is not None,
+        empirical_coverage=(
+            round(bundle.interval.empirical_coverage, 4) if bundle.interval is not None else None
+        ),
+        target_coverage=(bundle.interval.target_coverage if bundle.interval is not None else None),
+        factor=(round(bundle.interval.factor, 4) if bundle.interval is not None else None),
+        notes=list(bundle.notes),
+    )
+
+
+@router.post(
+    "/recipes/{recipe_id}/pareto",
+    response_model=ParetoResultOut,
+    tags=["ml", "recipes"],
+    dependencies=[Depends(require_writer)],
+    summary="Multi-objective (Pareto) optimisation across property targets",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def pareto_optimise(
+    recipe_id: str,
+    payload: ParetoRequestIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> ParetoResultOut:
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...infrastructure.ml.optimiser import ComponentBounds, PropertyTarget
+    from ...infrastructure.ml.pareto import ParetoOptimiser, ParetoRequest
+
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    def _predict(candidate, code):  # type: ignore[no-untyped-def]
+        prediction = container.property_regressor.predict(candidate, code, alpha=None)
+        return prediction.predicted_value if prediction else None
+
+    optimiser = ParetoOptimiser(predictor=_predict)
+    result = optimiser.optimise(
+        recipe,
+        ParetoRequest(
+            targets=tuple(
+                PropertyTarget(
+                    property_code=t.property_code,
+                    target_value=t.target_value,
+                    tolerance=t.tolerance,
+                    direction=t.direction,
+                    weight=t.weight,
+                )
+                for t in payload.targets
+            ),
+            bounds=tuple(
+                ComponentBounds(
+                    component_name=b.component_name,
+                    min_percent=b.min_percent,
+                    max_percent=b.max_percent,
+                )
+                for b in payload.bounds
+            ),
+            population_size=payload.population_size,
+            generations=payload.generations,
+            mutation_std=payload.mutation_std,
+            seed=payload.seed,
+        ),
+    )
+    return ParetoResultOut(
+        base_recipe_id=result.base_recipe_id,
+        front=[
+            ParetoPointOut(
+                mass_percent={k: round(v, 4) for k, v in p.mass_percent.items()},
+                objectives={k: round(v, 4) for k, v in p.objectives.items()},
+                rank=p.rank,
+                crowding_distance=round(p.crowding_distance, 6),
+            )
+            for p in result.front
+        ],
+        generations=result.generations,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — batch calibration + coverage matrix
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/calibrate",
+    response_model=CalibrationBatchOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Calibrate isotonic + interval bounds for many models in one call",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_VALIDATION},
+)
+async def calibrate_models_batch(
+    payload: CalibrationBatchRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> CalibrationBatchOut:
+    from ...infrastructure.ml.calibration import CalibrationError
+
+    calibrated: list[CalibrationOut] = []
+    skipped: dict[str, str] = {}
+
+    for entry in payload.entries:
+        code = entry.property_code
+        raw = [s.raw_prediction for s in entry.samples]
+        actual = [s.actual for s in entry.samples]
+        lowers = [s.lower for s in entry.samples if s.lower is not None]
+        uppers = [s.upper for s in entry.samples if s.upper is not None]
+        include_interval = len(lowers) == len(entry.samples) and len(uppers) == len(entry.samples)
+        try:
+            bundle = container.property_regressor.calibrate(
+                code,
+                raw_predictions=raw,
+                actual_values=actual,
+                lowers=(lowers if include_interval else None),
+                uppers=(uppers if include_interval else None),
+                target_coverage=payload.target_coverage,
+            )
+        except CalibrationError as exc:
+            skipped[code] = str(exc)
+            continue
+
+        calibrated.append(
+            CalibrationOut(
+                property_code=bundle.property_code,
+                version=bundle.version,
+                n_samples=bundle.calibration_n,
+                has_isotonic=bundle.isotonic is not None,
+                has_interval=bundle.interval is not None,
+                empirical_coverage=(
+                    round(bundle.interval.empirical_coverage, 4)
+                    if bundle.interval is not None
+                    else None
+                ),
+                target_coverage=(
+                    bundle.interval.target_coverage if bundle.interval is not None else None
+                ),
+                factor=(round(bundle.interval.factor, 4) if bundle.interval is not None else None),
+                notes=list(bundle.notes),
+            )
+        )
+
+    return CalibrationBatchOut(calibrated=calibrated, skipped=skipped)
+
+
+@router.get(
+    "/ml/calibration-matrix",
+    response_model=CalibrationMatrixOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Coverage matrix across every registered model (model + calibration side-by-side)",
+    responses={**_UNAUTHORIZED},
+)
+async def calibration_matrix(
+    container: Annotated[Container, Depends(get_container)],
+) -> CalibrationMatrixOut:
+    rows: list[CalibrationMatrixRowOut] = []
+    n_calibrated = 0
+    n_under_covered = 0
+
+    for metadata in container.property_regressor.list_models():
+        bundle = container.property_regressor.get_calibration(metadata.property_code)
+        has_calibration = bundle is not None
+        has_iso = bool(bundle and bundle.isotonic)
+        has_interval = bool(bundle and bundle.interval)
+        target_cov: float | None = None
+        empirical_cov: float | None = None
+        factor: float | None = None
+        cal_n: int | None = None
+        gap: float | None = None
+        if bundle is not None:
+            n_calibrated += 1
+            cal_n = bundle.calibration_n
+            if bundle.interval is not None:
+                target_cov = bundle.interval.target_coverage
+                empirical_cov = round(bundle.interval.empirical_coverage, 4)
+                factor = round(bundle.interval.factor, 4)
+                gap = round(empirical_cov - target_cov, 4)
+                # More than 5 percentage points below target = under-covering.
+                if gap <= -0.05:
+                    n_under_covered += 1
+
+        rows.append(
+            CalibrationMatrixRowOut(
+                property_code=metadata.property_code,
+                model_version=metadata.version,
+                cv_mean_r2=round(metadata.cv_mean_r2, 4),
+                n_samples=metadata.n_samples,
+                has_calibration=has_calibration,
+                has_isotonic=has_iso,
+                has_interval=has_interval,
+                target_coverage=target_cov,
+                empirical_coverage=empirical_cov,
+                coverage_gap=gap,
+                factor=factor,
+                calibration_n=cal_n,
+            )
+        )
+
+    return CalibrationMatrixOut(
+        rows=rows,
+        n_models=len(rows),
+        n_calibrated=n_calibrated,
+        n_under_covered=n_under_covered,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — drift + alert dispatch
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/models/{property_code}/drift-full/alert",
+    response_model=DriftAlertOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Run per-feature drift and dispatch an alert when severe drift is detected",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_VALIDATION},
+)
+async def drift_full_alert(
+    property_code: str,
+    payload: DriftAlertRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> DriftAlertOut:
+    from ...infrastructure.ml.drift import (
+        DriftLevel,
+        compare_feature_matrices,
+    )
+    from ...infrastructure.ml.features import FEATURE_NAMES
+    from ...infrastructure.notifications import Alert
+
+    reference = container.property_regressor.get_training_vectors(property_code)
+    if reference is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={property_code!r}",
+        )
+    if any(len(row) != len(FEATURE_NAMES) for row in payload.current_vectors):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"every current_vectors row must have {len(FEATURE_NAMES)} entries",
+        )
+
+    reports = compare_feature_matrices(
+        reference, payload.current_vectors, feature_names=list(FEATURE_NAMES)
+    )
+    order = {DriftLevel.NO_DRIFT: 0, DriftLevel.MODERATE_DRIFT: 1, DriftLevel.SEVERE_DRIFT: 2}
+    worst = DriftLevel.NO_DRIFT
+    for report in reports:
+        if order[report.level] > order[worst]:
+            worst = report.level
+
+    accepted_levels = {"no_drift", "moderate_drift", "severe_drift"}
+    if payload.dispatch_min_level not in accepted_levels:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"dispatch_min_level must be one of {sorted(accepted_levels)}",
+        )
+    threshold = order[DriftLevel(payload.dispatch_min_level)]
+
+    dispatched = False
+    reason = "below-threshold"
+    if order[worst] >= threshold:
+        top = sorted(
+            reports,
+            key=lambda r: (order[r.level], r.psi, r.ks_statistic),
+            reverse=True,
+        )[:5]
+        alert = Alert(
+            kind="ml.drift",
+            severity="critical" if worst == DriftLevel.SEVERE_DRIFT else "warning",
+            title=f"Feature drift detected for {property_code}",
+            summary=(
+                f"Worst level: {worst.value}. "
+                f"{len(reports)} features compared "
+                f"({len(payload.current_vectors)} current vs "
+                f"{len(reference)} reference samples)."
+            ),
+            fields={
+                "property_code": property_code,
+                "worst_level": worst.value,
+                "n_reference": len(reference),
+                "n_current": len(payload.current_vectors),
+                "top_features": [
+                    {
+                        "feature": r.feature_name,
+                        "level": r.level.value,
+                        "psi": round(r.psi, 4),
+                        "ks": round(r.ks_statistic, 4),
+                    }
+                    for r in top
+                ],
+                **payload.context,
+            },
+        )
+        dispatched = await container.alert_notifier.notify(alert)
+        reason = "dispatched" if dispatched else "notifier-rejected"
+
+    return DriftAlertOut(
+        property_code=property_code,
+        worst_level=worst.value,
+        reports=[
+            DriftReportOut(
+                feature_name=r.feature_name,
+                psi=round(r.psi, 6),
+                ks_statistic=round(r.ks_statistic, 6),
+                ks_p_value=(round(r.ks_p_value, 6) if r.ks_p_value is not None else None),
+                level=r.level.value,
+                n_reference=r.n_reference,
+                n_current=r.n_current,
+            )
+            for r in reports
+        ],
+        alert_dispatched=dispatched,
+        dispatch_reason=reason,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — async training + job registry
+# ---------------------------------------------------------------------------
+def _job_to_out(record: Any) -> JobRecordOut:
+    return JobRecordOut(
+        id=record.id,
+        kind=record.kind,
+        status=record.status,
+        created_at=record.created_at,
+        started_at=record.started_at,
+        finished_at=record.finished_at,
+        duration_seconds=record.duration_seconds,
+        metadata=dict(record.metadata),
+        result=record.result,
+        error=record.error,
+    )
+
+
+@router.post(
+    "/ml/train/async",
+    response_model=JobRecordOut,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Submit a non-blocking training job; poll /ml/jobs/{job_id} for status",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN},
+)
+async def train_models_async(
+    payload: TrainModelsRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> JobRecordOut:
+    from ...application.use_cases.ml_train import TrainPropertyModelsCommand
+
+    async def _run() -> dict[str, Any]:
+        result = await container.train_property_models.execute(
+            TrainPropertyModelsCommand(
+                recipe_ids=tuple(payload.recipe_ids),
+                property_codes=tuple(payload.property_codes),
+            )
+        )
+        return {
+            "trained": [
+                {
+                    "property_code": m.property_code,
+                    "version": m.version,
+                    "n_samples": m.n_samples,
+                    "cv_mean_r2": round(m.cv_mean_r2, 4),
+                    "cv_std_r2": round(m.cv_std_r2, 4),
+                    "fingerprint": m.fingerprint,
+                }
+                for m in result.trained
+            ],
+            "skipped": dict(result.skipped),
+        }
+
+    record = await container.job_registry.submit(
+        kind="ml.train",
+        coro_factory=_run,
+        metadata={
+            "recipe_ids": list(payload.recipe_ids),
+            "property_codes": list(payload.property_codes),
+        },
+    )
+    return _job_to_out(record)
+
+
+@router.get(
+    "/ml/jobs",
+    response_model=JobsListOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="List recent ML jobs (most recent first, up to 100)",
+    responses={**_UNAUTHORIZED},
+)
+async def list_jobs(
+    container: Annotated[Container, Depends(get_container)],
+    status_filter: str | None = Query(
+        default=None,
+        alias="status",
+        description="Filter by status: queued|running|succeeded|failed|cancelled",
+    ),
+    kind: str | None = Query(default=None, description="Filter by job kind (e.g. ml.train)."),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> JobsListOut:
+    records = container.job_registry.list(
+        status=status_filter,  # type: ignore[arg-type]
+        kind=kind,
+        limit=limit,
+    )
+    return JobsListOut(jobs=[_job_to_out(r) for r in records])
+
+
+@router.get(
+    "/ml/jobs/{job_id}",
+    response_model=JobRecordOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Fetch a single job by id",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_job(
+    job_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> JobRecordOut:
+    record = container.job_registry.get(job_id)
+    if record is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Job not found")
+    return _job_to_out(record)
+
+
+@router.delete(
+    "/ml/jobs/{job_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Cancel a queued or running job (no-op for terminal jobs)",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def cancel_job(
+    job_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> None:
+    ok = await container.job_registry.cancel(job_id)
+    if not ok:
+        # Distinguish "unknown id" (404) from "already-terminal" (409).
+        if container.job_registry.get(job_id) is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Job not found")
+        raise HTTPException(status.HTTP_409_CONFLICT, "Job is already in a terminal state")
+
+
+__all__ = ["router"]

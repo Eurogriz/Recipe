@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: formulation-workbench
+  namespace: formulation-workbench
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: formulation-workbench
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # HTTP from any pod in the ingress-controller namespace + Prometheus.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 8000
+          protocol: TCP
+  egress:
+    # DNS is always required.
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # Database — narrow to the Postgres service when known.
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgres
+      ports:
+        - port: 5432
+          protocol: TCP
+    # HTTPS (OpenTelemetry collector, package updates, etc.).
+    - ports:
+        - port: 443
+          protocol: TCP

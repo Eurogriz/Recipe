@@ -1,7 +1,7 @@
 {
   "_category": "Лаки",
-  "_description": "Лаки — verified formulations (70 recipes across 14 base formulations).",
-  "_count": 70,
+  "_description": "Лаки — verified formulations (85 recipes across 14 base formulations).",
+  "_count": 85,
   "recipes": [
     {
       "id": "ad033135-8ad2-1d5a-e1c2-57dfe8cb7240",
@@ -7420,6 +7420,429 @@
       }
     },
     {
+      "id": "720bb627-33e2-5cde-2960-a40f0ef7f4e6",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "SuperEconomy",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Полупрозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "SuperEconomy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: B (Полупрозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 44.75,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 22.38,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 16.78,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 6.58,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 2.8,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.36,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.12,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.28,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.17,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 1.79,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "bbf618e7-28fc-8e86-86bf-92789a3f0e83",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "SuperEconomy",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "SuperEconomy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: C (Прозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 47.9,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 23.95,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 17.96,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 2.99,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.59,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.2,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.18,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 1.92,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "29d17e6d-75ca-5ca6-1e96-26e1ab7c7cbd",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "SuperEconomy",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "SuperEconomy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: D (Тёмный под колеровку). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 47.19,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 23.6,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 17.7,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 1.49,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 2.95,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.54,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.18,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.18,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 1.89,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
       "id": "3eb2e79d-1389-28e6-a193-ff1f69d30368",
       "metadata": {
         "category": "Лаки",
@@ -7524,6 +7947,429 @@
               "cas_number": "112926-00-8",
               "function": "Матирование",
               "mass_percent": 2.35,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "643257b5-a6fe-1739-7404-36ee3c16845d",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Economy",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Полупрозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Economy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: B (Полупрозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 43.27,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 21.64,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 16.23,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 7.72,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 3.79,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.25,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.08,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.38,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.23,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 2.42,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "270a015f-bfc8-d34b-ed00-c508585d33a2",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Economy",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Economy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: C (Прозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 46.89,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 23.45,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 17.58,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 4.1,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.52,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.17,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.41,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.25,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 2.63,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "2a0722aa-09d1-ffe7-6f3b-776f11069376",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Economy",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Economy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: D (Тёмный под колеровку). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 46.07,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 23.03,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 17.28,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 1.76,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 4.03,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.46,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.15,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.4,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.24,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 2.58,
               "tolerance_percent": 0.3
             }
           ]
@@ -7702,6 +8548,429 @@
       }
     },
     {
+      "id": "35fd1e04-a0b5-4c6f-8432-9625ecf14665",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Standard",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Полупрозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Standard",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: B (Полупрозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 41.49,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 20.75,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 15.56,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 8.71,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 5.19,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.11,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.04,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.52,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.31,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 3.32,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "c5950e7b-a5f1-d5f8-c3bf-69c5be3e8194",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Standard",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Standard",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: C (Прозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 45.45,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 22.73,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 17.05,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 5.68,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.41,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.14,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.57,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.34,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 3.64,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "c1044efa-fb77-e859-770b-6f0761f0600d",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Standard",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Standard",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: D (Тёмный под колеровку). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 44.54,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 22.27,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 16.7,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 2.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 5.57,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.34,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.11,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.56,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.33,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 3.56,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
       "id": "9e54fdef-2519-36c4-c333-9be96564567e",
       "metadata": {
         "category": "Лаки",
@@ -7843,6 +9112,429 @@
       }
     },
     {
+      "id": "c6d36536-c79a-9be6-4e1e-93e48e65a9e9",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Premium",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Полупрозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Premium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: B (Полупрозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 39.86,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 19.93,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 14.95,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 9.63,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 6.48,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 2.99,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.65,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.39,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 4.15,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "9b858cdd-9599-a000-3b59-e38b69c80696",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Premium",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Premium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: C (Прозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 44.1,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 22.05,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 16.54,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 7.17,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.31,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.1,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.72,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.43,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 4.59,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "ccd2143e-f251-2ad7-586b-f9a41bacf3f1",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "Premium",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "Premium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: D (Тёмный под колеровку). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 43.12,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 21.56,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 16.17,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 2.23,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 7.01,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.23,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.08,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.7,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.42,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 4.48,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
       "id": "74fa2b9f-c655-be69-21e6-bb3f501210bc",
       "metadata": {
         "category": "Лаки",
@@ -7947,6 +9639,429 @@
               "cas_number": "112926-00-8",
               "function": "Матирование",
               "mass_percent": 4.7,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "38c09acf-d1db-5d44-8978-884aab2c8e8a",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "SuperPremium",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Полупрозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "SuperPremium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: B (Полупрозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 38.34,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 19.17,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 14.38,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 10.47,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 7.67,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 2.88,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 0.96,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.77,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.46,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 4.91,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "e8b7075a-35e8-8b8a-7346-a3a58b4d3760",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "SuperPremium",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Прозрачный",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "SuperPremium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: C (Прозрачный). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 42.83,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 21.41,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 16.06,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 8.57,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.21,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.07,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.86,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.51,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 5.48,
+              "tolerance_percent": 0.3
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.2,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 10.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Allnex technical bulletin, Ebecryl series (2019)"
+      }
+    },
+    {
+      "id": "d0c98d31-049f-e00b-bf64-8a5a29313134",
+      "metadata": {
+        "category": "Лаки",
+        "subcategory": "УФ-отверждаемые (пигментированные)",
+        "binder_type": "Уретан-акрилат (3-функциональный)",
+        "product_class": "SuperPremium",
+        "intended_use": "Промышленный УФ-лак пигментированный",
+        "finish": "Полуглянцевый (блеск 60° 50-70 GU)",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "uv",
+          "industrial",
+          "pigmented",
+          "SuperPremium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Allnex technical bulletin, Ebecryl series (2019)",
+          "page_or_formula": "Formulation EB-220 'Pigmented UV Wood Coating'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: D (Тёмный под колеровку). Источник: Allnex technical bulletin, Ebecryl series (2019)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Aliphatic urethane acrylate (3-functional)",
+              "cas_number": "proprietary",
+              "function": "Олигомер",
+              "mass_percent": 41.78,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "TMPTA",
+              "cas_number": "15625-89-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 20.89,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "TPGDA",
+              "cas_number": "42978-66-5",
+              "function": "Реактивный разбавитель",
+              "mass_percent": 15.67,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Titanium dioxide (rutile)",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 2.44,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 8.36,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Photoinitiator (Irgacure 184)",
+              "cas_number": "947-19-3",
+              "function": "Фотоинициатор",
+              "mass_percent": 3.13,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Photoinitiator (Irgacure 819)",
+              "cas_number": "162881-26-7",
+              "function": "Фотоинициатор",
+              "mass_percent": 1.04,
+              "tolerance_percent": 0.2
+            },
+            {
+              "name": "Wetting agent",
+              "cas_number": "63148-62-9",
+              "function": "Смачиватель",
+              "mass_percent": 0.84,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Defoamer",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Matting agent",
+              "cas_number": "112926-00-8",
+              "function": "Матирование",
+              "mass_percent": 5.35,
               "tolerance_percent": 0.3
             }
           ]
