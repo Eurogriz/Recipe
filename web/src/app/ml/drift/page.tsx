@@ -23,7 +23,7 @@ export default function DriftPage() {
   const [models, setModels] = useState<ModelMetadata[] | null>(null);
   const [selectedCode, setSelectedCode] = useState<string>("");
   const [source, setSource] = useState<Source>("current");
-  const [nCurrent, setNCurrent] = useState<number>(50);
+  const [nCurrent, setNCurrent] = useState<number>(100);
   const [busy, setBusy] = useState<boolean>(false);
   const [err, setErr] = useState<string | null>(null);
   const [report, setReport] = useState<DriftFullOut | null>(null);
@@ -45,23 +45,22 @@ export default function DriftPage() {
     setErr(null);
     setReport(null);
     try {
-      let vectors: number[][] = [];
-      if (source === "random") {
-        // Deterministic-ish demo vectors: uniform noise in [0, 30].
-        vectors = Array.from({ length: nCurrent }, () =>
+      let r: DriftFullOut;
+      if (source === "current") {
+        // Backend endpoint pulls real recipes from the DB and extracts
+        // the same 37-column feature vector we use everywhere.  No
+        // client-side feature engineering required.
+        r = await api.driftFromCatalog(selectedCode, { limit: nCurrent });
+      } else {
+        // Deterministic-ish random vectors for a smoke test: uniform
+        // noise in [0, 30] on each of the 37 dimensions.  This will
+        // usually trigger severe drift on almost every feature — that's
+        // the point: it verifies the pipeline works end-to-end.
+        const vectors = Array.from({ length: nCurrent }, () =>
           Array.from({ length: FEATURE_COUNT }, () => Math.random() * 30)
         );
-      } else {
-        // Grab the actual feature vectors the models were trained on
-        // via the current catalog — we don't have that endpoint yet,
-        // so approximate by sampling zero-vectors (matches shape,
-        // exercises the endpoint honestly).  A real deployment would
-        // POST the last-N production experiments here.
-        vectors = Array.from({ length: nCurrent }, () =>
-          Array.from({ length: FEATURE_COUNT }, () => 0)
-        );
+        r = await api.driftFull(selectedCode, vectors);
       }
-      const r = await api.driftFull(selectedCode, vectors);
       setReport(r);
     } catch (e: any) {
       setErr(t("drift.failed", { msg: e.message ?? String(e) }));

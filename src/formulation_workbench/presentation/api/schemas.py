@@ -65,6 +65,23 @@ class SearchResponse(BaseModel):
     has_more: bool = Field(examples=[False])
 
 
+class SimilarRecipeOut(BaseModel):
+    """One neighbour of a reference recipe in composition-feature space."""
+
+    recipe_id: str
+    category: str
+    subcategory: str
+    binder_type: str
+    product_class: str
+    similarity: float = Field(examples=[0.9421], ge=-1.0, le=1.0)
+
+
+class SimilarRecipesOut(BaseModel):
+    reference_recipe_id: str
+    same_category_only: bool
+    matches: list[SimilarRecipeOut]
+
+
 class CatalogStats(BaseModel):
     total: int = Field(examples=[500])
     by_status: dict[str, int] = Field(
@@ -861,6 +878,8 @@ __all__ = [
     "RejectRequest",
     "RuleFindingOut",
     "SearchResponse",
+    "SimilarRecipeOut",
+    "SimilarRecipesOut",
     "StoichiometryFindingOut",
     "StoichiometryOut",
     "SubmitReviewRequest",

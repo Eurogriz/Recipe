@@ -7,6 +7,92 @@
 
 ---
 
+## [1.10.0] — Строгая русификация, поиск похожих рецептов, реальный дрейф из каталога (2026-08-23)
+
+Три изменения по мотивам обратной связи пользователя:
+
+1. **Русский без англицизмов.** Все ярлыки типа «Async / Job / ML / Ops
+   / Hold-out / MAE / Кликните / Фича» в RU-словаре заменены на русские
+   аналоги, где они есть в отраслевом обиходе. Латиницей оставлены
+   только обозначения, которые в ГОСТах и статьях так и пишут:
+   `CAS`, `VOC`, `TiO2`, `PSI`, `R²`, единицы (`kg`, `EUR`).
+   Название продукта («Formulation Workbench») сохранено как торговая
+   марка.
+
+   Примеры «до → после»:
+   - `ML / Ops` → «Модели» (в навигации), «Модели и качество» (заголовок)
+   - `Async / Job` → «Расчёт», «Фоновые расчёты»
+   - `Hold-out R²` → «R² на контроле»
+   - `MAE` → «Средн. абс. ошибка»
+   - `Кликните` → «Нажмите»
+   - `Фича` → «Признак»
+   - `Drift / KS-статистика` → «Дрейф / Стат-ка К—С»
+   - `p-value` → «p-значение»
+   - `Swagger UI` → «Справочник по программному интерфейсу»
+
+### Added — Поиск похожих рецептов (cosine similarity)
+
+- Новый use case `FindSimilarRecipesUseCase`
+  (`application/use_cases/similar_recipes.py`) — считает косинусную
+  меру сходства между 37-мерными признаковыми векторами того же
+  формата, на которых обучаются регрессоры. Совместимость с ML
+  критична: две рецептуры, помеченные как «похожие», должны получить
+  и близкие предсказания свойств.
+- Новый endpoint `GET /recipes/{id}/similar` с параметрами:
+  - `top_k` (1–50, default 5)
+  - `same_category_only` (default true — не сравнивать краски с герметиками)
+  - `min_similarity` (0…1, default 0)
+- В UI: новый таб «Похожие» в карточке рецепта — таблица кандидатов
+  с гиперссылками, цветной индикатор сходства (зелёный ≥ 0.95,
+  синий ≥ 0.8, жёлтый ≥ 0.5, красный ниже).
+- Тесты: 4 unit-теста для use case (self-exclusion, top-K, category
+  filter, min-similarity gate) + 4 integration-теста API. **+8
+  тестов.**
+
+### Added — Дрейф из каталога (без клиентской подготовки данных)
+
+- Новый endpoint `GET /ml/models/{code}/drift-from-catalog?limit=100&category=…`
+  — сам подтягивает N текущих рецептов из БД, извлекает те же
+  37-мерные векторы через `to_vector()` и возвращает per-feature PSI
+  + KS. Клиенту не нужно дублировать логику извлечения признаков.
+- В UI дашборд дрейфа теперь по умолчанию использует
+  «Все текущие рецепты каталога» через новый endpoint (было —
+  нулевые векторы-заглушки). Опция «Случайные значения (для проверки)»
+  оставлена как smoke test.
+
+### Endpoints
+
+**36 REST endpoints** (+2 к v1.9.0):
+- `GET /recipes/{id}/similar`
+- `GET /ml/models/{code}/drift-from-catalog`
+
+### i18n
+
++13 новых ключей в RU/EN (similar tab). **Итого 227 переведённых
+строк, паритет 100 %.**
+
+### Metrics
+
+- Тесты: **436 passed, 0 failed** (+8 к v1.9.0).
+- ruff / ruff-format / mypy / bandit — clean.
+- Source files: **104** (было 103, +similar_recipes.py).
+
+### Files touched
+
+- src/formulation_workbench/application/use_cases/similar_recipes.py (new)
+- src/formulation_workbench/infrastructure/di/__init__.py (регистрация)
+- src/formulation_workbench/presentation/api/routes.py (+2 endpoints)
+- src/formulation_workbench/presentation/api/schemas.py (SimilarRecipeOut/Out)
+- tests/unit/application/test_similar_recipes.py (new, 4 tests)
+- tests/integration/test_api_similar.py (new, 4 tests)
+- web/src/i18n/dictionaries/ru.ts (строгая русификация + similar keys)
+- web/src/i18n/dictionaries/en.ts (parity + similar keys)
+- web/src/lib/api.ts (SimilarRecipesOut, similarRecipes, driftFromCatalog)
+- web/src/app/recipes/[id]/page.tsx (Similar tab + bar viz)
+- web/src/app/ml/drift/page.tsx (переключён на drift-from-catalog)
+
+---
+
 ## [1.9.0] — 980-recipe corpus, Optimise/Pareto UI, Drift dashboard, model cache (2026-08-23)
 
 Расширение датасета до ~1000 рецептов, две новые UI-фичи, и один

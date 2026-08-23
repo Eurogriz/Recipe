@@ -12,6 +12,7 @@ import {
   Target,
   Plus,
   Trash2,
+  Network,
 } from "lucide-react";
 import {
   api,
@@ -23,6 +24,7 @@ import {
   type PropertyTarget,
   type RecipeCost,
   type RecipeFull,
+  type SimilarRecipesOut,
 } from "@/lib/api";
 import { fmt } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +33,13 @@ import { Button } from "@/components/ui/button";
 import { Table, TBody, THead, TH, TR, TD } from "@/components/ui/table";
 import { useT } from "@/i18n/I18nProvider";
 
-type Tab = "composition" | "assessment" | "predict" | "cost" | "optimise";
+type Tab =
+  | "composition"
+  | "assessment"
+  | "predict"
+  | "cost"
+  | "optimise"
+  | "similar";
 
 export default function RecipeDetailPage() {
   const t = useT();
@@ -138,6 +146,14 @@ export default function RecipeDetailPage() {
         >
           {t("recipe.tab.optimise")}
         </TabButton>
+        <TabButton
+          current={tab}
+          v="similar"
+          onClick={setTab}
+          icon={<Network className="h-4 w-4" />}
+        >
+          {t("recipe.tab.similar")}
+        </TabButton>
       </div>
 
       {tab === "composition" && <CompositionTab recipe={recipe} />}
@@ -145,6 +161,7 @@ export default function RecipeDetailPage() {
       {tab === "predict" && <PredictTab id={id} />}
       {tab === "cost" && <CostTab recipe={recipe} />}
       {tab === "optimise" && <OptimiseTab id={id} />}
+      {tab === "similar" && <SimilarTab id={id} />}
     </div>
   );
 }
@@ -1057,6 +1074,151 @@ function MiniStat({
     <div className="border border-border rounded-md p-2">
       <div className="text-[10px] uppercase text-muted-foreground">{label}</div>
       <div className={`text-lg font-semibold ${color}`}>{value}</div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------- Similar */
+function SimilarTab({ id }: { id: string }) {
+  const t = useT();
+  const [data, setData] = useState<SimilarRecipesOut | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [topK, setTopK] = useState(10);
+  const [sameCategory, setSameCategory] = useState(true);
+  const [minSim, setMinSim] = useState(0);
+
+  const load = () => {
+    setLoading(true);
+    setErr(null);
+    api
+      .similarRecipes(id, {
+        top_k: topK,
+        same_category_only: sameCategory,
+        min_similarity: minSim,
+      })
+      .then(setData)
+      .catch((e) => setErr(e.message ?? String(e)))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(load, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("similar.title")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("similar.subtitle")}</p>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={sameCategory}
+              onChange={(e) => setSameCategory(e.target.checked)}
+            />
+            {t("similar.same_category")}
+          </label>
+          <div>
+            <label className="text-xs text-muted-foreground">{t("similar.top_k")}</label>
+            <input
+              type="number"
+              min={1}
+              max={50}
+              value={topK}
+              onChange={(e) => setTopK(Number(e.target.value) || 5)}
+              className="w-full h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">{t("similar.min_sim")}</label>
+            <input
+              type="number"
+              step="0.01"
+              min={-1}
+              max={1}
+              value={minSim}
+              onChange={(e) => setMinSim(Number(e.target.value))}
+              className="w-full h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+            />
+          </div>
+          <Button onClick={load} disabled={loading}>
+            {loading ? t("similar.loading") : t("common.search")}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {err && (
+        <div className="rounded-md border border-destructive/30 bg-red-50 text-red-900 px-4 py-3 text-sm">
+          {t("similar.failed", { msg: err })}
+        </div>
+      )}
+
+      {data && (
+        <Card>
+          <CardContent className="p-0">
+            {data.matches.length === 0 ? (
+              <div className="text-sm text-muted-foreground text-center py-6">
+                {t("similar.empty")}
+              </div>
+            ) : (
+              <Table>
+                <THead>
+                  <TR>
+                    <TH>{t("similar.col.subcategory")}</TH>
+                    <TH>{t("similar.col.binder")}</TH>
+                    <TH>{t("similar.col.class")}</TH>
+                    <TH className="text-right">{t("similar.col.similarity")}</TH>
+                  </TR>
+                </THead>
+                <TBody>
+                  {data.matches.map((m) => (
+                    <TR key={m.recipe_id} className="cursor-pointer">
+                      <TD>
+                        <Link
+                          href={`/recipes/${encodeURIComponent(m.recipe_id)}`}
+                          className="text-primary hover:underline"
+                        >
+                          {m.subcategory || m.recipe_id}
+                        </Link>
+                      </TD>
+                      <TD className="text-xs">{m.binder_type || "—"}</TD>
+                      <TD>
+                        <Badge variant="outline">{m.product_class}</Badge>
+                      </TD>
+                      <TD className="text-right">
+                        <SimilarityBar value={m.similarity} />
+                      </TD>
+                    </TR>
+                  ))}
+                </TBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function SimilarityBar({ value }: { value: number }) {
+  // Range 0..1 → 0..100% width.  Negative similarity clamps to 0.
+  const pct = Math.max(0, Math.min(1, value)) * 100;
+  const color =
+    value >= 0.95
+      ? "bg-emerald-500"
+      : value >= 0.8
+        ? "bg-blue-500"
+        : value >= 0.5
+          ? "bg-amber-500"
+          : "bg-red-400";
+  return (
+    <div className="flex items-center justify-end gap-2 min-w-[140px]">
+      <div className="w-24 h-2 bg-muted rounded overflow-hidden">
+        <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="font-mono text-xs w-14 text-right">{value.toFixed(3)}</span>
     </div>
   );
 }

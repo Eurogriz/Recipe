@@ -92,6 +92,8 @@ from .schemas import (
     RejectRequest,
     RuleFindingOut,
     SearchResponse,
+    SimilarRecipeOut,
+    SimilarRecipesOut,
     StoichiometryFindingOut,
     StoichiometryOut,
     SubmitReviewRequest,
@@ -304,6 +306,50 @@ async def get_recipe_full(
         stages=stages_out,
         primary_source=_citation_to_out(recipe.primary_source),
         cross_references=[_citation_to_out(c) for c in recipe.cross_references],
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/similar",
+    response_model=SimilarRecipesOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="List recipes with the most similar composition-feature vector",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_similar_recipes(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    top_k: int = Query(default=5, ge=1, le=50),
+    same_category_only: bool = Query(default=True),
+    min_similarity: float = Query(default=0.0, ge=-1.0, le=1.0),
+) -> SimilarRecipesOut:
+    from ...application.use_cases.similar_recipes import FindSimilarQuery
+
+    matches = await container.find_similar_recipes.execute(
+        FindSimilarQuery(
+            recipe_id=recipe_id,
+            top_k=top_k,
+            same_category_only=same_category_only,
+            min_similarity=min_similarity,
+        )
+    )
+    if matches is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return SimilarRecipesOut(
+        reference_recipe_id=recipe_id,
+        same_category_only=same_category_only,
+        matches=[
+            SimilarRecipeOut(
+                recipe_id=m.recipe_id,
+                category=m.category,
+                subcategory=m.subcategory,
+                binder_type=m.binder_type,
+                product_class=m.product_class,
+                similarity=round(m.similarity, 6),
+            )
+            for m in matches
+        ],
     )
 
 
@@ -1168,6 +1214,94 @@ async def drift_full(
     )
     # Aggregate worst level for a quick banner in the UI.
     order = {DriftLevel.NO_DRIFT: 0, DriftLevel.MODERATE_DRIFT: 1, DriftLevel.SEVERE_DRIFT: 2}
+    worst = DriftLevel.NO_DRIFT
+    for report in reports:
+        if order[report.level] > order[worst]:
+            worst = report.level
+
+    return DriftFullOut(
+        property_code=property_code,
+        reports=[
+            DriftReportOut(
+                feature_name=r.feature_name,
+                psi=round(r.psi, 6),
+                ks_statistic=round(r.ks_statistic, 6),
+                ks_p_value=(round(r.ks_p_value, 6) if r.ks_p_value is not None else None),
+                level=r.level.value,
+                n_reference=r.n_reference,
+                n_current=r.n_current,
+            )
+            for r in reports
+        ],
+        worst_level=worst.value,
+    )
+
+
+@router.get(
+    "/ml/models/{property_code}/drift-from-catalog",
+    response_model=DriftFullOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Per-feature drift comparing the model's training snapshot against "
+        "the composition-feature vectors of the current recipes in the catalog"
+    ),
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def drift_from_catalog(
+    property_code: str,
+    container: Annotated[Container, Depends(get_container)],
+    limit: int = Query(
+        default=100,
+        ge=5,
+        le=1000,
+        description="How many catalog recipes to sample for the current distribution.",
+    ),
+    category: str | None = Query(
+        default=None,
+        description="Restrict the sample to recipes in this category (optional).",
+    ),
+) -> DriftFullOut:
+    """Convenience endpoint: no client-side feature engineering needed.
+
+    Callers just pick a property_code, we do everything else — pull the
+    reference snapshot the model was fitted on, pull the current
+    catalog rows, extract the same 37-column feature vector we use
+    everywhere, and hand back a per-feature PSI + KS report.
+    """
+    from ...infrastructure.ml.drift import (
+        DriftLevel,
+        compare_feature_matrices,
+    )
+    from ...infrastructure.ml.features import FEATURE_NAMES, to_vector
+
+    reference = container.property_regressor.get_training_vectors(property_code)
+    if reference is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={property_code!r}",
+        )
+
+    catalog = await container.recipe_repository.find_by_criteria(
+        category=category,
+        limit=limit,
+        offset=0,
+    )
+    if not catalog:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            "No recipes in the catalog to compare against.",
+        )
+    current_vectors = [to_vector(r) for r in catalog]
+
+    reports = compare_feature_matrices(
+        reference, current_vectors, feature_names=list(FEATURE_NAMES)
+    )
+    order = {
+        DriftLevel.NO_DRIFT: 0,
+        DriftLevel.MODERATE_DRIFT: 1,
+        DriftLevel.SEVERE_DRIFT: 2,
+    }
     worst = DriftLevel.NO_DRIFT
     for report in reports:
         if order[report.level] > order[worst]:

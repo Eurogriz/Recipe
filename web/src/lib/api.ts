@@ -104,6 +104,23 @@ export const api = {
   getJob: (id: string) => request<JobRecord>(`/ml/jobs/${id}`),
   cancelJob: (id: string) => request<void>(`/ml/jobs/${id}`, { method: "DELETE" }),
 
+  // similar recipes
+  similarRecipes: (
+    id: string,
+    params?: { top_k?: number; same_category_only?: boolean; min_similarity?: number }
+  ) => {
+    const q = new URLSearchParams();
+    if (params?.top_k) q.set("top_k", String(params.top_k));
+    if (params?.same_category_only !== undefined)
+      q.set("same_category_only", String(params.same_category_only));
+    if (params?.min_similarity !== undefined)
+      q.set("min_similarity", String(params.min_similarity));
+    const qs = q.toString();
+    return request<SimilarRecipesOut>(
+      `/recipes/${id}/similar${qs ? "?" + qs : ""}`
+    );
+  },
+
   // pareto + optimiser
   pareto: (recipeId: string, body: ParetoRequest) =>
     request<ParetoResult>(`/recipes/${recipeId}/pareto`, {
@@ -117,6 +134,18 @@ export const api = {
     }),
 
   // drift
+  driftFromCatalog: (
+    code: string,
+    params?: { limit?: number; category?: string }
+  ) => {
+    const q = new URLSearchParams();
+    if (params?.limit) q.set("limit", String(params.limit));
+    if (params?.category) q.set("category", params.category);
+    const qs = q.toString();
+    return request<DriftFullOut>(
+      `/ml/models/${code}/drift-from-catalog${qs ? "?" + qs : ""}`
+    );
+  },
   driftFull: (code: string, currentVectors: number[][]) =>
     request<DriftFullOut>(`/ml/models/${code}/drift-full`, {
       method: "POST",
@@ -374,6 +403,21 @@ export interface DriftFullOut {
 export interface DriftAlertOut extends DriftFullOut {
   alert_dispatched: boolean;
   dispatch_reason: string;
+}
+
+export interface SimilarRecipe {
+  recipe_id: string;
+  category: string;
+  subcategory: string;
+  binder_type: string;
+  product_class: string;
+  similarity: number;
+}
+
+export interface SimilarRecipesOut {
+  reference_recipe_id: string;
+  same_category_only: boolean;
+  matches: SimilarRecipe[];
 }
 
 // ---- Pareto / optimiser ----------------------------------------------------

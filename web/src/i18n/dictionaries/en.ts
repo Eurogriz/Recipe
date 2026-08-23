@@ -98,6 +98,22 @@ export const en: Dict = {
   "recipe.tab.predict": "Predict",
   "recipe.tab.cost": "Cost",
   "recipe.tab.optimise": "Optimise",
+  "recipe.tab.similar": "Similar",
+
+  // similar
+  "similar.title": "Similar recipes",
+  "similar.subtitle":
+    "Nearest neighbours in the composition-feature space (cosine similarity). ML models see them the same way.",
+  "similar.same_category": "Same category only",
+  "similar.top_k": "How many to show",
+  "similar.min_sim": "Minimum similarity",
+  "similar.loading": "Finding neighbours…",
+  "similar.failed": "Failed: {msg}",
+  "similar.empty": "No similar recipes found.",
+  "similar.col.subcategory": "Subcategory",
+  "similar.col.binder": "Binder",
+  "similar.col.class": "Class",
+  "similar.col.similarity": "Similarity",
 
   // optimise
   "optimise.title": "Optimise composition against property targets",

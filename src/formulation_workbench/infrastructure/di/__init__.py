@@ -26,6 +26,7 @@ from ...application.use_cases.search_recipes import (
     GetCatalogStatisticsUseCase,
     SearchRecipesUseCase,
 )
+from ...application.use_cases.similar_recipes import FindSimilarRecipesUseCase
 from ...application.use_cases.update_recipe import UpdateRecipeUseCase
 from ...application.use_cases.verification_workflow import (
     CreateNewVersionUseCase,
@@ -70,6 +71,7 @@ class Container:
     get_recipe: GetRecipeByIdUseCase
     get_recipe_versions: GetAllRecipeVersionsUseCase
     search_recipes: SearchRecipesUseCase
+    find_similar_recipes: FindSimilarRecipesUseCase
     catalog_stats: GetCatalogStatisticsUseCase
     submit_for_review: SubmitRecipeForReviewUseCase
     verify_recipe: VerifyRecipeUseCase
@@ -150,6 +152,7 @@ class Container:
             get_recipe=GetRecipeByIdUseCase(recipe_repository),
             get_recipe_versions=GetAllRecipeVersionsUseCase(recipe_repository),
             search_recipes=SearchRecipesUseCase(recipe_repository),
+            find_similar_recipes=FindSimilarRecipesUseCase(recipe_repository),
             catalog_stats=GetCatalogStatisticsUseCase(recipe_repository),
             submit_for_review=SubmitRecipeForReviewUseCase(recipe_repository, audit_logger),
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),
