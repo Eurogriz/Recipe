@@ -28,6 +28,12 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from ..value_objects.functions import ComponentFunction
+from .flory import (
+    AmineReactivityBreakdown,
+    FloryAnalysis,
+    amine_h_breakdown,
+    analyse_flory,
+)
 
 if TYPE_CHECKING:
     from ..entities.recipe import Component, Recipe
@@ -98,6 +104,9 @@ class StoichiometryReport:
     recommended_ratio_low: float = 0.95  # 95 % index by default
     recommended_ratio_high: float = 1.10  # 110 % index
     findings: tuple[Finding, ...] = field(default_factory=tuple)
+    # Extended analysis — populated whenever we could compute it.
+    amine_breakdown: tuple[AmineReactivityBreakdown, ...] = field(default_factory=tuple)
+    flory: FloryAnalysis | None = None
 
     @property
     def is_balanced(self) -> bool:
@@ -264,8 +273,30 @@ def analyse(
             findings=tuple(findings),
         )
 
+    # If the reactive side is an amine, refine equivalents using primary /
+    # secondary NH breakdown when the component carries the extra metadata.
+    amine_breakdown: list[AmineReactivityBreakdown] = []
+    if pair.reactive_group is ChemicalGroup.AMINE_HYDROGEN:
+        for component in recipe.all_components:
+            if _detect_group(component) is not ChemicalGroup.AMINE_HYDROGEN:
+                continue
+            detail = amine_h_breakdown(component)
+            if detail is not None:
+                amine_breakdown.append(detail)
+
     reactive_eq = _sum_equivalents(contribs_t, pair.reactive_group)
     coreactive_eq = _sum_equivalents(contribs_t, pair.co_reactive_group)
+
+    # Effective equivalents override the raw sum only when we managed
+    # to compute *at least one* breakdown — otherwise stick with the
+    # simple AHEW value (backwards compatible).
+    if amine_breakdown:
+        eff_total = sum(b.effective_ah_equivalents_per_100g for b in amine_breakdown)
+        # Only replace if the effective total is strictly positive; a
+        # component with no primary + no secondary should never lower
+        # reactive_eq to zero.
+        if eff_total > 0:
+            reactive_eq = eff_total
 
     ratio: float | None
     ratio = reactive_eq / coreactive_eq if coreactive_eq > 0 else None
@@ -319,6 +350,16 @@ def analyse(
             )
         )
 
+    # Functionality — number-averaged across contributors of each group.
+    f_reactive = _average_functionality(contribs_t, pair.reactive_group, recipe)
+    f_coreactive = _average_functionality(contribs_t, pair.co_reactive_group, recipe)
+    flory = analyse_flory(
+        equivalents_a=coreactive_eq,
+        equivalents_b=reactive_eq,
+        functionality_a=f_coreactive,
+        functionality_b=f_reactive,
+    )
+
     return StoichiometryReport(
         detected_system=pair.label,
         contributions=contribs_t,
@@ -329,7 +370,34 @@ def analyse(
         recommended_ratio_low=ratio_low,
         recommended_ratio_high=ratio_high,
         findings=tuple(findings),
+        amine_breakdown=tuple(amine_breakdown),
+        flory=flory,
     )
+
+
+def _average_functionality(
+    contribs: tuple[GroupContribution, ...],
+    group: ChemicalGroup,
+    recipe: Recipe,
+) -> float | None:
+    """Mass-weighted average functionality across ``group`` contributors."""
+    lookup = {c.name: c for c in recipe.all_components}
+    numerator = 0.0
+    denominator = 0.0
+    for contrib in contribs:
+        if contrib.group is not group:
+            continue
+        component = lookup.get(contrib.component_name)
+        if component is None or component.properties is None:
+            continue
+        f = component.properties.functionality
+        if f is None or f <= 0:
+            continue
+        numerator += f * contrib.mass_percent
+        denominator += contrib.mass_percent
+    if denominator == 0:
+        return None
+    return numerator / denominator
 
 
 def batch_mix_ratio(report: StoichiometryReport) -> tuple[float, float] | None:

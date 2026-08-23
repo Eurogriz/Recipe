@@ -7,6 +7,125 @@
 
 ---
 
+## [1.5.0] — Flory, ML uncertainty, batch analysis, optimisation, REACH loader (2026-08-23)
+
+Восьмой раунд — все пять отложенных пунктов v1.4.
+
+### Added — Extended stoichiometry (Flory-Stockmayer)
+
+- `PhysicalProperties` расширен пятью полями:
+  `primary_amine_h_count`, `secondary_amine_h_count`,
+  `primary_amine_reactivity` (default 1.0),
+  `secondary_amine_reactivity` (default 0.5),
+  `functionality` (число реактивных групп на молекулу).
+- Новый `domain/services/flory.py`:
+  - `amine_h_breakdown(component)` — эффективный AHEW с учётом
+    первичных/вторичных NH и их относительной реактивности.
+  - `analyse_flory(...)` — Flory-Stockmayer:
+      * коэффициент эквивалентов r = min / max,
+      * gel-point conversion `p_c = 1 / sqrt(r × (f_A-1) × (f_B-1))`,
+      * theoretical max conversion (Carothers-style) для minority /
+        majority сторон,
+      * `can_form_network` через (f-1)(g-1) > 1.
+- `StoichiometryReport` обогащён `amine_breakdown[]` + `flory`.
+- Эффективные amine equivalents подменяют raw AHEW когда доступна
+  разбивка primary/secondary.
+- +12 unit-тестов для Flory + amine breakdown.
+
+### Added — ML prediction uncertainty
+
+- `infrastructure/ml/uncertainty.py`:
+  - `predict_with_interval(model, features, alpha=0.1)` — quantile
+    regression forests-стиль через per-tree predictions
+    (Meinshausen 2006 применённый к tree averages).
+  - `PredictionInterval(mean, median, lower, upper, alpha,
+    interval_width)`.
+- `PropertyPrediction` расширен `lower_bound`, `upper_bound`,
+  `interval_alpha`.
+- `PropertyRegressor.predict(recipe, code, alpha=0.1)` теперь
+  возвращает интервал автоматически.
+
+### Added — Drift detection
+
+- `infrastructure/ml/drift.py`:
+  - `population_stability_index(reference, current, buckets=10)` —
+    PSI на quantile-based bins с эпсилон-полом.
+  - `ks_statistic(reference, current)` — правильный merged-sort KS.
+  - `ks_p_value(D, n1, n2)` — асимптотическая Kolmogorov-серия
+    (Numerical Recipes 14.3).
+  - `compare_distributions(...)` возвращает `DriftReport`
+    (`no_drift` / `moderate_drift` / `severe_drift`).
+  - KS-эскалация: `p < 0.01` поднимает уровень до moderate даже при
+    тихом PSI.
+- `PropertyRegressor.get_training_vectors(code)` — снимок обучающих
+  фичей для drift-check.
+- `POST /ml/models/{code}/drift` endpoint.
+
+### Added — REACH CSV loader
+
+- Два CSV-файла в `data/regulatory/`:
+  - `reach_svhc.csv` — **61 запись** ECHA candidate list (было 20).
+  - `reach_annex_xvii.csv` — **30 записей** Annex XVII (было 8).
+- `infrastructure/regulatory/loader.py`:
+  - `load_svhc_from_csv(path)`,
+  - `load_annex_xvii_from_csv(path)`,
+  - `build_checker_from_data_dir(data_dir)` — one-shot loader.
+- Комментарии в CSV (`# …`) игнорируются, blank cells в
+  `max_concentration_percent` = outright ban.
+- `FW_REGULATORY_DATA_DIR` env-переменная.
+- DI автоматически подхватывает CSV-loader при старте; fallback на
+  compiled snapshot если файлы отсутствуют.
+- +6 integration-тестов.
+
+### Added — Batch cost + regulatory + mass balance
+
+- `domain/services/batch_analysis.py`:
+  - `analyse_batch_cost(recipe, batch, prices)` — scale per-kg cost
+    to actual batch mass; каждая line несёт `mass_kg` + `lot_number`
+    + `cost`.
+  - `analyse_batch_mass_balance(batch)` — yield %,
+    `is_within_tolerance` (±2 %).
+  - `analyse_batch_regulatory(recipe, batch, checker)` — regulatory
+    findings, привязанные к batch_number.
+  - `analyse_batch(...)` — one-shot bundle.
+- `POST /experiments/{id}/batch-report` endpoint.
+- +7 unit-тестов + 3 API-теста.
+- Live: batch 49.7 кг → 104.39 EUR, yield 99.4 %, lot numbers
+  корректно распространяются по позициям.
+
+### Added — Recipe optimisation (inverse problem)
+
+- `infrastructure/ml/optimiser.py`:
+  - `RecipeOptimiser(predictor)` — SciPy `differential_evolution`
+    поверх любого predictor callable (не обязательно RandomForest).
+  - `PropertyTarget(direction ∈ {match, minimise, maximise},
+    weight, tolerance)`.
+  - `ComponentBounds(component_name, min, max)` — hard bounds;
+    default ±20 % от текущей массы.
+  - Soft-penalty на sum-to-100 (±0.5), rejection candidates нарушающих
+    Recipe invariants.
+  - Автоматическая нормализация к 100 % перед вызовом predictor.
+- `OptimiseRecipeUseCase` + `POST /recipes/{id}/optimise`.
+- +4 unit-теста (linear stub predictor полностью инвертируется).
+- +3 API-теста.
+
+### Config
+
+- `FW_REGULATORY_DATA_DIR` (default `./data/regulatory`).
+
+### Metrics after 1.5.0
+
+- **373 теста зелёные** (было 327, +46).
+- **Coverage 84.12 %** (было 83.13 %, gate 60 %).
+- **Ruff clean · Ruff-format clean · Bandit clean · MyPy clean**
+  (97 source files).
+- Live-проверка полного цикла: recipe → experiment → complete →
+  batch-report прошла успешно.
+- Regulatory-loader на старте сообщает `svhc_entries: 61,
+  annex_xvii_entries: 30`.
+
+---
+
 ## [1.4.0] — Persistent experiments, 2K stoichiometry, ML regressor (2026-08-23)
 
 Седьмой раунд — три отложенных пункта из плана v1.3.

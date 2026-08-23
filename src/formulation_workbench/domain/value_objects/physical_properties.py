@@ -37,6 +37,21 @@ class PhysicalProperties:
     glass_transition_c: float | None = None  # Tg of the neat polymer
     minimum_film_forming_temp_c: float | None = None
     equivalent_weight_g_per_eq: float | None = None  # epoxy / OH / NCO / acid
+    # Reactive-amine descriptors (used by the extended stoichiometry
+    # engine).  Together they replace the naive "each amine hydrogen
+    # counts equally" assumption:
+    #   - primary_amine_count / secondary_amine_count = per-molecule tally,
+    #   - primary_amine_reactivity / secondary_amine_reactivity = effective
+    #     conversion factor at ambient cure (0..1); defaults 1.0 / 0.5 are
+    #     industry norms for aliphatic amines.
+    primary_amine_h_count: int | None = None
+    secondary_amine_h_count: int | None = None
+    primary_amine_reactivity: float | None = None
+    secondary_amine_reactivity: float | None = None
+    # Functionality — number of *reactive* groups per molecule.  Used by
+    # Flory-Stockmayer gelation / max-conversion math.  For polymers this
+    # is the number-average functionality.
+    functionality: float | None = None
 
     # Solvent-specific
     hansen_delta_d: float | None = None  # MPa^0.5, dispersive

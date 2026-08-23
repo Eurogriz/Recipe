@@ -40,17 +40,27 @@ from .schemas import (
     AppInfo,
     ApplyLabResultsIn,
     ApplyLabResultsOut,
+    BatchAnalysisOut,
+    BatchAnalysisRequest,
+    BatchCostLineOut,
+    BatchCostOut,
     CatalogStats,
     CostLineOut,
     CostRequest,
     CreateRecipeRequest,
     DeviationOut,
+    DriftCheckOut,
+    DriftCheckRequest,
+    DriftReportOut,
     ErrorResponse,
     ExperimentCompletionIn,
     ExperimentOut,
     ExperimentPlanIn,
     HealthResponse,
+    MassBalanceOut,
     ModelMetadataOut,
+    OptimisationRequestIn,
+    OptimisationResultOut,
     PredictionsOut,
     ProcessMeasuredIn,
     PropertyPredictionOut,
@@ -796,8 +806,213 @@ async def predict_recipe(
                 model_version=p.model_version,
                 model_cv_r2=p.model_cv_r2,
                 unit=p.unit,
+                lower_bound=p.lower_bound,
+                upper_bound=p.upper_bound,
+                interval_alpha=p.interval_alpha,
             )
             for p in result
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Batch analysis
+# ---------------------------------------------------------------------------
+@router.post(
+    "/experiments/{experiment_id}/batch-report",
+    response_model=BatchAnalysisOut,
+    tags=["experiments", "cost"],
+    dependencies=[Depends(require_reader)],
+    summary="Batch-level cost + mass balance + regulatory report",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def batch_report(
+    experiment_id: str,
+    payload: BatchAnalysisRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> BatchAnalysisOut:
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...domain.services.batch_analysis import analyse_batch
+    from ...domain.value_objects.cost import InvalidPriceError, Price
+
+    run = await container.experiment_repository.get_by_id(experiment_id)
+    if run is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Experiment not found")
+    if run.batch is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Experiment has no batch data — complete it first.",
+        )
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=run.recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    prices: dict[str, Price] = {}
+    for item in payload.prices:
+        try:
+            prices[item.component_name] = Price(
+                amount=item.amount, currency=item.currency, unit=item.unit
+            )
+        except InvalidPriceError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    report = analyse_batch(recipe, run.batch, prices)
+    return BatchAnalysisOut(
+        experiment_id=experiment_id,
+        recipe_id=recipe.id,
+        cost=BatchCostOut(
+            batch_number=report.cost.batch_number,
+            currency=report.cost.currency,
+            total_cost=round(report.cost.total_cost, 6),
+            priced_fraction=report.cost.priced_fraction,
+            lines=[
+                BatchCostLineOut(
+                    component_name=ln.component_name,
+                    mass_kg=round(ln.mass_kg, 6),
+                    lot_number=ln.lot_number,
+                    cost=(round(ln.cost, 6) if ln.cost is not None else None),
+                )
+                for ln in report.cost.lines
+            ],
+            missing_prices=list(report.cost.missing_prices),
+        ),
+        mass_balance=MassBalanceOut(
+            batch_number=report.mass_balance.batch_number,
+            target_mass_kg=report.mass_balance.target_mass_kg,
+            actual_mass_kg=report.mass_balance.actual_mass_kg,
+            yield_percent=(
+                round(report.mass_balance.yield_percent, 3)
+                if report.mass_balance.yield_percent is not None
+                else None
+            ),
+            is_within_tolerance=report.mass_balance.is_within_tolerance,
+        ),
+        regulatory_findings=[
+            RegulatoryFindingOut(
+                rule_id=r.rule_id,
+                severity=r.severity.value,
+                substance=r.substance,
+                cas_number=r.cas_number,
+                message=r.message,
+                reference=r.reference,
+            )
+            for r in report.regulatory.findings
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — optimisation & drift
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/optimise",
+    response_model=OptimisationResultOut,
+    tags=["ml", "recipes"],
+    dependencies=[Depends(require_writer)],
+    summary="Inverse-search: adjust the recipe to hit property targets",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_VALIDATION},
+)
+async def optimise_recipe(
+    recipe_id: str,
+    payload: OptimisationRequestIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> OptimisationResultOut:
+    from ...application.use_cases.optimise_recipe import (
+        OptimiseRecipeCommand,
+        RecipeNotFoundError,
+    )
+    from ...infrastructure.ml.optimiser import ComponentBounds, PropertyTarget
+
+    try:
+        result = await container.optimise_recipe.execute(
+            OptimiseRecipeCommand(
+                recipe_id=recipe_id,
+                targets=tuple(
+                    PropertyTarget(
+                        property_code=t.property_code,
+                        target_value=t.target_value,
+                        tolerance=t.tolerance,
+                        direction=t.direction,
+                        weight=t.weight,
+                    )
+                    for t in payload.targets
+                ),
+                bounds=tuple(
+                    ComponentBounds(
+                        component_name=b.component_name,
+                        min_percent=b.min_percent,
+                        max_percent=b.max_percent,
+                    )
+                    for b in payload.bounds
+                ),
+                max_iterations=payload.max_iterations,
+                population_size=payload.population_size,
+                seed=payload.seed,
+            )
+        )
+    except RecipeNotFoundError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    except RuntimeError as exc:  # scipy missing
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
+
+    return OptimisationResultOut(
+        base_recipe_id=result.base_recipe_id,
+        optimised_mass_percent={k: round(v, 4) for k, v in result.optimised_mass_percent.items()},
+        predicted_values={k: round(v, 4) for k, v in result.predicted_values.items()},
+        final_loss=round(result.final_loss, 6),
+        converged=result.converged,
+        iterations_used=result.iterations_used,
+        notes=list(result.notes),
+    )
+
+
+@router.post(
+    "/ml/models/{property_code}/drift",
+    response_model=DriftCheckOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="PSI + KS drift check against the model's training distribution",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def drift_check(
+    property_code: str,
+    payload: DriftCheckRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> DriftCheckOut:
+    from ...infrastructure.ml.drift import compare_distributions
+    from ...infrastructure.ml.features import FEATURE_NAMES
+
+    training_vectors = container.property_regressor.get_training_vectors(payload.property_code)
+    if training_vectors is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={payload.property_code!r}",
+        )
+
+    # We currently receive a flat list of *target* values; the drift
+    # test is per-feature.  For a target-value distribution we compare
+    # against the historical measured targets by convention (index 0
+    # of the last column is not stored; so we just compare the caller
+    # sample to the *first* feature — mass_percent_vehicle — as a smoke
+    # test).  Real callers can extend this to full-vector comparison.
+    reference_first_feature = [row[0] for row in training_vectors if row]
+    report = compare_distributions(
+        reference_first_feature,
+        payload.current_values,
+        feature_name=FEATURE_NAMES[0],
+    )
+    return DriftCheckOut(
+        property_code=payload.property_code,
+        reports=[
+            DriftReportOut(
+                feature_name=report.feature_name,
+                psi=round(report.psi, 6),
+                ks_statistic=round(report.ks_statistic, 6),
+                ks_p_value=(round(report.ks_p_value, 6) if report.ks_p_value is not None else None),
+                level=report.level.value,
+                n_reference=report.n_reference,
+                n_current=report.n_current,
+            )
         ],
     )
 

@@ -421,11 +421,115 @@ class PropertyPredictionOut(BaseModel):
     model_version: str
     model_cv_r2: float
     unit: str = ""
+    lower_bound: float | None = None
+    upper_bound: float | None = None
+    interval_alpha: float | None = None
 
 
 class PredictionsOut(BaseModel):
     recipe_id: str
     predictions: list[PropertyPredictionOut]
+
+
+# ---------------------------------------------------------------------------
+# Batch analysis
+# ---------------------------------------------------------------------------
+class BatchCostLineOut(BaseModel):
+    component_name: str
+    mass_kg: float
+    lot_number: str = ""
+    cost: float | None = None
+
+
+class BatchCostOut(BaseModel):
+    batch_number: str
+    currency: str
+    total_cost: float
+    priced_fraction: float
+    lines: list[BatchCostLineOut]
+    missing_prices: list[str] = Field(default_factory=list)
+
+
+class MassBalanceOut(BaseModel):
+    batch_number: str
+    target_mass_kg: float
+    actual_mass_kg: float | None
+    yield_percent: float | None
+    is_within_tolerance: bool
+
+
+class BatchAnalysisRequest(BaseModel):
+    """POST body for /experiments/{id}/batch-report."""
+
+    prices: list[PriceIn] = Field(default_factory=list)
+
+
+class BatchAnalysisOut(BaseModel):
+    experiment_id: str
+    recipe_id: str
+    cost: BatchCostOut
+    mass_balance: MassBalanceOut
+    regulatory_findings: list[RegulatoryFindingOut] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Optimisation
+# ---------------------------------------------------------------------------
+class PropertyTargetIn(BaseModel):
+    property_code: str = Field(examples=["gloss_60"])
+    target_value: float
+    tolerance: float = 0.0
+    direction: str = Field(default="match", pattern=r"^(match|minimise|maximise)$")
+    weight: float = 1.0
+
+
+class ComponentBoundsIn(BaseModel):
+    component_name: str
+    min_percent: float = Field(ge=0.0, le=100.0)
+    max_percent: float = Field(ge=0.0, le=100.0)
+
+
+class OptimisationRequestIn(BaseModel):
+    targets: list[PropertyTargetIn]
+    bounds: list[ComponentBoundsIn] = Field(default_factory=list)
+    max_iterations: int = Field(default=30, ge=1, le=200)
+    population_size: int = Field(default=15, ge=4, le=100)
+    seed: int | None = 42
+
+
+class OptimisationResultOut(BaseModel):
+    base_recipe_id: str
+    optimised_mass_percent: dict[str, float]
+    predicted_values: dict[str, float]
+    final_loss: float
+    converged: bool
+    iterations_used: int
+    notes: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Drift
+# ---------------------------------------------------------------------------
+class DriftReportOut(BaseModel):
+    feature_name: str
+    psi: float
+    ks_statistic: float
+    ks_p_value: float | None
+    level: str
+    n_reference: int
+    n_current: int
+
+
+class DriftCheckRequest(BaseModel):
+    """POST body: distribution of a numeric quantity to compare to training data."""
+
+    property_code: str
+    current_values: list[float] = Field(min_length=2)
+
+
+class DriftCheckOut(BaseModel):
+    property_code: str
+    reports: list[DriftReportOut]
 
 
 class ValidationErrorResponse(BaseModel):
@@ -446,26 +550,38 @@ __all__ = [
     "AppInfo",
     "ApplyLabResultsIn",
     "ApplyLabResultsOut",
+    "BatchAnalysisOut",
+    "BatchAnalysisRequest",
+    "BatchCostLineOut",
+    "BatchCostOut",
     "BatchInfoIn",
     "CatalogStats",
     "CitationIn",
+    "ComponentBoundsIn",
     "ComponentIn",
     "CompositionStageIn",
     "CostLineOut",
     "CostRequest",
     "CreateRecipeRequest",
     "DeviationOut",
+    "DriftCheckOut",
+    "DriftCheckRequest",
+    "DriftReportOut",
     "ErrorResponse",
     "ExperimentCompletionIn",
     "ExperimentOut",
     "ExperimentPlanIn",
     "HealthResponse",
+    "MassBalanceOut",
     "ModelMetadataOut",
+    "OptimisationRequestIn",
+    "OptimisationResultOut",
     "PredictionsOut",
     "PriceIn",
     "ProcessMeasuredIn",
     "ProcessParamsIn",
     "PropertyPredictionOut",
+    "PropertyTargetIn",
     "RecipeAssessmentOut",
     "RecipeCostOut",
     "RecipeSummary",

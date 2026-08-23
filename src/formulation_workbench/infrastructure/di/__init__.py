@@ -21,6 +21,7 @@ from ...application.use_cases.delete_recipe import DeleteRecipeUseCase
 from ...application.use_cases.get_recipe import GetAllRecipeVersionsUseCase, GetRecipeByIdUseCase
 from ...application.use_cases.ml_predict import PredictPropertiesUseCase
 from ...application.use_cases.ml_train import TrainPropertyModelsUseCase
+from ...application.use_cases.optimise_recipe import OptimiseRecipeUseCase
 from ...application.use_cases.search_recipes import (
     GetCatalogStatisticsUseCase,
     SearchRecipesUseCase,
@@ -37,6 +38,7 @@ from ..db.connection import Database
 from ..db.repositories.session_scoped import ScopedAuditLogger, ScopedRecipeRepository
 from ..db.repositories.sqlalchemy_experiment_repository import ScopedExperimentRepository
 from ..ml.property_regressor import PropertyRegressor
+from ..regulatory import RegulatoryDataError, build_checker_from_data_dir
 
 if TYPE_CHECKING:
     from ...application.ports.audit_logger import AuditLogger
@@ -78,6 +80,7 @@ class Container:
     property_regressor: PropertyRegressor
     train_property_models: TrainPropertyModelsUseCase
     predict_properties: PredictPropertiesUseCase
+    optimise_recipe: OptimiseRecipeUseCase
 
     @classmethod
     async def build(cls, settings: AppSettings | None = None) -> Container:
@@ -102,6 +105,17 @@ class Container:
         experiment_repository = ScopedExperimentRepository(database)
         property_regressor = PropertyRegressor(storage_dir=settings.model_dir)
 
+        # Load the CSV-backed regulatory tables when they exist; otherwise
+        # fall back to the compiled snapshot inside RegulatoryComplianceChecker.
+        regulatory_checker = None
+        try:
+            regulatory_checker = build_checker_from_data_dir(settings.regulatory_data_dir)
+        except RegulatoryDataError as exc:
+            logger.warning(
+                "regulatory_csv_unavailable",
+                extra={"reason": str(exc), "path": str(settings.regulatory_data_dir)},
+            )
+
         return cls(
             settings=settings,
             database=database,
@@ -119,7 +133,7 @@ class Container:
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),
             reject_recipe=RejectRecipeUseCase(recipe_repository, audit_logger),
             create_new_version=CreateNewVersionUseCase(recipe_repository, audit_logger),
-            assess_recipe=AssessRecipeUseCase(recipe_repository),
+            assess_recipe=AssessRecipeUseCase(recipe_repository, regulatory_checker),
             calculate_cost=CalculateRecipeCostUseCase(recipe_repository),
             apply_lab_results=ApplyLabResultsUseCase(
                 experiment_repository, recipe_repository, audit_logger
@@ -129,6 +143,7 @@ class Container:
                 experiment_repository, recipe_repository, property_regressor
             ),
             predict_properties=PredictPropertiesUseCase(recipe_repository, property_regressor),
+            optimise_recipe=OptimiseRecipeUseCase(recipe_repository, property_regressor),
         )
 
     async def close(self) -> None:

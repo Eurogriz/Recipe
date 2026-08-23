@@ -1,6 +1,6 @@
 [project]
 name = "formulation-workbench"
-version = "1.4.0"
+version = "1.5.0"
 description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -243,6 +243,7 @@ module = [
     "opentelemetry.*",
     "prometheus_client.*",
     "reportlab.*",
+    "scipy.*",
     "sklearn.*",
     "structlog.*",
 ]

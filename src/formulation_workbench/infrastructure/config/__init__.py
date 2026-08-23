@@ -70,6 +70,7 @@ class AppSettings(BaseSettings):
     data_dir: Path = Path("./data")
     export_dir: Path = Path("./exports")
     model_dir: Path = Path("./data/models")
+    regulatory_data_dir: Path = Path("./data/regulatory")
 
     # ---- Observability -------------------------------------------------------
     metrics_enabled: bool = True

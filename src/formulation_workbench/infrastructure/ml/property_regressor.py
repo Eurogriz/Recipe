@@ -82,6 +82,11 @@ class PropertyPrediction:
     model_version: str
     model_cv_r2: float
     unit: str = ""
+    # Uncertainty descriptors — populated when the underlying model
+    # is an ensemble that can report per-tree quantiles.
+    lower_bound: float | None = None
+    upper_bound: float | None = None
+    interval_alpha: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,7 +213,7 @@ class PropertyRegressor:
                 training_recipe_ids=tuple(sorted({s.recipe_id for s in bucket})),
                 fingerprint=fingerprint,
             )
-            self._save_model(code, model, metadata)
+            self._save_model(code, model, metadata, samples=bucket)
             trained.append(metadata)
             logger.info(
                 "regressor_trained",
@@ -224,7 +229,17 @@ class PropertyRegressor:
         return TrainingResult(trained=tuple(trained), skipped=skipped)
 
     # ------------------------------------------------------------------ predict
-    def predict(self, recipe: Recipe, property_code: str) -> PropertyPrediction | None:
+    def predict(
+        self,
+        recipe: Recipe,
+        property_code: str,
+        *,
+        alpha: float | None = 0.1,
+    ) -> PropertyPrediction | None:
+        """Point prediction with an optional ``(1 - alpha)`` interval.
+
+        ``alpha=None`` skips the interval computation (small speedup).
+        """
         model, metadata = self._load_model(property_code)
         if model is None or metadata is None:
             return None
@@ -233,13 +248,48 @@ class PropertyRegressor:
             import numpy as np
         except ImportError as exc:  # pragma: no cover
             raise ModelUnavailableError("scikit-learn / numpy required for prediction") from exc
+
         value = float(model.predict(np.asarray([vector], dtype=float))[0])
+
+        lower = upper = None
+        used_alpha: float | None = None
+        if alpha is not None and hasattr(model, "estimators_"):
+            try:
+                from .uncertainty import predict_with_interval
+
+                interval = predict_with_interval(model, vector, alpha=alpha)
+                lower = interval.lower
+                upper = interval.upper
+                used_alpha = alpha
+            except Exception:  # pragma: no cover — never break a prediction
+                logger.exception("uncertainty_interval_failed")
+
         return PropertyPrediction(
             property_code=property_code,
             predicted_value=value,
             model_version=metadata.version,
             model_cv_r2=metadata.cv_mean_r2,
+            lower_bound=lower,
+            upper_bound=upper,
+            interval_alpha=used_alpha,
         )
+
+    def get_training_vectors(self, property_code: str) -> list[list[float]] | None:
+        """Return the feature vectors used to train ``property_code``.
+
+        Used by drift detection to compare an incoming batch against the
+        distribution the model was trained on.  Returns ``None`` if we
+        don't have a snapshot on disk (e.g. legacy model or the file was
+        pruned).
+        """
+        path = self._storage / f"{property_code}.samples.json"
+        if not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return None
+        return [list(map(float, row)) for row in data]
 
     # ------------------------------------------------------------------ registry
     def list_models(self) -> list[ModelMetadata]:
@@ -275,12 +325,25 @@ class PropertyRegressor:
     def _meta_path(self, property_code: str) -> Path:
         return self._storage / f"{property_code}.meta.json"
 
-    def _save_model(self, code: str, model, metadata: ModelMetadata) -> None:  # type: ignore[no-untyped-def]
+    def _save_model(  # type: ignore[no-untyped-def]
+        self,
+        code: str,
+        model,
+        metadata: ModelMetadata,
+        *,
+        samples: list[TrainingSample] | None = None,
+    ) -> None:
         self._model_path(code).write_bytes(pickle.dumps(model, protocol=pickle.HIGHEST_PROTOCOL))
         self._meta_path(code).write_text(
             json.dumps(metadata.to_dict(), ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
+        # Persist the training feature vectors — needed by the drift
+        # detector.  Kept in a sidecar so old readers (which don't know
+        # about it) simply ignore it.
+        if samples:
+            samples_path = self._storage / f"{code}.samples.json"
+            samples_path.write_text(json.dumps([s.features for s in samples]), encoding="utf-8")
 
     def _load_model(self, code: str):  # type: ignore[no-untyped-def]
         m_path = self._model_path(code)
