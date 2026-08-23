@@ -16,15 +16,13 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
-
 
 # ============================================================================
 # TEST 1: Password Hashing (Argon2id)
 # ============================================================================
+
 
 class TestArgon2idPasswordHashing:
     """Verify password hashing follows OWASP recommendations."""
@@ -32,12 +30,16 @@ class TestArgon2idPasswordHashing:
     def test_argon2id_imports(self) -> None:
         """Argon2id library must be available."""
         try:
-            import argon2
-            assert argon2.__version__ is not None
-            print("\n✓ argon2-cffi available:", argon2.__version__)
+            from importlib.metadata import version
+
+            import argon2  # noqa: F401
+
+            assert version("argon2-cffi") is not None
         except ImportError:
-            print("\n⚠ argon2-cffi not installed in sandbox (OK for production)")
             # In production, this is required
+            import pytest
+
+            pytest.skip("argon2-cffi not installed in this environment")
 
     def test_weak_password_rejected(self) -> None:
         """Verify password length validation."""
@@ -75,14 +77,14 @@ class TestArgon2idPasswordHashing:
 # TEST 2: SQLCipher Integration
 # ============================================================================
 
+
 class TestSqlCipherEncryption:
     """Verify SQLCipher encryption works correctly."""
 
     def test_sqlcipher_library_available(self) -> None:
         """SQLCipher library must be importable."""
         try:
-            import sqlcipher3
-            print("\n✓ sqlcipher3 available")
+            import sqlcipher3  # noqa: F401
         except ImportError:
             print("\n⚠ sqlcipher3 not installed in sandbox (required in production)")
 
@@ -100,8 +102,8 @@ class TestSqlCipherEncryption:
 
         # Bad keys
         bad_keys = [
-            "a" * 32,        # Too short
-            "g" * 64,        # Invalid hex
+            "a" * 32,  # Too short
+            "g" * 64,  # Invalid hex
             "0x1234567890abcdef" * 4,  # Has prefix
             "",
         ]
@@ -123,14 +125,8 @@ class TestSqlCipherEncryption:
         plaintext = "sensitive recipe data"
 
         # Simple XOR "encryption" for demonstration
-        encrypted = bytes(
-            ord(c) ^ key[i % len(key)]
-            for i, c in enumerate(plaintext)
-        )
-        decrypted = "".join(
-            chr(b ^ key[i % len(key)])
-            for i, b in enumerate(encrypted)
-        )
+        encrypted = bytes(ord(c) ^ key[i % len(key)] for i, c in enumerate(plaintext))
+        decrypted = "".join(chr(b ^ key[i % len(key)]) for i, b in enumerate(encrypted))
 
         assert plaintext == decrypted
         assert encrypted != plaintext.encode()
@@ -140,6 +136,7 @@ class TestSqlCipherEncryption:
 # ============================================================================
 # TEST 3: RBAC (Role-Based Access Control)
 # ============================================================================
+
 
 class TestRBAC:
     """Verify role-based access control is enforced."""
@@ -221,6 +218,7 @@ class TestRBAC:
 # TEST 4: Audit Log Integrity
 # ============================================================================
 
+
 class TestAuditLogIntegrity:
     """Verify audit log entries are complete and tamper-evident."""
 
@@ -275,6 +273,7 @@ class TestAuditLogIntegrity:
 # TEST 5: SQL Injection Prevention
 # ============================================================================
 
+
 class TestSQLInjectionPrevention:
     """Verify SQL queries use parametrized statements (no string concat)."""
 
@@ -291,10 +290,10 @@ class TestSQLInjectionPrevention:
             'f"INSERT',
             'f"UPDATE',
             'f"DELETE',
-            'f\'SELECT',
-            'f\'INSERT',
-            'f\'UPDATE',
-            'f\'DELETE',
+            "f'SELECT",
+            "f'INSERT",
+            "f'UPDATE",
+            "f'DELETE",
         ]
 
         violations = []
@@ -318,9 +317,9 @@ class TestSQLInjectionPrevention:
             # Soft-fail: only fail if it's not a PRAGMA
             non_pragma = [v for v in violations if "PRAGMA" not in str(v[1])]
             assert not non_pragma, f"Unsafe query patterns (non-PRAGMA): {non_pragma[:3]}"
-            print(f"\n✓ Only PRAGMA statements use execute(f'...') — these are validated before use")
+            print("\n✓ Only PRAGMA statements use execute(f'...') — these are validated before use")
         else:
-            print(f"\n✓ No unsafe query patterns in source")
+            print("\n✓ No unsafe query patterns in source")
 
     def test_sqlalchemy_uses_text_with_bindparams(self) -> None:
         """Verify SQLAlchemy queries use :bindparam syntax."""
@@ -333,20 +332,24 @@ class TestSQLInjectionPrevention:
 # TEST 6: Input Validation
 # ============================================================================
 
+
 class TestInputValidation:
     """Verify user inputs are validated before processing."""
 
     def test_cas_number_format_strict(self) -> None:
         """CAS numbers must match XXXXXX-XX-X format."""
-        from src.domain.value_objects.cas_number import CasNumber, InvalidCasNumberError
+        from formulation_workbench.domain.value_objects.cas_number import (
+            CasNumber,
+            InvalidCasNumberError,
+        )
 
         valid = ["7732-18-5", "13463-67-7", "50-00-0"]
         invalid = [
             "7732-18-6",  # Bad checksum
-            "7732-18",   # Wrong format
+            "7732-18",  # Wrong format
             "abc-de-f",  # Non-numeric
-            "",           # Empty
-            "7732-18-55", # Too many digits in check
+            "",  # Empty
+            "7732-18-55",  # Too many digits in check
         ]
 
         for cas in valid:
@@ -365,8 +368,12 @@ class TestInputValidation:
     def test_recipe_category_whitelist(self) -> None:
         """Categories must be from approved list."""
         approved = {
-            "Лаки", "Краски", "Колеры и пигментные пасты",
-            "Клеи", "Герметики", "Мастики",
+            "Лаки",
+            "Краски",
+            "Колеры и пигментные пасты",
+            "Клеи",
+            "Герметики",
+            "Мастики",
             "Грунтовки, шпатлёвки, штукатурки, наливные полы",
             "Антикоррозионные покрытия, огнезащита, гидроизоляция",
         }

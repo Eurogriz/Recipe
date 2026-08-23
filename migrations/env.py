@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 # Add src to path so we can import our models
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from infrastructure.db.models import Base  # noqa: E402
+from formulation_workbench.infrastructure.db.models import Base  # noqa: E402
 
 # This is the Alembic Config object
 config = context.config

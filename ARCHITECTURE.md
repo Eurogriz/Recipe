@@ -13,31 +13,38 @@
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│ Presentation (PySide6 / Qt 6)                       │
-│   - ViewModels, Command Palette (Ctrl+K)            │
-│   - Material Design 3 / Fluent Design              │
+│ Presentation                                        │
+│   - Typer CLI  (formulation-workbench)              │
+│   - FastAPI    (formulation-api, /docs /metrics)    │
+│   - One-shot commands (init-db, import-seed, …)     │
+│   - PySide6 desktop (optional, [desktop] extra)     │
 └─────────────────────────────────────────────────────┘
                          ↓ uses
 ┌─────────────────────────────────────────────────────┐
 │ Application (use cases, CQRS)                       │
-│   - Commands (write) / Queries (read)                │
-│   - DTOs, ports (interfaces)                         │
+│   - Commands (write) / Queries (read)               │
+│   - DTOs, ports (interfaces)                        │
 │   - Workflow orchestration                          │
 └─────────────────────────────────────────────────────┘
                          ↓ uses
 ┌─────────────────────────────────────────────────────┐
 │ Domain (pure Python, no external deps)              │
 │   - Entities, Value Objects, Domain Services        │
-│   - Domain Events                                    │
+│   - Domain Events                                   │
 └─────────────────────────────────────────────────────┘
                          ↑ implemented by
 ┌─────────────────────────────────────────────────────┐
-│ Infrastructure                                       │
-│   - SQLAlchemy repos, SQLCipher                     │
-│   - ReportLab PDF, 1С CommerceML, sklearn           │
-│   - structlog, i18n, DI container                   │
+│ Infrastructure                                      │
+│   - SQLAlchemy repos (session-scoped adapters)      │
+│   - SQLite / SQLCipher / PostgreSQL / MySQL         │
+│   - ReportLab PDF · openpyxl · defusedxml (1С)      │
+│   - sklearn (advisory, optional [ml] extra)         │
+│   - structlog · i18n · DI container · AppSettings   │
 └─────────────────────────────────────────────────────┘
 ```
+
+Все слои упакованы под единый top-level пакет
+`formulation_workbench` (см. [ADR-0006](docs/06-ops/ADR-0006-headless-service.md)).
 
 ## 2. Dependency Rule
 

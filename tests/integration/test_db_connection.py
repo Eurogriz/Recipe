@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from infrastructure.db.connection import (
+from formulation_workbench.infrastructure.db.connection import (
     Database,
     DatabaseConnectionError,
     derive_encryption_key_from_passphrase,
@@ -60,9 +60,7 @@ class TestDatabaseConnection:
 class TestPassphraseDerivation:
     """Tests for Argon2id passphrase → key derivation."""
 
-    def test_same_passphrase_same_salt_same_key(
-        self, passphrase: str, salt: bytes
-    ) -> None:
+    def test_same_passphrase_same_salt_same_key(self, passphrase: str, salt: bytes) -> None:
         """Deterministic: same inputs → same key."""
         key1 = derive_encryption_key_from_passphrase(passphrase, salt)
         key2 = derive_encryption_key_from_passphrase(passphrase, salt)

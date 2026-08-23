@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from domain.value_objects.verification_status import (
+from formulation_workbench.domain.value_objects.verification_status import (
     InvalidStatusTransitionError,
     VerificationState,
     VerificationStatus,
@@ -98,7 +98,7 @@ class TestVerificationCount:
             state=VerificationState.PENDING_REVIEW, required_verifications=5
         )
         s = status
-        for i in range(4):
+        for _i in range(4):
             s = s.add_verification()
             assert s.state == VerificationState.PENDING_REVIEW
         s = s.add_verification()

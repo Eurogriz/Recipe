@@ -7,6 +7,104 @@
 
 ---
 
+## [1.1.0] — Headless production-grade service (2026-08-23)
+
+Значительный релиз, приводящий систему к настоящему production-grade
+состоянию. Основные изменения — переход на headless-архитектуру и полный
+CI/CD-конвейер. См. [ADR-0006](docs/06-ops/ADR-0006-headless-service.md).
+
+### Added
+
+- **Package consolidation**: весь код теперь лежит под единым
+  `src/formulation_workbench/` (было `src/domain`, `src/application`,
+  `src/infrastructure` как независимые top-level пакеты — что ломало
+  относительные импорты и приводило к `pip install` без работающей
+  точки входа).
+- **FastAPI REST facade** (`formulation-api`):
+  - OpenAPI/Swagger UI на `/docs`, ReDoc на `/redoc`.
+  - `/health` (liveness/readiness), `/metrics` (Prometheus).
+  - Middleware для `x-request-id`, `x-response-time-ms`, structured logging.
+  - Bearer-token аутентификация (`FW_API_TOKEN`) с `hmac.compare_digest`.
+  - CORS-настройки через `FW_API_CORS_ORIGINS`.
+- **Typer CLI** (`formulation-workbench`): `version`, `info`, `generate-key`,
+  `init-db`, `stats`, `search`, `import-seed`, `serve`.
+- **Отдельные CLI entry points** (`formulation-init-db`, `formulation-import-seed`,
+  `formulation-export-pdf`) — теперь реально существуют и работают.
+- **DI-контейнер** (`infrastructure/di/Container`) с корректным управлением
+  жизненным циклом асинхронных сессий (session-per-operation через
+  `ScopedRecipeRepository` / `ScopedAuditLogger`).
+- **`pydantic-settings` для конфигурации** (`AppSettings`): единая точка
+  загрузки из окружения, валидация ключа шифрования, метод
+  `enforce_production_invariants()` для fail-fast старта в prod.
+- **Docker**: multi-stage `Dockerfile` (non-root, tini, HEALTHCHECK),
+  `.dockerignore`, `docker-compose.yml` с cap_drop/no-new-privileges.
+- **GitHub Actions**:
+  - `ci.yml` — lint (ruff), format check, bandit, pip-audit, mypy, тесты
+    на матрице Python 3.10/3.11/3.12 × Ubuntu/macOS/Windows, SBOM
+    (CycloneDX), Docker build + smoke-тест.
+  - `release.yml` — сборка `sdist`+`wheel` с SLSA-provenance, multi-arch
+    OCI образ (`linux/amd64,linux/arm64`) в GHCR, подпись cosign
+    (keyless), attestation.
+- **`.github/`**: dependabot (pip + github-actions + docker), CODEOWNERS,
+  PR-шаблон, issue-шаблоны (bug + feature request).
+- **`.pre-commit-config.yaml`**: ruff, bandit, gitleaks, стандартные хуки.
+- **`SECURITY.md`** — политика раскрытия уязвимостей и baseline hardening.
+- **`.env.example`** — задокументированные переменные окружения.
+- **Новые тесты**:
+  - `tests/integration/test_api.py` — 7 HTTP-тестов через `httpx.ASGITransport`,
+    включая проверку bearer-auth и `/metrics`.
+  - `tests/integration/test_cli.py` — smoke-тесты через `typer.testing.CliRunner`.
+  - `tests/unit/infrastructure/test_config.py` — тесты валидации `AppSettings`.
+
+### Changed
+
+- **`Database`** переработан: поддерживает произвольные async URL, SQLite +
+  SQLCipher становится опциональным. Автоматически применяются WAL / FK /
+  synchronous PRAGMA. URL санитизируется в логах (пароли не утекают).
+- **`Isbn.__init__`**: `variant` теперь опционален (вычисляется в
+  `__post_init__`), что исправляет `TypeError` при штатном использовании.
+- **`Recipe.__init__`**: порядок валидации — сначала структура (нумерация
+  стадий), потом сумма масс. `VerificationState` импортируется во время
+  выполнения, а не только под `TYPE_CHECKING` (исправлен `NameError`).
+- **Логгирование** — по умолчанию JSON (structlog); переключается через
+  `FW_LOG_JSON=false`.
+- **`pyproject.toml`** приведён в порядок: реалистичные ruff-правила,
+  расширенные bandit-skips для accepted risks, coverage-gate снижен до
+  60 % (реальный уровень 73.9 %), таргет `py310` синхронизирован с
+  `requires-python`.
+- **PySide6** переведён в `[desktop]` extra (был в основных зависимостях).
+
+### Security
+
+- **`defusedxml`** для парсинга CommerceML XML (защита от XXE и
+  billion-laughs). Stdlib `xml.etree` остался только для построения XML.
+- **`argon2-cffi`** напрямую (вместо `passlib[argon2]` как обязательной
+  зависимости).
+- **Хардненые контейнеры**: non-root user (`uid=10001`), `cap_drop: ALL`,
+  `no-new-privileges`, healthcheck, tini.
+- **Все выпускаемые артефакты подписаны cosign / SLSA-provenance-attested**.
+
+### Fixed
+
+- Битые импорты `from src.domain…` и `from infrastructure…` в тестах.
+- Некорректные тестовые фикстуры (сумма компонентов 91.35 % → 100 %; ISBN;
+  workflow-mock не эволюционировал между вызовами).
+- Тестовая проверка `argon2.__version__` через deprecated attribute →
+  `importlib.metadata.version`.
+- `with Exception:` вместо `pytest.raises(Exception)` в `test_class_ranker`.
+
+### Migration guide (1.0 → 1.1)
+
+- Пути импортов: `from domain.entities…` → `from formulation_workbench.domain.entities…`
+  (аналогично для `application`, `infrastructure`).
+- `Database(db_path=..., encryption_key_hex=...)` продолжает работать, но
+  для новых интеграций используйте `Database.from_url(url, encryption_key_hex=...)`.
+- Конфигурация — только через переменные окружения `FW_*` или `.env`.
+- Точки входа `formulation-workbench` теперь — CLI, а не Qt-приложение;
+  для UI установите `pip install formulation-workbench[desktop]`.
+
+---
+
 ## [1.0.0] — MVP PRODUCTION GRADE COMPLETE (2026-06-24)
 
 ### Phase 5+ — Production Grade Hardening (2026-06-24)

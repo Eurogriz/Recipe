@@ -5,29 +5,42 @@ Tests use cases with mock repository and audit logger.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
-from application.use_cases.create_recipe import CreateRecipeCommand, CreateRecipeUseCase
-from application.use_cases.delete_recipe import DeleteRecipeCommand, DeleteRecipeUseCase
-from application.use_cases.search_recipes import SearchFilter, SearchRecipesUseCase
-from application.use_cases.update_recipe import UpdateRecipeCommand, UpdateRecipeUseCase
-from application.use_cases.verification_workflow import (
+from formulation_workbench.application.use_cases.create_recipe import (
+    CreateRecipeCommand,
+    CreateRecipeUseCase,
+)
+from formulation_workbench.application.use_cases.delete_recipe import (
+    DeleteRecipeCommand,
+    DeleteRecipeUseCase,
+)
+from formulation_workbench.application.use_cases.search_recipes import (
+    SearchFilter,
+    SearchRecipesUseCase,
+)
+from formulation_workbench.application.use_cases.update_recipe import (
+    UpdateRecipeCommand,
+    UpdateRecipeUseCase,
+)
+from formulation_workbench.application.use_cases.verification_workflow import (
     SubmitRecipeForReviewCommand,
     SubmitRecipeForReviewUseCase,
     VerifyRecipeCommand,
     VerifyRecipeUseCase,
 )
-from domain.entities.recipe import (
+from formulation_workbench.domain.entities.recipe import (
     Component,
     CompositionStage,
     ProcessParams,
     ProductClass,
     Recipe,
 )
-from domain.value_objects.citation import Citation
-from domain.value_objects.verification_status import VerificationState
+from formulation_workbench.domain.value_objects.citation import Citation
+from formulation_workbench.domain.value_objects.isbn import Isbn
+from formulation_workbench.domain.value_objects.verification_status import VerificationState
 
 
 def make_recipe(
@@ -41,8 +54,11 @@ def make_recipe(
         title="Water-Based Paint Formulations, Vol. 3",
         year=1995,
         publisher="Noyes Publications",
+        isbn=Isbn("9780815513773"),
+        page_or_formula="pp. 78-82",
     )
-    from domain.value_objects.verification_status import VerificationStatus
+    from formulation_workbench.domain.value_objects.verification_status import VerificationStatus
+
     return Recipe(
         id=id,
         category="Краски",
@@ -56,9 +72,15 @@ def make_recipe(
                 name="Mixing",
                 description="Mix all components",
                 components=(
-                    Component(name="Water", cas_number="7732-18-5", function="vehicle", mass_percent=50.0),
-                    Component(name="Binder", cas_number="mixture", function="binder", mass_percent=40.0),
-                    Component(name="TiO2", cas_number="13463-67-7", function="pigment", mass_percent=10.0),
+                    Component(
+                        name="Water", cas_number="7732-18-5", function="vehicle", mass_percent=50.0
+                    ),
+                    Component(
+                        name="Binder", cas_number="mixture", function="binder", mass_percent=40.0
+                    ),
+                    Component(
+                        name="TiO2", cas_number="13463-67-7", function="pigment", mass_percent=10.0
+                    ),
                 ),
                 process=ProcessParams(equipment="Disperser"),
             ),
@@ -95,7 +117,9 @@ class TestUpdateRecipeUseCase:
         repo.get_by_id.return_value = make_recipe(status_state=VerificationState.DRAFT)
         use_case = UpdateRecipeUseCase(repo, audit)
         new_recipe = make_recipe()
-        command = UpdateRecipeCommand(recipe=new_recipe, actor="user1", changes_summary="Fixed typo")
+        command = UpdateRecipeCommand(
+            recipe=new_recipe, actor="user1", changes_summary="Fixed typo"
+        )
 
         result = await use_case.execute(command)
 
@@ -176,8 +200,16 @@ class TestVerificationWorkflowUseCases:
     async def test_verify_three_times_reaches_verified(self) -> None:
         repo = AsyncMock()
         audit = AsyncMock()
-        recipe = make_recipe(status_state=VerificationState.PENDING_REVIEW)
-        repo.get_by_id.return_value = recipe
+        current = {"recipe": make_recipe(status_state=VerificationState.PENDING_REVIEW)}
+
+        async def _get(rid: str) -> Recipe:
+            return current["recipe"]
+
+        async def _save(r: Recipe) -> None:
+            current["recipe"] = r
+
+        repo.get_by_id.side_effect = _get
+        repo.save.side_effect = _save
         use_case = VerifyRecipeUseCase(repo, audit)
 
         for i in range(3):

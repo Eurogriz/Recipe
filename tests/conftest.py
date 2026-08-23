@@ -16,7 +16,10 @@ import pytest_asyncio
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from infrastructure.db.connection import Database, derive_encryption_key_from_passphrase  # noqa: E402
+from formulation_workbench.infrastructure.db.connection import (
+    Database,
+    derive_encryption_key_from_passphrase,
+)
 
 
 @pytest.fixture(scope="session")
@@ -69,8 +72,9 @@ async def test_database(temp_dir: Path, encryption_key: str) -> AsyncIterator[Da
     await db.init()
 
     # Run migrations
-    from infrastructure.db.models import Base
     from sqlalchemy.ext.asyncio import create_async_engine
+
+    from formulation_workbench.infrastructure.db.models import Base
 
     engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.absolute()}")
     async with engine.begin() as conn:

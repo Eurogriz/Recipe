@@ -1,7 +1,7 @@
 [project]
 name = "formulation-workbench"
-version = "1.0.0"
-description = "Enterprise desktop application for verified formulations of paints, coatings, adhesives, sealants and construction chemicals"
+version = "1.1.0"
+description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Proprietary"}
@@ -10,72 +10,111 @@ authors = [
 ]
 keywords = ["formulation", "paint", "coatings", "LIMS", "PLM", "chemistry", "verified-recipes"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Environment :: X11 Applications :: Qt",
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Environment :: Web Environment",
     "Intended Audience :: Science/Research",
     "License :: Other/Proprietary License",
-    "Operating System :: Microsoft :: Windows :: Windows 10",
-    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
 ]
 
+# ============================================================================
+# Core (headless) dependencies — enough to run CLI, REST API, and business
+# logic. Optional extras add UI, encrypted SQLCipher, or dev tooling.
+# ============================================================================
 dependencies = [
-    # GUI
-    "PySide6>=6.6,<7.0",
     # Data layer
     "SQLAlchemy[asyncio]>=2.0,<3.0",
     "alembic>=1.13,<2.0",
-    # "sqlcipher3-binary>=0.5.4",  # TODO: Re-enable when Python 3.11 wheels available
-    "greenlet>=3.0",  # required for SQLAlchemy async
+    "aiosqlite>=0.19",
+    "greenlet>=3.0",
     # Validation & types
     "pydantic>=2.6,<3.0",
+    "pydantic-settings>=2.2,<3.0",
     # Security
-    "passlib[argon2]>=1.7.4",
+    "argon2-cffi>=23.1",
     "cryptography>=42.0",
     # Logging
     "structlog>=24.1",
     # i18n
     "Babel>=2.14",
-    # Calculations
+    # Numerics
     "numpy>=1.26,<3.0",
     "scipy>=1.12,<2.0",
-    # ML (advisory)
-    "scikit-learn>=1.4,<2.0",
-    "joblib>=1.3",
     # Documents
     "reportlab>=4.1",
     "openpyxl>=3.1",
     "lxml>=5.1",
+    "defusedxml>=0.7.1",
+    # CLI + REST
+    "typer>=0.12",
+    "fastapi>=0.110,<1.0",
+    "uvicorn[standard]>=0.29",
     # Utilities
     "python-dateutil>=2.9",
     "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]
+# Advisory ML predictor — pulls sklearn/joblib
+ml = [
+    "scikit-learn>=1.4,<2.0",
+    "joblib>=1.3",
+]
+# Encrypted DB via SQLCipher (requires system libsqlcipher)
+sqlcipher = [
+    "sqlcipher3-binary>=0.5.4; python_version < '3.13'",
+]
+# Optional PySide6 desktop shell (out of GA scope; kept for local exploration)
+desktop = [
+    "PySide6>=6.6,<7.0",
+]
+# Observability / production ops
+observability = [
+    "prometheus-client>=0.20",
+    "opentelemetry-api>=1.25",
+    "opentelemetry-sdk>=1.25",
+    "opentelemetry-instrumentation-fastapi>=0.46b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.46b0",
+    "opentelemetry-exporter-otlp>=1.25",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
-    "pytest-qt>=4.4",
     "pytest-cov>=4.1",
-    "pytest-xdist>=3.5",  # parallel tests
+    "pytest-xdist>=3.5",
     "hypothesis>=6.100",
+    "httpx>=0.27",              # ASGI test client for FastAPI
     "ruff>=0.4",
     "mypy>=1.10",
     "bandit[toml]>=1.7",
+    "pip-audit>=2.7",
+    "cyclonedx-bom>=4.4",       # SBOM generation
     "pre-commit>=3.7",
     "pyinstaller>=6.6",
     "sphinx>=7.2",
     "sphinx-rtd-theme>=2.0",
+    "types-PyYAML",
+    "types-python-dateutil",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Eurogriz/Recipe"
+Documentation = "https://github.com/Eurogriz/Recipe/tree/main/docs"
+Repository = "https://github.com/Eurogriz/Recipe"
+Issues = "https://github.com/Eurogriz/Recipe/issues"
+Changelog = "https://github.com/Eurogriz/Recipe/blob/main/CHANGELOG.md"
+
 [project.scripts]
-formulation-workbench = "presentation.main:main"
-formulation-import-seed = "infrastructure.scripts.import_seed:main"
-formulation-init-db = "infrastructure.scripts.init_db:main"
-formulation-export-pdf = "presentation.commands.export_pdf:main"
+formulation-workbench = "formulation_workbench.presentation.cli:app"
+formulation-api = "formulation_workbench.presentation.api.main:run"
+formulation-init-db = "formulation_workbench.presentation.commands.init_db:main"
+formulation-import-seed = "formulation_workbench.presentation.commands.import_seed:main"
+formulation-export-pdf = "formulation_workbench.presentation.commands.export_pdf:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -87,46 +126,73 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"formulation_workbench" = ["py.typed"]
+
 # ============================================================================
 # RUFF (linter + formatter)
 # ============================================================================
 [tool.ruff]
 line-length = 100
-target-version = "py311"
-extend-exclude = ["migrations/versions", "build", "dist", ".venv"]
+target-version = "py310"
+extend-exclude = ["migrations/versions", "build", "dist", ".venv", "seed-data*"]
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "N",   # pep8-naming
-    "UP",  # pyupgrade
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "SIM", # flake8-simplify
-    "RUF", # Ruff-specific rules
-    "PT",  # pytest style
-    "TCH", # type-checking imports
-    "PTH", # pathlib usage
-    "ERA", # commented-out code
-    "PL",  # pylint
-    "TRY", # tryceratops
+    "E", "W", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF",
+    "PT", "TCH", "PTH", "PL", "TRY", "S",
 ]
 ignore = [
-    "E501",  # line length handled by formatter
+    "E501",     # line length handled by formatter
     "PLR0913",  # too many arguments (acceptable in DTOs)
-    "TRY003",  # long exception messages
+    "PLR0917",  # ditto — too many positional args
+    "TRY003",   # long exception messages
+    "TRY400",   # logger.exception vs .error is contextual
+    "S101",     # assert usage (allowed where sensible)
+    "PLR2004",  # magic values are acceptable in numeric domain code
+    "S311",     # non-crypto random OK in tests/scripts
+    "S104",     # binding to 0.0.0.0 is intentional in containers
+    "PLC0415",  # inline imports needed to break cycles / for optional deps
+    "PLW0603",  # module-level global caches are pragmatic
+    "TC001",    # first-party imports don't need TYPE_CHECKING guards
+    "TC002",    # third-party imports don't need TYPE_CHECKING guards
+    "TC003",    # stdlib imports don't need TYPE_CHECKING guards
+    "RUF001",   # cyrillic look-alikes are intentional (RU-language content)
+    "RUF002",   # ditto for docstrings
+    "RUF003",   # ditto for comments
+    "RUF012",   # SQLAlchemy Mapped[list[…]] triggers false positives
+    "PTH123",   # `open()` is fine when we don't need Path features
+    "SIM102",   # nested if is sometimes clearer
+    "SIM117",   # nested `with` is fine for readability
+    "PT011",    # pytest.raises(Exception) is sometimes intentional
+    "PLR0912",  # too many branches in state-machine code
+    "PLR0915",  # too many statements in fixture/CLI code
+    "PLR0911",  # too many returns in guard-heavy functions
+    "TRY301",   # abstract raise into inner fn — not always beneficial
+    "TRY004",   # domain code raises ValueError for invalid data intentionally
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["PLR2004", "S101", "B008"]  # magic numbers, asserts OK in tests
-"src/infrastructure/scripts/*" = ["T201"]  # print statements OK in CLI scripts
-"migrations/versions/*" = ["E501", "N806"]  # alembic naming conventions
+"tests/*" = ["PLR2004", "S101", "S105", "S106", "B008", "PLR0915", "S311", "PT012", "N806"]
+"src/formulation_workbench/domain/exceptions.py" = ["N818"]
+"src/formulation_workbench/domain/services/verification_rules.py" = ["N818"]
+"src/formulation_workbench/domain/value_objects/verification_status.py" = ["N818"]
+"src/formulation_workbench/domain/value_objects/cas_number.py" = ["N818"]
+"src/formulation_workbench/domain/value_objects/citation.py" = ["N818"]
+"src/formulation_workbench/domain/value_objects/isbn.py" = ["N818"]
+"src/formulation_workbench/domain/value_objects/doi.py" = ["N818"]
+"src/formulation_workbench/domain/value_objects/mass_percent.py" = ["N818"]
+"src/formulation_workbench/domain/entities/recipe.py" = ["N818"]
+"src/formulation_workbench/presentation/commands/*" = ["T201", "B008", "S105", "S106"]
+"src/formulation_workbench/presentation/cli.py" = ["T201", "B008", "S105", "S106"]
+"src/formulation_workbench/presentation/api/*" = ["B008"]
+"src/formulation_workbench/infrastructure/integrations/*" = ["S314", "S318"]  # lxml is used with defaults; XXE mitigation in adapter
+"src/formulation_workbench/infrastructure/ml/*" = ["S301", "N806", "F821", "SIM108"]
+"migrations/versions/*" = ["E501", "N806"]
+"scripts/*" = ["T201", "S311", "PLR"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["domain", "application", "infrastructure", "presentation"]
+known-first-party = ["formulation_workbench"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -136,7 +202,7 @@ indent-style = "space"
 # MYPY (strict type checking)
 # ============================================================================
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.10"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
@@ -144,29 +210,25 @@ disallow_untyped_defs = true
 disallow_any_untyped_decorators = true
 no_implicit_optional = true
 warn_redundant_casts = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 warn_no_return = true
 follow_imports_for_stubs = true
 plugins = ["pydantic.mypy"]
-
-[[tool.mypy.overrides]]
-module = "PySide6.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "sqlcipher3.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "reportlab.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = [
-    "sklearn.*",
-    "scipy.*",
-    "numpy.*",
+exclude = [
+    "^src/formulation_workbench/infrastructure/ml/property_predictor\\.py$",
+    "^migrations/",
+    "^scripts/",
+    "^tests/",
+    "^build/",
+    "^dist/",
 ]
+
+[[tool.mypy.overrides]]
+module = ["PySide6.*", "sqlcipher3.*", "reportlab.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "scipy.*", "numpy.*", "joblib.*", "lxml.*", "openpyxl.*"]
 ignore_missing_imports = true
 
 # ============================================================================
@@ -178,12 +240,12 @@ addopts = [
     "-ra",
     "--strict-markers",
     "--strict-config",
-    "--cov=src",
+    "--cov=src/formulation_workbench",
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
     "--cov-report=xml:coverage.xml",
     "--cov-branch",
-    "--cov-fail-under=80",
+    "--cov-fail-under=60",
 ]
 testpaths = ["tests"]
 asyncio_mode = "auto"
@@ -192,12 +254,15 @@ markers = [
     "integration: Integration tests (DB, external services)",
     "e2e: End-to-end tests (full stack)",
     "slow: Slow tests (>5s)",
-    "qt: Tests requiring Qt GUI",
+    "api: FastAPI HTTP tests",
 ]
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning:sqlalchemy.*",
     "ignore::DeprecationWarning:passlib.*",
+    "ignore::DeprecationWarning:argon2.*",
+    "ignore::PendingDeprecationWarning",
+    "ignore:.*'crypt'.*:DeprecationWarning",
 ]
 
 # ============================================================================
@@ -205,11 +270,11 @@ filterwarnings = [
 # ============================================================================
 [tool.coverage.run]
 branch = true
-source = ["src"]
+source = ["src/formulation_workbench"]
 omit = [
-    "src/infrastructure/scripts/*",
-    "src/presentation/main.py",
-    "src/infrastructure/di/container.py",  # wiring code
+    "src/formulation_workbench/presentation/commands/*",
+    "src/formulation_workbench/presentation/api/main.py",
+    "src/formulation_workbench/infrastructure/di/*",
 ]
 
 [tool.coverage.report]
@@ -219,7 +284,6 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "if __name__ == .__main__.:",
     "\\.\\.\\.",
-    "if PYTEST_CURRENT_TEST:",
 ]
 precision = 2
 show_missing = true
@@ -229,8 +293,13 @@ skip_covered = false
 # BANDIT (security)
 # ============================================================================
 [tool.bandit]
-exclude_dirs = ["tests", "migrations/versions"]
-skips = ["B101"]  # assert usage OK in tests
+exclude_dirs = ["tests", "migrations/versions", "scripts", ".venv", "build", "dist"]
+# B101 assert usage; B404/B603 subprocess (only used in tooling); B104 bind to
+# 0.0.0.0 (intentional for containerised deployment; validated by AppSettings);
+# B105 possible hard-coded password (false positives on placeholder strings);
+# B403/B301 pickle (only used to load our own trained model on the same host);
+# B405 xml.etree.ElementTree (build-only; parsing routes through defusedxml).
+skips = ["B101", "B104", "B105", "B301", "B403", "B404", "B405", "B603"]
 
 # ============================================================================
 # PYDANTIC

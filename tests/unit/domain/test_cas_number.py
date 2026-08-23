@@ -5,11 +5,11 @@ Validates format and checksum logic. Includes property-based tests with hypothes
 
 from __future__ import annotations
 
-from hypothesis import given, strategies as st
-
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
-from domain.value_objects.cas_number import CasNumber, InvalidCasNumberError
+from formulation_workbench.domain.value_objects.cas_number import CasNumber, InvalidCasNumberError
 
 
 class TestCasNumberValidation:
@@ -23,7 +23,7 @@ class TestCasNumberValidation:
     def test_valid_titanium_dioxide(self) -> None:
         """TiO2 (CAS 13463-67-7) is valid."""
         cas = CasNumber("13463-67-7")
-        assert cas.value == "13463-18-7" or cas.value == "13463-67-7"
+        assert cas.value in {"13463-18-7", "13463-67-7"}
 
     def test_strips_whitespace(self) -> None:
         """Leading/trailing whitespace is stripped."""
@@ -63,7 +63,7 @@ class TestCasNumberValidation:
     def test_immutable(self) -> None:
         """CasNumber is immutable (frozen dataclass)."""
         cas = CasNumber("7732-18-5")
-        with pytest.raises(Exception):  # FrozenInstanceError or AttributeError
+        with pytest.raises((AttributeError, TypeError)):  # frozen dataclass
             cas.value = "fake"  # type: ignore[misc]
 
     def test_try_parse_returns_none_on_failure(self) -> None:
@@ -114,9 +114,9 @@ class TestCasNumberPropertyBased:
     @given(st.text(min_size=1, max_size=20))
     def test_random_text_rejected(self, text: str) -> None:
         """Random text is rejected (unless coincidentally valid)."""
+        import contextlib
+
         # We don't check that it's always rejected (could be valid by chance),
         # just that no crash happens
-        try:
+        with contextlib.suppress(InvalidCasNumberError):
             CasNumber(text)
-        except InvalidCasNumberError:
-            pass  # Expected

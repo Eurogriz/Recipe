@@ -1,0 +1,49 @@
+# Formulation Workbench — local production-like stack.
+#
+# Bring the API up with:
+#   docker compose up --build api
+#
+# One-shot database initialisation (before first run):
+#   docker compose run --rm api formulation-init-db
+#
+# Import a seed dataset:
+#   docker compose run --rm api formulation-import-seed --source /seed-data/example.json
+
+services:
+  api:
+    build:
+      context: .
+      args:
+        APP_VERSION: "1.1.0"
+    image: formulation-workbench:local
+    container_name: formulation-workbench-api
+    restart: unless-stopped
+    environment:
+      FW_ENVIRONMENT: ${FW_ENVIRONMENT:-production}
+      FW_LOG_LEVEL: ${FW_LOG_LEVEL:-INFO}
+      FW_LOG_JSON: "true"
+      FW_API_HOST: 0.0.0.0
+      FW_API_PORT: "8000"
+      # SECURITY: override in your local .env — do NOT commit real values.
+      FW_API_TOKEN: ${FW_API_TOKEN:-changeme-local-token}
+      FW_ENCRYPTION_KEY_HEX: ${FW_ENCRYPTION_KEY_HEX:-}
+      FW_DATABASE_URL: "sqlite+aiosqlite:////data/formulation.db"
+    ports:
+      - "8000:8000"
+    volumes:
+      - formulation-data:/data
+      - ./seed-data:/seed-data:ro
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  formulation-data:
