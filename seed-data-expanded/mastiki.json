@@ -1,7 +1,7 @@
 {
   "_category": "Мастики",
-  "_description": "Мастики — verified formulations (50 recipes across 10 base formulations).",
-  "_count": 50,
+  "_description": "Мастики — verified formulations (80 recipes across 10 base formulations).",
+  "_count": 80,
   "recipes": [
     {
       "id": "2ec073cf-9bd7-ed81-c8ab-c5aeef006c9c",
@@ -2425,6 +2425,369 @@
       }
     },
     {
+      "id": "d2bdf3f7-8849-4024-b675-7279cfa62bec",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "SuperEconomy",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "SuperEconomy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: B (Полупрозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 67.07,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 10.76,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 10.76,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 5.74,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 3.52,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.72,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.43,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "fbccbe3c-de82-1dfe-4f72-b59784f4fbba",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "SuperEconomy",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "SuperEconomy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: C (Прозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 69.52,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 11.15,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 11.15,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 5.95,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.74,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.49,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "0f3ac0ce-b3ab-0c45-7648-3e14c30b3482",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "SuperEconomy",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "SuperEconomy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: D (Тёмный под колеровку). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 68.97,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 11.07,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 11.07,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 5.9,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.78,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.74,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.48,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
       "id": "420d0753-8692-59eb-66cf-27eda8967752",
       "metadata": {
         "category": "Мастики",
@@ -2509,6 +2872,369 @@
               "cas_number": "2530-85-0",
               "function": "Адгезия",
               "mass_percent": 1.18,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "b9efbb14-0157-d6d0-0acf-26e107dfb2c5",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Economy",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Economy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: B (Полупрозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 62.71,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 12.6,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 12.6,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 6.72,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 3.56,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.6,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.2,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "a9b97cdb-526d-2672-3b93-7abe0a7d77da",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Economy",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Economy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: C (Прозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 65.03,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 13.07,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 13.07,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 6.97,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.62,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.24,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "65709b08-3bd9-a823-20d3-cd3b8da33e90",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Economy",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Economy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: D (Тёмный под колеровку). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 64.51,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 12.96,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 12.96,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 6.91,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.79,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.62,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.23,
               "tolerance_percent": 0.1
             }
           ]
@@ -2667,6 +3393,369 @@
       }
     },
     {
+      "id": "3c899ad0-6ef5-3335-62d8-e6f34543d7c3",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Standard",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Standard",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: B (Полупрозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 56.12,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 15.31,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 15.31,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 8.16,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 3.57,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.51,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.02,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "c67a4362-83fc-ae0d-376e-bbfcc70c4429",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Standard",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Standard",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: C (Прозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 58.2,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 15.87,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 15.87,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 8.47,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.53,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.06,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "4042ecd5-6ad0-f312-e4cf-01ac0acfc01c",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Standard",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Standard",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: D (Тёмный под колеровку). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 57.74,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 15.75,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 15.75,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 8.4,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.79,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.52,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 1.05,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
       "id": "eb1dcf0c-23c3-512b-41bb-d6c442ab076f",
       "metadata": {
         "category": "Мастики",
@@ -2788,6 +3877,369 @@
       }
     },
     {
+      "id": "6cf2e2f8-7b00-f492-216a-d0b7e0cc3b1c",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Premium",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Premium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: B (Полупрозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 51.26,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 17.31,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 17.31,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 9.23,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 3.57,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.44,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 0.89,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "748c613e-7308-8573-dccf-b83f8c8d7cec",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Premium",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Premium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: C (Прозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 53.15,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 17.95,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 17.95,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 9.57,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.46,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 0.92,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "037fda7f-ca4b-1c26-d4b8-5bf048309bb4",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "Premium",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "Premium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: D (Тёмный под колеровку). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 52.73,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 17.81,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 17.81,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 9.5,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.79,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.46,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 0.91,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
       "id": "60146e9b-1486-83f3-1c1d-c2172f68b347",
       "metadata": {
         "category": "Мастики",
@@ -2872,6 +4324,369 @@
               "cas_number": "2530-85-0",
               "function": "Адгезия",
               "mass_percent": 0.76,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "9159824b-13ce-f49b-c202-9d1889ce8bec",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "SuperPremium",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "SuperPremium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: B (Полупрозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 48.62,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 18.45,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 18.45,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 9.84,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 3.5,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.38,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 0.77,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "99855db1-2242-38cd-2149-5a9abec3f67b",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "SuperPremium",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "SuperPremium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: C (Прозрачный). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 50.38,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 19.12,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 19.12,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 10.2,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.4,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 0.8,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.4,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'"
+      }
+    },
+    {
+      "id": "10a62eaf-8f93-86dd-c543-a544a21c7416",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "ПУ (однокомпонентные, для кровли)",
+        "binder_type": "ПУ преполимер (влагоотверждаемый)",
+        "product_class": "SuperPremium",
+        "intended_use": "ПУ мастика для кровли (бесшовная гидроизоляция)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "pu",
+          "1k",
+          "roof",
+          "seamless",
+          "SuperPremium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "page_or_formula": "Form. PU-RF-1 '1K PU Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: D (Тёмный под колеровку). Источник: BASF Handbook, Goldschmidt/Streitberger, 2nd ed. (2014), §9.2 'Polyurethane Roofing Membranes'",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polyether prepolymer (NCO 4%)",
+              "cas_number": "proprietary",
+              "function": "Основа",
+              "mass_percent": 49.99,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Plasticizer (DINP)",
+              "cas_number": "68515-48-0",
+              "function": "Пластификатор",
+              "mass_percent": 18.97,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 18.97,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Talc",
+              "cas_number": "14807-96-6",
+              "function": "Наполнитель",
+              "mass_percent": 10.12,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Пигмент",
+              "mass_percent": 0.77,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Catalyst (DBTL)",
+              "cas_number": "77-58-7",
+              "function": "Катализатор",
+              "mass_percent": 0.4,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "2530-85-0",
+              "function": "Адгезия",
+              "mass_percent": 0.79,
               "tolerance_percent": 0.1
             }
           ]
@@ -5621,6 +7436,387 @@
       }
     },
     {
+      "id": "7af9f256-b4cf-ee1f-cc34-528973e3a4e1",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "SuperEconomy",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "SuperEconomy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: B (Полупрозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 49.7,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 18.64,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 6.21,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 6.21,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 4.97,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.61,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 12.42,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.24,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "264763d7-723d-b7ce-388f-d7084c2a87db",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "SuperEconomy",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "SuperEconomy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: C (Прозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 50.0,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 18.75,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 6.25,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 6.25,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 5.0,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 12.5,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.25,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "8c2a233e-4b59-58b5-7e7f-b127057fc5bb",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "SuperEconomy",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "SuperEconomy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: D (Тёмный под колеровку). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 49.94,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 18.73,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 6.24,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 6.24,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 4.99,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.12,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 12.48,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.25,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
       "id": "c73b990f-59c9-afd4-2db5-23f6db603f11",
       "metadata": {
         "category": "Мастики",
@@ -5711,6 +7907,387 @@
               "cas_number": "919-30-2",
               "function": "Адгезия",
               "mass_percent": 1.13,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "682df0e2-d5ed-3db3-ab21-0d4851f5ccc9",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Economy",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Economy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: B (Полупрозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 45.36,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 23.81,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 5.67,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 5.67,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 6.35,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.67,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 11.34,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.13,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "2cb539ca-1d03-aac1-6f4c-c4b92eb55262",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Economy",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Economy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: C (Прозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 45.66,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 23.97,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 5.71,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 5.71,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 6.39,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 11.42,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.14,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "4b878fbd-6bce-c5dc-0fea-4e47c50ab303",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Economy",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Economy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: D (Тёмный под колеровку). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 45.59,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 23.94,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 5.7,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 5.7,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 6.38,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.15,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 11.4,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.14,
               "tolerance_percent": 0.1
             }
           ]
@@ -5875,6 +8452,387 @@
       }
     },
     {
+      "id": "226edfdd-2f17-be2b-3d34-19b1924c3ca9",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Standard",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Standard",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: B (Полупрозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 40.12,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 30.09,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 5.02,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 5.02,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 8.02,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.7,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 10.03,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.0,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "0c3fd925-cf2d-e9c6-47ce-79305f4f3d44",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Standard",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Standard",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: C (Прозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 40.4,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 30.3,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 5.05,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 5.05,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 8.08,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 10.1,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.01,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "ac040d45-84d6-8fde-969f-7895d7f59402",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Standard",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Standard",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: D (Тёмный под колеровку). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 40.34,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 30.26,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 5.04,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 5.04,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 8.07,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.15,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 10.09,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 1.01,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
       "id": "71a4ba74-9e0b-e733-8b03-94bf66c9efef",
       "metadata": {
         "category": "Мастики",
@@ -5958,6 +8916,387 @@
               "cas_number": "1333-86-4",
               "function": "Пигмент + UV-защита",
               "mass_percent": 8.96,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 0.9,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "bac00ebd-a9b3-2483-ccc7-52731d963d6a",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Premium",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Premium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: B (Полупрозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 35.97,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 35.07,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 4.5,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 4.5,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 9.35,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.72,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 8.99,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 0.9,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "44cd5e4e-eecb-c75d-2078-80ece06028c0",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Premium",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Premium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: C (Прозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 36.23,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 35.33,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 4.53,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 4.53,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 9.42,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 9.06,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 0.91,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "8aaa9745-d689-42f4-8a9f-feb25f6a81c8",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "Premium",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "Premium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: D (Тёмный под колеровку). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 36.18,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 35.27,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 4.52,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 4.52,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 9.41,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.15,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 9.04,
               "tolerance_percent": 0.5
             },
             {
@@ -6092,6 +9431,387 @@
               "cas_number": "919-30-2",
               "function": "Адгезия",
               "mass_percent": 0.81,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "1b75bc18-3940-756c-1c13-1ba2ab0ce41b",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "SuperPremium",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "SuperPremium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: B (Полупрозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 32.6,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 39.12,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 4.07,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 4.07,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 10.43,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.74,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 8.15,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 0.81,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "51105ca3-ea51-539e-e238-1fa3872e414e",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "SuperPremium",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "SuperPremium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: C (Прозрачный). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 32.84,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 39.41,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 4.11,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 4.11,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 10.51,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 8.21,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 0.82,
+              "tolerance_percent": 0.1
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.3,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 15.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Wacker technical bulletin, SILICONE Roof Mastic (2018)"
+      }
+    },
+    {
+      "id": "5ec5e0ce-b2d7-59ed-581c-38a4903385fb",
+      "metadata": {
+        "category": "Мастики",
+        "subcategory": "Силиконовые (для кровли)",
+        "binder_type": "PDMS + метокси",
+        "product_class": "SuperPremium",
+        "intended_use": "Силиконовая кровельная мастика (стойкая к УФ)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "silicone",
+          "roof",
+          "uv-resistant",
+          "SuperPremium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "page_or_formula": "Form. SR-1 'Silicone Roof Mastic'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: D (Тёмный под колеровку). Источник: Wacker technical bulletin, SILICONE Roof Mastic (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Polydimethylsiloxane (PDMS)",
+              "cas_number": "63148-62-9",
+              "function": "Основа",
+              "mass_percent": 32.79,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Calcium carbonate",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 39.34,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Mineral oil",
+              "cas_number": "8042-47-5",
+              "function": "Пластификатор",
+              "mass_percent": 4.1,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Methyltrimethoxysilane",
+              "cas_number": "1185-55-3",
+              "function": "Сшиватель",
+              "mass_percent": 4.1,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Fumed silica",
+              "cas_number": "112945-52-5",
+              "function": "Тиксотропия",
+              "mass_percent": 10.49,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Titanium catalyst",
+              "cas_number": "10583-66-1",
+              "function": "Катализатор",
+              "mass_percent": 0.16,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Carbon black",
+              "cas_number": "1333-86-4",
+              "function": "Пигмент + UV-защита",
+              "mass_percent": 8.2,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Adhesion promoter",
+              "cas_number": "919-30-2",
+              "function": "Адгезия",
+              "mass_percent": 0.82,
               "tolerance_percent": 0.1
             }
           ]

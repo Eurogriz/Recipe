@@ -3,11 +3,24 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Beaker, ClipboardCheck, DollarSign, LineChart } from "lucide-react";
+import {
+  ArrowLeft,
+  Beaker,
+  ClipboardCheck,
+  DollarSign,
+  LineChart,
+  Target,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import {
   api,
   type Assessment,
+  type ModelMetadata,
+  type OptimisationResult,
+  type ParetoResult,
   type PredictionsOut,
+  type PropertyTarget,
   type RecipeCost,
   type RecipeFull,
 } from "@/lib/api";
@@ -18,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TBody, THead, TH, TR, TD } from "@/components/ui/table";
 import { useT } from "@/i18n/I18nProvider";
 
-type Tab = "composition" | "assessment" | "predict" | "cost";
+type Tab = "composition" | "assessment" | "predict" | "cost" | "optimise";
 
 export default function RecipeDetailPage() {
   const t = useT();
@@ -117,12 +130,21 @@ export default function RecipeDetailPage() {
         >
           {t("recipe.tab.cost")}
         </TabButton>
+        <TabButton
+          current={tab}
+          v="optimise"
+          onClick={setTab}
+          icon={<Target className="h-4 w-4" />}
+        >
+          {t("recipe.tab.optimise")}
+        </TabButton>
       </div>
 
       {tab === "composition" && <CompositionTab recipe={recipe} />}
       {tab === "assessment" && <AssessmentTab id={id} />}
       {tab === "predict" && <PredictTab id={id} />}
       {tab === "cost" && <CostTab recipe={recipe} />}
+      {tab === "optimise" && <OptimiseTab id={id} />}
     </div>
   );
 }
@@ -644,6 +666,397 @@ function CostTab({ recipe }: { recipe: RecipeFull }) {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------- Optimise */
+interface EditableTarget extends PropertyTarget {
+  _key: string;
+}
+
+function OptimiseTab({ id }: { id: string }) {
+  const t = useT();
+  const [models, setModels] = useState<ModelMetadata[] | null>(null);
+  const [targets, setTargets] = useState<EditableTarget[]>([]);
+  const [singleResult, setSingleResult] = useState<OptimisationResult | null>(null);
+  const [paretoResult, setParetoResult] = useState<ParetoResult | null>(null);
+  const [busy, setBusy] = useState<null | "single" | "pareto">(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    api
+      .listModels()
+      .then((ms) => {
+        setModels(ms);
+        // Seed 2 default targets if models are trained.
+        if (ms.length >= 2 && targets.length === 0) {
+          const g = ms.find((m) => m.property_code === "gloss_60") ?? ms[0];
+          const v = ms.find((m) => m.property_code === "voc_content") ?? ms[1];
+          setTargets([
+            {
+              _key: crypto.randomUUID(),
+              property_code: g.property_code,
+              target_value: 60,
+              direction: "maximise",
+              weight: 1,
+              tolerance: 5,
+            },
+            {
+              _key: crypto.randomUUID(),
+              property_code: v.property_code,
+              target_value: 0,
+              direction: "minimise",
+              weight: 1,
+              tolerance: 5,
+            },
+          ]);
+        }
+      })
+      .catch(() => setModels([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const addTarget = () => {
+    if (!models || models.length === 0) return;
+    setTargets((ts) => [
+      ...ts,
+      {
+        _key: crypto.randomUUID(),
+        property_code: models[0].property_code,
+        target_value: 50,
+        direction: "match",
+        weight: 1,
+        tolerance: 5,
+      },
+    ]);
+  };
+  const removeTarget = (key: string) =>
+    setTargets((ts) => ts.filter((x) => x._key !== key));
+  const updateTarget = (key: string, patch: Partial<PropertyTarget>) =>
+    setTargets((ts) => ts.map((x) => (x._key === key ? { ...x, ...patch } : x)));
+
+  const runSingle = async () => {
+    if (targets.length === 0) {
+      setErr(t("optimise.no_targets"));
+      return;
+    }
+    setBusy("single");
+    setErr(null);
+    setSingleResult(null);
+    setParetoResult(null);
+    try {
+      const r = await api.optimise(id, {
+        targets: targets.map(({ _key, ...rest }) => rest),
+        max_iterations: 15,
+        population_size: 10,
+        seed: 42,
+      });
+      setSingleResult(r);
+    } catch (e: any) {
+      setErr(t("optimise.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const runPareto = async () => {
+    if (targets.length < 2) {
+      setErr(t("optimise.no_targets"));
+      return;
+    }
+    setBusy("pareto");
+    setErr(null);
+    setSingleResult(null);
+    setParetoResult(null);
+    try {
+      const r = await api.pareto(id, {
+        targets: targets.map(({ _key, ...rest }) => rest),
+        population_size: 20,
+        generations: 15,
+        seed: 42,
+      });
+      setParetoResult(r);
+    } catch (e: any) {
+      setErr(t("optimise.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  if (!models) return <div className="text-sm text-muted-foreground">{t("common.loading")}</div>;
+  if (models.length === 0) {
+    return (
+      <div className="text-sm text-muted-foreground">
+        <NoModelsMessage />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("optimise.title")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("optimise.subtitle")}</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {targets.map((tgt) => (
+            <div
+              key={tgt._key}
+              className="grid grid-cols-1 md:grid-cols-6 gap-2 items-center border border-border rounded-md p-3"
+            >
+              <div className="md:col-span-2">
+                <label className="text-xs text-muted-foreground">{t("optimise.property")}</label>
+                <select
+                  className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+                  value={tgt.property_code}
+                  onChange={(e) => updateTarget(tgt._key, { property_code: e.target.value })}
+                >
+                  {models.map((m) => (
+                    <option key={m.property_code} value={m.property_code}>
+                      {m.property_code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">{t("optimise.target_value")}</label>
+                <input
+                  type="number"
+                  className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white font-mono"
+                  value={tgt.target_value}
+                  onChange={(e) =>
+                    updateTarget(tgt._key, { target_value: Number(e.target.value) })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">{t("optimise.tolerance")}</label>
+                <input
+                  type="number"
+                  className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white font-mono"
+                  value={tgt.tolerance ?? 0}
+                  onChange={(e) => updateTarget(tgt._key, { tolerance: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">{t("optimise.direction")}</label>
+                <select
+                  className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+                  value={tgt.direction ?? "match"}
+                  onChange={(e) =>
+                    updateTarget(tgt._key, {
+                      direction: e.target.value as PropertyTarget["direction"],
+                    })
+                  }
+                >
+                  <option value="match">{t("optimise.direction.match")}</option>
+                  <option value="minimise">{t("optimise.direction.minimise")}</option>
+                  <option value="maximise">{t("optimise.direction.maximise")}</option>
+                </select>
+              </div>
+              <div className="flex items-end justify-end">
+                <Button variant="ghost" size="sm" onClick={() => removeTarget(tgt._key)}>
+                  <Trash2 className="h-4 w-4" /> {t("optimise.remove")}
+                </Button>
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button variant="outline" onClick={addTarget}>
+              <Plus className="h-4 w-4" /> {t("optimise.add_target")}
+            </Button>
+            <Button onClick={runSingle} disabled={busy !== null || targets.length === 0}>
+              {busy === "single" ? t("optimise.running") : t("optimise.run_single")}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={runPareto}
+              disabled={busy !== null || targets.length < 2}
+            >
+              {busy === "pareto" ? t("optimise.running") : t("optimise.run_pareto")}
+            </Button>
+          </div>
+          {err && <div className="text-sm text-red-700">{err}</div>}
+        </CardContent>
+      </Card>
+
+      {singleResult && <OptimisationResultCard result={singleResult} />}
+      {paretoResult && <ParetoResultCard result={paretoResult} />}
+    </div>
+  );
+}
+
+function OptimisationResultCard({ result }: { result: OptimisationResult }) {
+  const t = useT();
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("optimise.result.title")}</CardTitle>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <MiniStat label={t("optimise.result.loss")} value={fmt(result.final_loss, 4)} />
+            <MiniStat label={t("optimise.result.iterations")} value={String(result.iterations_used)} />
+            <MiniStat
+              label={t("optimise.result.converged")}
+              value={result.converged ? t("common.yes") : t("common.no")}
+              variant={result.converged ? "success" : "warning"}
+            />
+          </div>
+          <div className="text-xs uppercase text-muted-foreground mb-2">
+            {t("optimise.result.predicted")}
+          </div>
+          <ul className="space-y-1 text-sm">
+            {Object.entries(result.predicted_values).map(([k, v]) => (
+              <li key={k} className="flex justify-between border-b border-border/60 py-1">
+                <span className="font-mono text-xs">{k}</span>
+                <span className="font-mono">{fmt(v, 2)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <div className="text-xs uppercase text-muted-foreground mb-2">
+            {t("optimise.result.composition")}
+          </div>
+          <ul className="space-y-1 text-sm max-h-96 overflow-auto">
+            {Object.entries(result.optimised_mass_percent)
+              .sort((a, b) => b[1] - a[1])
+              .map(([k, v]) => (
+                <li key={k} className="flex justify-between border-b border-border/60 py-1">
+                  <span className="truncate pr-2">{k}</span>
+                  <span className="font-mono">{fmt(v, 3)} %</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ParetoResultCard({ result }: { result: ParetoResult }) {
+  const t = useT();
+  if (result.front.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-sm text-muted-foreground">
+          {t("optimise.pareto.no_front")}
+        </CardContent>
+      </Card>
+    );
+  }
+  const objKeys = Object.keys(result.front[0].objectives);
+  // We plot a 2D scatter of the first two objectives.
+  const xKey = objKeys[0];
+  const yKey = objKeys[1] ?? objKeys[0];
+  const xs = result.front.map((p) => p.objectives[xKey]);
+  const ys = result.front.map((p) => p.objectives[yKey]);
+  const xMin = Math.min(...xs);
+  const xMax = Math.max(...xs);
+  const yMin = Math.min(...ys);
+  const yMax = Math.max(...ys);
+  const W = 560;
+  const H = 320;
+  const M = 40;
+  const nx = (x: number) => M + ((x - xMin) / Math.max(1e-9, xMax - xMin)) * (W - 2 * M);
+  const ny = (y: number) => H - M - ((y - yMin) / Math.max(1e-9, yMax - yMin)) * (H - 2 * M);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("optimise.pareto.title")}</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {t("optimise.pareto.subtitle", {
+            n: result.front.length,
+            gen: result.generations,
+          })}
+        </p>
+      </CardHeader>
+      <CardContent>
+        <svg width={W} height={H} className="mx-auto block max-w-full">
+          {/* axes */}
+          <line x1={M} y1={H - M} x2={W - M} y2={H - M} stroke="hsl(215 16% 65%)" />
+          <line x1={M} y1={M} x2={M} y2={H - M} stroke="hsl(215 16% 65%)" />
+          <text x={W / 2} y={H - 8} textAnchor="middle" className="text-xs" fill="hsl(215 16% 47%)">
+            {xKey}
+          </text>
+          <text
+            x={12}
+            y={H / 2}
+            transform={`rotate(-90, 12, ${H / 2})`}
+            textAnchor="middle"
+            className="text-xs"
+            fill="hsl(215 16% 47%)"
+          >
+            {yKey}
+          </text>
+          {/* min / max labels */}
+          <text x={M} y={H - M + 16} className="text-[10px]" fill="hsl(215 16% 47%)">
+            {fmt(xMin, 2)}
+          </text>
+          <text
+            x={W - M}
+            y={H - M + 16}
+            textAnchor="end"
+            className="text-[10px]"
+            fill="hsl(215 16% 47%)"
+          >
+            {fmt(xMax, 2)}
+          </text>
+          <text x={M - 6} y={H - M} textAnchor="end" className="text-[10px]" fill="hsl(215 16% 47%)">
+            {fmt(yMin, 2)}
+          </text>
+          <text x={M - 6} y={M + 4} textAnchor="end" className="text-[10px]" fill="hsl(215 16% 47%)">
+            {fmt(yMax, 2)}
+          </text>
+          {/* points */}
+          {result.front.map((p, i) => (
+            <circle
+              key={i}
+              cx={nx(p.objectives[xKey])}
+              cy={ny(p.objectives[yKey])}
+              r={5}
+              fill="hsl(221 83% 53%)"
+              fillOpacity={0.7}
+              stroke="hsl(221 83% 33%)"
+            >
+              <title>
+                {`${xKey}=${fmt(p.objectives[xKey], 3)}, ${yKey}=${fmt(
+                  p.objectives[yKey],
+                  3
+                )}`}
+              </title>
+            </circle>
+          ))}
+        </svg>
+      </CardContent>
+    </Card>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  variant,
+}: {
+  label: string;
+  value: string;
+  variant?: "success" | "warning";
+}) {
+  const color =
+    variant === "success"
+      ? "text-green-700"
+      : variant === "warning"
+        ? "text-amber-700"
+        : "text-foreground";
+  return (
+    <div className="border border-border rounded-md p-2">
+      <div className="text-[10px] uppercase text-muted-foreground">{label}</div>
+      <div className={`text-lg font-semibold ${color}`}>{value}</div>
     </div>
   );
 }

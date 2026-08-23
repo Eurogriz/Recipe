@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Beaker, Cpu, LayoutDashboard, Activity, ExternalLink } from "lucide-react";
+import {
+  Beaker,
+  Cpu,
+  LayoutDashboard,
+  Activity,
+  ExternalLink,
+  Waves,
+} from "lucide-react";
 import { I18nProvider, useT } from "@/i18n/I18nProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
@@ -20,6 +27,7 @@ const NAV = [
   { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
   { href: "/recipes", labelKey: "nav.recipes", icon: Beaker },
   { href: "/ml", labelKey: "nav.ml", icon: Cpu },
+  { href: "/ml/drift", labelKey: "nav.drift", icon: Waves },
   { href: "/ml/jobs", labelKey: "nav.jobs", icon: Activity },
 ] as const;
 
@@ -39,16 +47,22 @@ function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-semibold leading-tight group-hover:text-primary transition-colors">
                 {t("app.brand")}
               </div>
-              <div className="text-xs text-muted-foreground">v1.8.0</div>
+              <div className="text-xs text-muted-foreground">v1.9.0</div>
             </div>
           </Link>
         </div>
         <nav className="flex-1 px-3 pb-6 space-y-1">
           {NAV.map((item) => {
-            const active =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname === item.href || pathname.startsWith(item.href + "/");
+            // Pick the longest matching NAV href, so /ml/drift lights up
+            // "Data drift" (not "ML / Ops"), and /recipes/{id} lights up
+            // "Recipes".
+            const bestMatch = NAV.filter(
+              (n) =>
+                (n.href === "/" && pathname === "/") ||
+                (n.href !== "/" &&
+                  (pathname === n.href || pathname.startsWith(n.href + "/")))
+            ).sort((a, b) => b.href.length - a.href.length)[0];
+            const active = bestMatch?.href === item.href;
             return (
               <Link
                 key={item.href}

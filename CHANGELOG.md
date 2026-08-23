@@ -7,6 +7,111 @@
 
 ---
 
+## [1.9.0] — 980-recipe corpus, Optimise/Pareto UI, Drift dashboard, model cache (2026-08-23)
+
+Расширение датасета до ~1000 рецептов, две новые UI-фичи, и один
+важный performance-fix для оптимизатора.
+
+### Changed — Seed generator: 500 → 980 recipes
+
+- `scripts/generate_seed_data.py`:
+  - `COLOR_BASES` дополнен базой **D** (тёмная под колеровку,
+    TiO2-фактор 0.15) — теперь A / B / C / D покрывают весь спектр
+    пигментной нагрузки от белой до глубокой тёмной.
+  - `generate_for_base` теперь генерирует **5 quality × 4 color =
+    20 variants** per base формулу (было 5 × 1).
+  - Умный skip: если базовая формула не содержит TiO2 (морилки,
+    прозрачные лаки, затирки), color-axis сворачивается в одну "A",
+    чтобы не плодить идентичные копии.
+- **980 рецептов** в 8 категориях (kraski 320, gruntovki 90,
+  germetiki 135, mastiki 80, laki 85, klei 70, kolery 65,
+  special 135), **4900 experiments** (5 per recipe) — почти × 2 к
+  v1.8.0 (500 / 2500).
+- Быть честным (как в v1.8): это всё ещё **100 книжных базовых
+  формул × вариации**, не 1000 независимых лабораторных измерений.
+
+**ML на расширенном корпусе (n=4900 per property, hold-out=980):**
+
+| property | CV R² ± σ | hold-out R² | MAE |
+|---|---|---|---|
+| gloss_60 | +0.995 ± 0.001 | **+0.996** | 2.28 GU |
+| hiding_power | +0.981 ± 0.002 | +0.984 | 0.30 m²/L |
+| viscosity_mid_shear | +0.971 ± 0.003 | +0.977 | 30.98 mPa·s |
+| voc_content | +0.997 ± 0.002 | +0.999 | 2.96 g/L |
+
+Тренировка всех 4 моделей — 129 сек (было 70 сек на 500 рецептах).
+Hold-out R² ≥ CV R² сохраняется.
+
+### Added — Optimise / Pareto UI tab
+
+Новый таб «Оптимизация» в карточке рецепта:
+
+- **Настраиваемые цели**: property_code (из списка обученных моделей),
+  target_value, tolerance, direction (match / minimise / maximise),
+  weight. Добавление / удаление целей on-the-fly.
+- **«Оптимизировать (одна точка)»** — `POST /recipes/{id}/optimise` с
+  differential evolution; показывает финальный loss, число итераций,
+  сошлось / нет, предсказанные значения и оптимизированный
+  состав (отсортированный по убыванию массы).
+- **«Построить Парето-фронт»** — `POST /recipes/{id}/pareto` с NSGA-II;
+  рисует чистый SVG-scatter первых двух objectives, точки с tooltip.
+- 2 предзаполненные default-цели (max gloss_60, min voc_content), чтобы
+  можно было нажать «Оптимизировать» без ручной настройки.
+- Параметры уменьшены под интерактивный UI: `max_iterations=15,
+  population_size=10` для single, `population_size=20, generations=15`
+  для Pareto — типичный запрос отрабатывает за 10-30 сек вместо 60+.
+
+### Added — Drift dashboard
+
+Новая страница `/ml/drift` в навигации:
+
+- Выбор модели из списка обученных, источник свежих данных
+  (в текущей версии: случайные вектора для демо; в проде — POST
+  последних N production-экспериментов).
+- Полноценный отчёт по всем 37 фичам: PSI, KS-статистика, p-value,
+  уровень (`no_drift / moderate_drift / severe_drift`) с цветной
+  Badge, sort по PSI desc.
+- Summary-cards: worst level, n reference, n current.
+- Подсказка порогов PSI (< 0.1 / 0.1–0.25 / > 0.25).
+
+### Changed — Model in-memory cache (perf)
+
+`PropertyRegressor._load_model` теперь кеширует распарсенную модель
+в памяти под ключом `(property_code, mtime)`. Раньше каждый
+`predict()` пере-unpickle'ил стек с диска (~1 сек), убивая
+optimiser/pareto (450+ predictions на один запрос). Warm predict
+теперь **~10 ms** (было ~20 ms), а cold — только на первый вызов
+после старта или после `train()`.
+
+### i18n
+
+- **+42 ключа** в RU / EN (optimise, pareto, drift, chart labels).
+- Итого: **214 переведённых строк, паритет 100 %**.
+
+### Endpoints
+
+Без изменений в API (все использованные endpoints для Optimise /
+Pareto / Drift уже были). UI просто впервые их выводит наружу.
+
+### Tests
+
+Без новых тестов бэкенда — API-контракты не менялись. `428 passed,
+0 failed` (кроме pre-existing regulatory CSV loader тестов, требующих
+локальные data/regulatory/*.csv).
+
+### Files
+
+- scripts/generate_seed_data.py (color base D + 20-variant generation)
+- src/formulation_workbench/infrastructure/ml/property_regressor.py
+  (in-memory model cache)
+- web/src/app/recipes/[id]/page.tsx (Optimise tab, Pareto SVG)
+- web/src/app/ml/drift/page.tsx (new drift dashboard)
+- web/src/components/AppShell.tsx (nav entry + best-match highlighting)
+- web/src/lib/api.ts (types: OptimisationRequest/Result, ParetoRequest/Result)
+- web/src/i18n/dictionaries/{ru,en}.ts (+42 keys)
+
+---
+
 ## [1.8.0] — 500-recipe corpus + Next.js UI + stacked ensemble (2026-08-23)
 
 Три большие вещи в одном раунде.

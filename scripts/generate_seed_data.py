@@ -36,9 +36,18 @@ QUALITY_CLASSES = {
 }
 
 COLOR_BASES = {
+    # Industry-standard tinting bases for paints/coatings.  The tinting
+    # convention is: "A" carries the maximum TiO2 payload (used for
+    # white / very light shades), "B" is medium (pastel), "C" is
+    # transparent (deep colours, tinted at the point of sale), and "D"
+    # is deep-tint / black-base (near-zero TiO2, high load of colouring
+    # pigments after tinting).  We seed the corpus with all four so the
+    # ML model sees the full pigment-loading spectrum, not just white
+    # base A.
     "A": {"name_suffix": " (база A, белая)", "tio2_factor": 1.0, "color": "Белый"},
     "B": {"name_suffix": " (база B, средняя)", "tio2_factor": 0.7, "color": "Полупрозрачный"},
     "C": {"name_suffix": " (база C, прозрачная)", "tio2_factor": 0.0, "color": "Прозрачный"},
+    "D": {"name_suffix": " (база D, тёмная под колеровку)", "tio2_factor": 0.15, "color": "Тёмный под колеровку"},
 }
 
 
@@ -174,12 +183,36 @@ def make_recipe(base, variation_id, quality, color_base="A"):
     }
 
 
-def generate_for_base(base, base_id, qualities=("SuperEconomy", "Economy", "Standard", "Premium", "SuperPremium")):
-    """Generate quality variations for one base."""
+def generate_for_base(
+    base,
+    base_id,
+    qualities=("SuperEconomy", "Economy", "Standard", "Premium", "SuperPremium"),
+    color_bases=("A", "B", "C", "D"),
+):
+    """Generate ``|qualities| × |color_bases|`` variations for one base.
+
+    With the default 5 quality tiers and 4 colour bases we get **20
+    variants per base formulation** — for 100 curated bases across the
+    8 seed categories that yields ~2000 recipes.  IDs stay
+    deterministic so re-running the generator produces byte-identical
+    output.
+
+    Skip color base A for wood stains / clear lacquers / grouts where
+    TiO2 is not typically present in the base formula — for those the
+    color axis collapses.
+    """
     variations = []
+    # If the base formula has no TiO2 at all, colour bases would all
+    # reduce to A — avoid generating identical copies.
+    has_tio2 = any(
+        "titanium" in c.get("name", "").lower() or "tio2" in c.get("name", "").lower()
+        for c in base.base_components
+    )
+    active_colors = tuple(color_bases) if has_tio2 else ("A",)
     for q in qualities:
-        var_id = f"{base_id}_{q}_A"
-        variations.append(make_recipe(base, var_id, q, "A"))
+        for cb in active_colors:
+            var_id = f"{base_id}_{q}_{cb}"
+            variations.append(make_recipe(base, var_id, q, cb))
     return variations
 
 

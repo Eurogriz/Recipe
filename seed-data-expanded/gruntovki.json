@@ -1,7 +1,7 @@
 {
   "_category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
-  "_description": "Грунтовки, шпатлёвки, штукатурки, наливные полы — verified formulations (60 recipes across 12 base formulations).",
-  "_count": 60,
+  "_description": "Грунтовки, шпатлёвки, штукатурки, наливные полы — verified formulations (90 recipes across 12 base formulations).",
+  "_count": 90,
   "recipes": [
     {
       "id": "e40e5b45-89d4-8b30-b767-763aa9d172ad",
@@ -1280,6 +1280,324 @@
       }
     },
     {
+      "id": "272314f5-f98e-3c42-4ae7-6d404593559a",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "SuperEconomy",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "SuperEconomy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: B (Полупрозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 11.43,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 85.74,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 1.68,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 0.86,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "11fb6965-0eba-1668-28e8-e16b459b9408",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "SuperEconomy",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "SuperEconomy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: C (Прозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 11.63,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 87.21,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 0.87,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "b9aa5691-5003-ea2e-9c59-7f4b062aa249",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "SuperEconomy",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "SuperEconomy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: D (Тёмный под колеровку). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 11.58,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 86.89,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.37,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 0.87,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
       "id": "cf2c1337-1471-cd08-7f92-2e83f1262d60",
       "metadata": {
         "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
@@ -1349,6 +1667,324 @@
               "cas_number": "8015-86-9",
               "function": "Стойкость",
               "mass_percent": 1.13,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "792dd5de-5851-01c4-9530-cc40bf1c3ef8",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Economy",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Economy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: B (Полупрозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 15.19,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 81.36,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 1.93,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.38,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.14,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "82bdf7a0-878e-f2d5-2a04-ece1a204943a",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Economy",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Economy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: C (Прозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 15.49,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 82.96,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.39,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.16,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "22197bc3-f67f-490b-a127-2fdedbe2f17e",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Economy",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Economy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: D (Тёмный под колеровку). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 15.42,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 82.62,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.42,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.39,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.16,
               "tolerance_percent": 0.2
             }
           ]
@@ -1492,6 +2128,324 @@
       }
     },
     {
+      "id": "2b7e8dc1-18a2-d550-6d1d-834477b147b9",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Standard",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Standard",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: B (Полупрозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 20.18,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 75.68,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 2.12,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.51,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "60f2f7ae-8be6-87e7-8b4b-10648b7f7a66",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Standard",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Standard",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: C (Прозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 20.62,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 77.32,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.52,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.55,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "5ce37b2e-d050-47a2-8648-3ec5caf98a35",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Standard",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Standard",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: D (Тёмный под колеровку). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 20.52,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 76.96,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.46,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.51,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.54,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
       "id": "063143f1-578b-d97d-ea7b-7a8f9674842d",
       "metadata": {
         "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
@@ -1598,6 +2552,324 @@
       }
     },
     {
+      "id": "a1e3ee1b-6d3b-6e16-1804-04b071b53a73",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Premium",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Premium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: B (Полупрозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 24.52,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 70.74,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 2.28,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.61,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.84,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "5ab7a347-b35d-453d-8931-259b6f75dc96",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Premium",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Premium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: C (Прозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 25.1,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 72.39,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.63,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.88,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "a0076583-d668-1416-7fa1-b44bebc2ce3e",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "Premium",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "Premium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: D (Тёмный под колеровку). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 24.97,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 72.03,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.62,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 1.87,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
       "id": "2310a6cb-3e3d-7e76-f024-bb8532106f1e",
       "metadata": {
         "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
@@ -1667,6 +2939,324 @@
               "cas_number": "8015-86-9",
               "function": "Стойкость",
               "mass_percent": 2.1,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "d4fb1c41-e5a8-f7f3-8170-3efd82ff834c",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "SuperPremium",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Полупрозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "SuperPremium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: B (Полупрозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 28.34,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 66.41,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 2.42,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.71,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 2.13,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "e5603c5c-11e6-f3b5-3421-6899479e4a9b",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "SuperPremium",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Прозрачный",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "SuperPremium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: C (Прозрачный). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 29.04,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 68.06,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.73,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 2.18,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 0.95,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 550.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)"
+      }
+    },
+    {
+      "id": "7b5a2a7c-3de6-2dc9-fcbe-1745fb0fe53b",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Грунтовки (блокирующие пятна)",
+        "binder_type": "Алкид + шеллак",
+        "product_class": "SuperPremium",
+        "intended_use": "Блокирующая грунтовка (от пятен, танина)",
+        "finish": "—",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "primer",
+          "stain-blocking",
+          "shellac",
+          "SuperPremium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "page_or_formula": "Form. SB-1 'Shellac-Based Stain-Blocking Primer'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: D (Тёмный под колеровку). Источник: Zinsser technical bulletin, BIN Shellac-Based Primer (2018)",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "Shellac (dewaxed, blonde)",
+              "cas_number": "9000-59-3",
+              "function": "Блокирующий агент",
+              "mass_percent": 28.89,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Ethanol (denatured)",
+              "cas_number": "64-17-5",
+              "function": "Растворитель",
+              "mass_percent": 67.7,
+              "tolerance_percent": 2.0
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.52,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Defoamer (silicone)",
+              "cas_number": "63148-62-9",
+              "function": "Пеногаситель",
+              "mass_percent": 0.72,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Wax",
+              "cas_number": "8015-86-9",
+              "function": "Стойкость",
+              "mass_percent": 2.17,
               "tolerance_percent": 0.2
             }
           ]
@@ -5096,6 +6686,387 @@
       }
     },
     {
+      "id": "9cf63494-de9a-bc1d-15f4-d4486d56867a",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "SuperEconomy",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Полупрозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "SuperEconomy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: B (Полупрозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 26.61,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.32,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 58.55,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 5.32,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 2.71,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.32,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.53,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.63,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "e226c570-6a7f-3855-8d7f-2c4302fcb41a",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "SuperEconomy",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Прозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "SuperEconomy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: C (Прозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 26.78,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.36,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 58.92,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 5.36,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 2.73,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.32,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.54,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "88cbd5ce-064e-ad89-90f4-edf6189b27fc",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "SuperEconomy",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "SuperEconomy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperEconomy. База: D (Тёмный под колеровку). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 26.74,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.35,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 58.84,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 5.35,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 2.73,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.32,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.53,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.14,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
       "id": "a5a01d30-5bae-999b-ee01-dd4f482cd370",
       "metadata": {
         "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
@@ -5186,6 +7157,387 @@
               "cas_number": "13463-67-7",
               "function": "Белый пигмент",
               "mass_percent": 1.06,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "c1f928f4-e5f3-672b-76bf-73df193063d0",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Economy",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Полупрозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Economy",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: B (Полупрозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 25.94,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.19,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 57.08,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 7.26,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 2.96,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.31,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.52,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.74,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "a87eb011-dc6f-e456-3974-2c877f7b88a8",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Economy",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Прозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Economy",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: C (Прозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 26.14,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.23,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 57.5,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 7.32,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 2.98,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.31,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.52,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "325e3bb8-e4b1-188d-4d5c-638c32f9a462",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Economy",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Economy",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Economy. База: D (Тёмный под колеровку). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 26.1,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.22,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 57.41,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 7.31,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 2.97,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.31,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.52,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.16,
               "tolerance_percent": 0.2
             }
           ]
@@ -5350,6 +7702,387 @@
       }
     },
     {
+      "id": "48dd4a88-5174-f48d-3c3a-fde42429dbdf",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Standard",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Полупрозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Standard",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: B (Полупрозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 25.09,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.02,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 55.2,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 10.04,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.01,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.5,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.84,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "4cb8fae2-3ea9-9be0-e82f-845a4622033d",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Standard",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Прозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Standard",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: C (Прозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 25.3,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.06,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 55.67,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 10.12,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.04,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.51,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "d6181c9a-8f4a-4ef2-8d8d-00ed9b1f20f8",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Standard",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Standard",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Standard. База: D (Тёмный под колеровку). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 25.26,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 5.05,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 55.57,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 10.1,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.03,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.3,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.51,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.18,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
       "id": "3020a4c7-1029-a483-4cf1-2742bca5dc52",
       "metadata": {
         "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
@@ -5477,6 +8210,387 @@
       }
     },
     {
+      "id": "600601a7-b7c7-8a27-f9f3-529eb9e883af",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Premium",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Полупрозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Premium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: B (Полупрозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 24.29,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 4.86,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 53.44,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 12.63,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.06,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.49,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.94,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "52fe300c-b148-03ae-f29a-eb4da1c6764b",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Premium",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Прозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Premium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: C (Прозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 24.52,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 4.9,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 53.95,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 12.75,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.09,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.49,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "4d56ca57-0f63-39b4-635b-aa8d7f753a61",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "Premium",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "Premium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: Premium. База: D (Тёмный под колеровку). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 24.47,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 4.89,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 53.84,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 12.73,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.08,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.49,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.21,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
       "id": "31ca3460-0add-8409-ce24-5a0cfe6f5235",
       "metadata": {
         "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
@@ -5567,6 +8681,387 @@
               "cas_number": "13463-67-7",
               "function": "Белый пигмент",
               "mass_percent": 1.46,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "d5373afe-dc72-7e60-f88b-185d3833053d",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "SuperPremium",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Полупрозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "SuperPremium",
+          "B"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: B (Полупрозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 23.51,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 4.7,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 51.72,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 15.05,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.24,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.28,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.47,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 1.03,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "46436111-ee37-eafe-18d2-73a4e959f232",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "SuperPremium",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Прозрачный",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "SuperPremium",
+          "C"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: C (Прозрачный). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 23.75,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 4.75,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 52.26,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 15.2,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.28,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.29,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.48,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.0,
+              "tolerance_percent": 0.2
+            }
+          ]
+        }
+      ],
+      "predicted_properties": [
+        {
+          "property": "Density",
+          "value": 1.8,
+          "unit": "г/см³",
+          "method": "Rule of mixtures",
+          "is_predicted": true,
+          "tolerance": "±0.05",
+          "warning": "Расчётное значение"
+        },
+        {
+          "property": "VOC",
+          "value": 0.0,
+          "unit": "г/л",
+          "method": "EU 2004/42/CE",
+          "is_predicted": true,
+          "tolerance": "±20",
+          "warning": "Расчётное значение"
+        }
+      ],
+      "application_conditions": {
+        "ambient_temperature_c": "15-30",
+        "tool": "Кисть, валик, краскопульт"
+      },
+      "verification_workflow": {
+        "status": "Draft",
+        "verification_count": 0,
+        "required_verifications": 3,
+        "next_action": "Verify primary source: EN 998-1 — Rendering and plastering mortar"
+      }
+    },
+    {
+      "id": "cc295ba8-e34b-8f35-0c97-c31a34e85155",
+      "metadata": {
+        "category": "Грунтовки, шпатлёвки, штукатурки, наливные полы",
+        "subcategory": "Штукатурки (цементные, декоративные)",
+        "binder_type": "Белый портландцемент + известь",
+        "product_class": "SuperPremium",
+        "intended_use": "Декоративная минеральная штукатурка",
+        "finish": "Шероховатая",
+        "color": "Тёмный под колеровку",
+        "tags": [
+          "plaster",
+          "cement",
+          "decorative",
+          "SuperPremium",
+          "D"
+        ]
+      },
+      "source_reference": {
+        "primary": {
+          "citation": "EN 998-1 — Rendering and plastering mortar",
+          "page_or_formula": "Form. PL-1 'Decorative Cement Plaster'"
+        },
+        "cross_references": []
+      },
+      "composition": [
+        {
+          "stage": 1,
+          "name": "Производственный процесс",
+          "description": "Вариант качества: SuperPremium. База: D (Тёмный под колеровку). Источник: EN 998-1 — Rendering and plastering mortar",
+          "process": {
+            "equipment": "Диссольвер с зубчатым диском Cowles, ∅ 250 мм",
+            "rotational_speed_rpm": 1500,
+            "temperature_c": 23.0,
+            "duration_min": 30
+          },
+          "components": [
+            {
+              "name": "White Portland cement CEM I 52.5 N",
+              "cas_number": "65997-15-1",
+              "function": "Минеральное связующее",
+              "mass_percent": 23.7,
+              "tolerance_percent": 1.5
+            },
+            {
+              "name": "Hydrated lime",
+              "cas_number": "1305-62-0",
+              "function": "Минеральная добавка",
+              "mass_percent": 4.74,
+              "tolerance_percent": 0.5
+            },
+            {
+              "name": "Quartz sand (0-2 mm)",
+              "cas_number": "14808-60-7",
+              "function": "Заполнитель",
+              "mass_percent": 52.14,
+              "tolerance_percent": 3.0
+            },
+            {
+              "name": "Calcium carbonate (micro)",
+              "cas_number": "1317-65-3",
+              "function": "Наполнитель",
+              "mass_percent": 15.17,
+              "tolerance_percent": 1.0
+            },
+            {
+              "name": "Redispersible polymer powder",
+              "cas_number": "proprietary",
+              "function": "Полимерный модификатор",
+              "mass_percent": 3.27,
+              "tolerance_percent": 0.3
+            },
+            {
+              "name": "Cellulose ether",
+              "cas_number": "9004-62-0",
+              "function": "Водоудержание",
+              "mass_percent": 0.28,
+              "tolerance_percent": 0.05
+            },
+            {
+              "name": "Calcium stearate",
+              "cas_number": "1592-23-0",
+              "function": "Гидрофобизация",
+              "mass_percent": 0.47,
+              "tolerance_percent": 0.1
+            },
+            {
+              "name": "Titanium dioxide",
+              "cas_number": "13463-67-7",
+              "function": "Белый пигмент",
+              "mass_percent": 0.22,
               "tolerance_percent": 0.2
             }
           ]

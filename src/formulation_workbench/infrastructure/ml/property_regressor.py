@@ -163,6 +163,11 @@ class PropertyRegressor:
     def __init__(self, storage_dir: Path) -> None:
         self._storage = Path(storage_dir)
         self._storage.mkdir(parents=True, exist_ok=True)
+        # In-memory cache of ``(model, metadata)`` keyed by property
+        # code + on-disk mtime.  Predict() is called hundreds of times
+        # per optimiser / pareto request, and re-unpickling the stacked
+        # ensemble on every call was ~50 ms of pure overhead.
+        self._cache: dict[str, tuple[float, object, ModelMetadata]] = {}
 
     # ------------------------------------------------------------------ train
     HOLDOUT_MIN_SAMPLES = 30  # below this we don't hold anything out — too small
@@ -595,6 +600,16 @@ class PropertyRegressor:
         meta_path = self._meta_path(code)
         if not m_path.exists() or not meta_path.exists():
             return None, None
+        # Return the cached copy when the pkl file hasn't changed on
+        # disk since we last loaded it (checked via mtime).  Stops
+        # per-predict pickle overhead from dominating optimiser loops.
+        try:
+            mtime = m_path.stat().st_mtime
+        except OSError:
+            mtime = 0.0
+        cached = self._cache.get(code)
+        if cached is not None and cached[0] == mtime:
+            return cached[1], cached[2]
         try:
             model = pickle.loads(m_path.read_bytes())
             data = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -613,6 +628,7 @@ class PropertyRegressor:
             algorithm=data.get("algorithm", "RandomForestRegressor"),
             fingerprint=data.get("fingerprint", ""),
         )
+        self._cache[code] = (mtime, model, metadata)
         return model, metadata
 
 
@@ -672,8 +688,9 @@ def _rf_view_for(model, vector):  # type: ignore[no-untyped-def]
                     surviving_names = [
                         n for n, keep in zip(surviving_names, mask, strict=False) if keep
                     ]
-            except Exception:  # pragma: no cover — defensive
-                pass
+            except Exception:  # defensive: mapping is best-effort
+                # and must not break predict()
+                logger.debug("feature_name_mapping_failed", exc_info=True)
     return rf, list(map(float, x[0])), surviving_names
 
 

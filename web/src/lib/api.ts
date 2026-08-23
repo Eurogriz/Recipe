@@ -104,6 +104,18 @@ export const api = {
   getJob: (id: string) => request<JobRecord>(`/ml/jobs/${id}`),
   cancelJob: (id: string) => request<void>(`/ml/jobs/${id}`, { method: "DELETE" }),
 
+  // pareto + optimiser
+  pareto: (recipeId: string, body: ParetoRequest) =>
+    request<ParetoResult>(`/recipes/${recipeId}/pareto`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  optimise: (recipeId: string, body: OptimisationRequest) =>
+    request<OptimisationResult>(`/recipes/${recipeId}/optimise`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   // drift
   driftFull: (code: string, currentVectors: number[][]) =>
     request<DriftFullOut>(`/ml/models/${code}/drift-full`, {
@@ -362,4 +374,59 @@ export interface DriftFullOut {
 export interface DriftAlertOut extends DriftFullOut {
   alert_dispatched: boolean;
   dispatch_reason: string;
+}
+
+// ---- Pareto / optimiser ----------------------------------------------------
+export interface PropertyTarget {
+  property_code: string;
+  target_value: number;
+  tolerance?: number;
+  direction?: "match" | "minimise" | "maximise";
+  weight?: number;
+}
+
+export interface ComponentBounds {
+  component_name: string;
+  min_percent: number;
+  max_percent: number;
+}
+
+export interface ParetoRequest {
+  targets: PropertyTarget[];
+  bounds?: ComponentBounds[];
+  population_size?: number;
+  generations?: number;
+  mutation_std?: number;
+  seed?: number | null;
+}
+
+export interface ParetoPoint {
+  mass_percent: Record<string, number>;
+  objectives: Record<string, number>;
+  rank: number;
+  crowding_distance: number;
+}
+
+export interface ParetoResult {
+  base_recipe_id: string;
+  front: ParetoPoint[];
+  generations: number;
+}
+
+export interface OptimisationRequest {
+  targets: PropertyTarget[];
+  bounds?: ComponentBounds[];
+  max_iterations?: number;
+  population_size?: number;
+  seed?: number | null;
+}
+
+export interface OptimisationResult {
+  base_recipe_id: string;
+  optimised_mass_percent: Record<string, number>;
+  predicted_values: Record<string, number>;
+  final_loss: number;
+  converged: boolean;
+  iterations_used: number;
+  notes?: string[];
 }
