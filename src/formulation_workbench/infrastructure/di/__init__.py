@@ -25,6 +25,7 @@ from ...application.use_cases.ml_predict import PredictPropertiesUseCase
 from ...application.use_cases.ml_train import TrainPropertyModelsUseCase
 from ...application.use_cases.optimise_recipe import OptimiseRecipeUseCase
 from ...application.use_cases.regulatory_scan import RegulatoryScanUseCase
+from ...application.use_cases.search_by_component import SearchByComponentUseCase
 from ...application.use_cases.search_recipes import (
     GetCatalogFacetsUseCase,
     GetCatalogStatisticsUseCase,
@@ -88,6 +89,7 @@ class Container:
     catalog_stats: GetCatalogStatisticsUseCase
     catalog_facets: GetCatalogFacetsUseCase
     data_quality: DataQualityUseCase
+    search_by_component: SearchByComponentUseCase
     submit_for_review: SubmitRecipeForReviewUseCase
     verify_recipe: VerifyRecipeUseCase
     reject_recipe: RejectRecipeUseCase
@@ -190,6 +192,7 @@ class Container:
             catalog_stats=GetCatalogStatisticsUseCase(recipe_repository),
             catalog_facets=GetCatalogFacetsUseCase(recipe_repository),
             data_quality=DataQualityUseCase(recipe_repository),
+            search_by_component=SearchByComponentUseCase(recipe_repository),
             submit_for_review=SubmitRecipeForReviewUseCase(recipe_repository, audit_logger),
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),
             reject_recipe=RejectRecipeUseCase(recipe_repository, audit_logger),

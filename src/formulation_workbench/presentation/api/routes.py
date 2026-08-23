@@ -63,6 +63,7 @@ from .schemas import (
     CatalogStats,
     CategoryBreakdownOut,
     CitationOut,
+    ComponentMatchOut,
     ComponentOut,
     CompositionStageOut,
     CostLineOut,
@@ -123,6 +124,7 @@ from .schemas import (
     RejectRequest,
     RuleBreakdownOut,
     RuleFindingOut,
+    SearchByComponentResultOut,
     SearchResponse,
     SensitivityPointOut,
     SensitivityRequest,
@@ -770,6 +772,74 @@ async def list_recipes(
         limit=result.limit,
         offset=result.offset,
         has_more=result.has_more,
+    )
+
+
+@router.get(
+    "/recipes/by-component",
+    response_model=SearchByComponentResultOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Reverse-composition search — every recipe containing this CAS, "
+        "sorted by mass-percent descending"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def recipes_by_component(
+    container: Annotated[Container, Depends(get_container)],
+    cas: str = Query(
+        min_length=1,
+        max_length=32,
+        description=(
+            "CAS number to look for.  Exact match — the CAS field of "
+            "each ``component`` row is compared verbatim."
+        ),
+    ),
+    min_mass_percent: float = Query(default=0.0, ge=0.0, le=100.0),
+    max_mass_percent: float = Query(default=100.0, ge=0.0, le=100.0),
+    category: str | None = Query(
+        default=None,
+        description="Optional pre-filter to narrow the scan.",
+    ),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> SearchByComponentResultOut:
+    """Answer «which recipes contain this CAS» in one round trip.
+
+    Sums mass-percent across all stages of the same recipe — a
+    recipe that mentions TiO2 both in stage 1 (grind base) and
+    stage 3 (topcoat) shows up once, with the total contribution.
+
+    Placed BEFORE ``/recipes/{recipe_id}`` in the router so the path
+    resolves as a fixed segment instead of being swallowed as a
+    ``recipe_id`` — FastAPI walks routes in registration order.
+    """
+    from ...application.use_cases.search_by_component import SearchByComponentQuery
+
+    result = await container.search_by_component.execute(
+        SearchByComponentQuery(
+            cas_number=cas,
+            min_mass_percent=min_mass_percent,
+            max_mass_percent=max_mass_percent,
+            category=category,
+            limit=limit,
+        )
+    )
+    return SearchByComponentResultOut(
+        cas_number=result.cas_number,
+        n_recipes=result.n_recipes,
+        matches=[
+            ComponentMatchOut(
+                recipe_id=m.recipe_id,
+                recipe_category=m.recipe_category,
+                recipe_subcategory=m.recipe_subcategory,
+                recipe_status=m.recipe_status,
+                total_mass_percent=m.total_mass_percent,
+                stage_names=list(m.stage_names),
+                n_stages=m.n_stages,
+            )
+            for m in result.matches
+        ],
     )
 
 

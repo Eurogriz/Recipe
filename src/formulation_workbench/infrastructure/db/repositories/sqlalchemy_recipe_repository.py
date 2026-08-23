@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -253,6 +253,79 @@ class SqlAlchemyRecipeRepository:
         )
         result = await self._session.execute(stmt)
         return [await self._to_entity(m) for m in result.scalars().all()]
+
+    async def find_by_component_cas(
+        self,
+        *,
+        cas_number: str,
+        min_mass_percent: float = 0.0,
+        max_mass_percent: float = 100.0,
+        category: str | None = None,
+        limit: int = 100,
+    ) -> list[Any]:
+        """Reverse-composition search — see the port for semantics.
+
+        We do the heavy lifting in one round trip: JOIN component ↔
+        stage ↔ recipe, filter by CAS, GROUP BY recipe id, SUM the
+        mass-percent.  Post-filter on ``[min, max]`` and sort.
+
+        The stage names use ``GROUP_CONCAT`` — SQLite-specific but
+        portable to Postgres via ``STRING_AGG`` if we ever migrate.
+        """
+        from sqlalchemy import func
+
+        from ....application.use_cases.search_by_component import ComponentMatch
+
+        stmt = (
+            select(
+                RecipeModel.id,
+                RecipeModel.category,
+                RecipeModel.subcategory,
+                RecipeModel.status,
+                func.sum(ComponentModel.mass_percent).label("total_pct"),
+                # SQLite-only aggregator; Postgres port would be
+                # ``string_agg(ComponentModel.name, ' | ')``.
+                func.group_concat(ComponentModel.name, " | ").label("stage_names"),
+                func.count(ComponentModel.id).label("n_stages"),
+            )
+            .join(CompositionStageModel, CompositionStageModel.id == ComponentModel.stage_id)
+            .join(RecipeModel, RecipeModel.id == CompositionStageModel.recipe_id)
+            .where(ComponentModel.cas_number == cas_number)
+        )
+        if category:
+            stmt = stmt.where(RecipeModel.category == category)
+        # SUM must be aggregated per recipe so ``HAVING`` is the right
+        # filter — a WHERE on mass_percent would drop stages that go
+        # above/below the range even if the total sums back into it.
+        stmt = (
+            stmt.group_by(
+                RecipeModel.id,
+                RecipeModel.category,
+                RecipeModel.subcategory,
+                RecipeModel.status,
+            )
+            .having(func.sum(ComponentModel.mass_percent) >= float(min_mass_percent))
+            .having(func.sum(ComponentModel.mass_percent) <= float(max_mass_percent))
+            .order_by(func.sum(ComponentModel.mass_percent).desc())
+            .limit(max(1, int(limit)))
+        )
+
+        rows = (await self._session.execute(stmt)).all()
+        matches: list[ComponentMatch] = []
+        for row in rows:
+            names = tuple(sorted(set(filter(None, (row.stage_names or "").split(" | ")))))
+            matches.append(
+                ComponentMatch(
+                    recipe_id=str(row.id),
+                    recipe_category=str(row.category or ""),
+                    recipe_subcategory=str(row.subcategory or ""),
+                    recipe_status=str(row.status or ""),
+                    total_mass_percent=float(row.total_pct or 0.0),
+                    stage_names=names,
+                    n_stages=int(row.n_stages or 0),
+                )
+            )
+        return matches
 
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         # Walk back via previous_version_id chain

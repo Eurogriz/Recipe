@@ -7,6 +7,115 @@
 
 ---
 
+## [1.25.0] — Обратный поиск по составу: «какие рецепты содержат этот CAS» (2026-08-23)
+
+Пост-v1.24 полный чистый каталог — время закрыть usability-задачу,
+которую невозможно было решить обычным full-text поиском.
+Инженер-технолог часто задаёт вопрос «где мы применяем TiO2»,
+«есть ли у нас формулы с DEHP», «покажи всё с высоким содержанием
+силикона» — сейчас на это нужно было руками грепать состав каждого
+рецепта.
+
+### Added — Endpoint ``GET /recipes/by-component``
+
+Обратный поиск по CAS: возвращает каждый рецепт, содержащий
+указанный компонент, с суммарной массовой долей.
+
+Ключевая деталь — **суммируется по всем этапам** одного рецепта.
+Если TiO2 добавляется в grind-base (30%) И в topcoat (10%),
+результат показывает **одну строку с total=40%**, не две по
+30% и 10%.  Так работает промышленный вопрос «сколько всего
+вещества в формуле».
+
+Query params:
+- ``cas`` (required) — точное совпадение по ``component.cas_number``.
+- ``min_mass_percent`` / ``max_mass_percent`` — фильтр по **сумме**,
+  не по отдельным этапам.  ``HAVING`` clause в SQL.
+- ``category`` — предварительная фильтрация до JOIN.
+- ``limit`` (1..500, default 100).
+
+Сортировка — total mass-percent DESC.  Первый ряд отвечает на
+default-вопрос «кто использует больше всего».
+
+Реализация в одном round-trip: JOIN ``component`` ↔ ``composition_stage``
+↔ ``recipe`` + GROUP BY + SUM.  Возвращает ``ComponentMatch`` per
+recipe с списком имён компонентов (dedup + sorted) — CAS один, но
+торговые названия разные (TiO2 vs Kronos 2310).
+
+Живой запуск на боевой БД (983 recipes):
+- ``cas=13463-67-7&min_mass_percent=10`` → 3 recipes (пигментные
+  пасты 45-54% TiO2)
+- ``cas=117-81-7`` (DEHP, SVHC) → **0 recipes**  ✓
+- ``cas=63148-62-9`` (PDMS) → 718 recipes (силиконовые продукты)
+
+### Added — Use case ``SearchByComponentUseCase``
+
+Application-layer wrapper с валидацией: пустой CAS → пустой
+результат; clamping ``min/max`` в [0,100]; ``limit`` clamp в [1,500].
+Регистрируется в ``Container.search_by_component``.
+
+Новый метод port'а ``RecipeRepository.find_by_component_cas`` +
+реализация в ``SqlAlchemyRecipeRepository`` через
+``func.group_concat`` (SQLite-native; портируется в Postgres как
+``string_agg``).
+
+### Added — UI страница ``/search``
+
+Новый пункт «Поиск по составу» в navigation (``FlaskConical``
+icon).  UI:
+
+- **Форма запроса:** CAS + Min% + Max% + Category dropdown.  Enter
+  запускает поиск.
+- **Быстрые кнопки** для 8 well-known CAS — TiO2, PDMS, Water,
+  Limestone + 4 SVHC (DEHP, Benzene, Formaldehyde, Cadmium) для
+  быстрого regulatory audit'а.
+- **Таблица результатов:** category / subcategory (клик → карточка
+  recipe) / status-badge / **total mass %** с цветовым кодом
+  (зелёный < 10%, амбер 10-30%, красный ≥ 30%) / n_stages / список
+  торговых имён (первые 3 + «...»).
+- Пустой результат — отдельное сообщение «ни в одном рецепте нет
+  этого CAS — попробуйте расширить условия».
+
+### Changed
+
+- ``Container.search_by_component: SearchByComponentUseCase`` — новое
+  поле.
+- Порядок роутов в ``routes.py``: ``/recipes/by-component``
+  зарегистрирован **до** ``/recipes/{recipe_id}`` — FastAPI walks
+  routes in registration order, иначе fixed segment был бы съеден
+  dynamic path'ом (регресс покрыт тестом).
+
+### Metrics
+
+- **644 тестов** (было 635, +9 for reverse-search: unit + 8 endpoint
+  сценариев включая regression guard для порядка роутов).
+  Прогон ~158 с.
+- **64 REST endpoints** (было 63, +1: ``/recipes/by-component``).
+- **16 UI-страниц** (было 15, +1: ``/search``).
+- **127 source file** (было 125, +2: ``search_by_component.py``
+  use case + расширение repository).
+- **574 i18n ключей** (было 554, +20 для search UI RU+EN),
+  паритет 100%.
+
+### QA
+
+- ``ruff check src tests`` — All checks passed!
+- ``ruff format --check`` — 214 files already formatted
+- ``mypy src/formulation_workbench`` — Success: no issues in 125 files
+- ``bandit -c pyproject.toml -q -r src`` — clean
+- ``pytest --no-cov --deselect ...`` — 644 passed, 16 deselected,
+  1 skipped
+- ``npx tsc --noEmit`` — clean
+- ``npx next build`` — 16 маршрутов, все ○ Static кроме
+  ``/recipes/[id]`` ƒ Dynamic
+- Реальный запрос через прокси next→api:
+  - ``TiO2 min≥30%`` → 3 pigment pastes 50-54% за 100 мс
+  - ``DEHP (SVHC)`` → 0 recipes (regulatory audit ok)
+  - ``PDMS`` → 718 silicone products
+- HTML ``/search`` компилируется за 877 мс first compile, 200 ok
+
+---
+
 ## [1.24.0] — Pass 3 URL backfill + publisher upgrade: 100% каталога Verified (2026-08-23)
 
 Продолжение v1.23. После починки ISBN оставалось 578 рецептов в

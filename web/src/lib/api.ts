@@ -94,6 +94,26 @@ export const api = {
   catalogFacets: () => request<CatalogFacetsOut>("/catalog/facets"),
   /** One-shot dashboard payload (v1.21) — replaces 5 independent GETs. */
   dashboardSummary: () => request<DashboardSummaryOut>("/dashboard/summary"),
+  /** Reverse composition search — CAS → recipes (v1.25). */
+  recipesByComponent: (params: {
+    cas: string;
+    min_mass_percent?: number;
+    max_mass_percent?: number;
+    category?: string;
+    limit?: number;
+  }) => {
+    const q = new URLSearchParams({ cas: params.cas });
+    if (params.min_mass_percent !== undefined)
+      q.set("min_mass_percent", String(params.min_mass_percent));
+    if (params.max_mass_percent !== undefined)
+      q.set("max_mass_percent", String(params.max_mass_percent));
+    if (params.category) q.set("category", params.category);
+    if (params.limit) q.set("limit", String(params.limit));
+    return request<SearchByComponentResultOut>(
+      `/recipes/by-component?${q.toString()}`
+    );
+  },
+
   /** Whole-catalogue R-rule aggregate (v1.22). */
   dashboardDataQuality: (params?: {
     sample_size?: number;
@@ -548,6 +568,24 @@ export interface CatalogFacetsOut {
   by_subcategory: Record<string, Record<string, number>>;
   by_product_class: Record<string, number>;
   by_status: Record<string, number>;
+}
+
+/** One row of the reverse composition-search result (v1.25). */
+export interface ComponentMatchOut {
+  recipe_id: string;
+  recipe_category: string;
+  recipe_subcategory: string;
+  recipe_status: string;
+  total_mass_percent: number;
+  stage_names: string[];
+  n_stages: number;
+}
+
+/** Response of ``GET /recipes/by-component`` (v1.25). */
+export interface SearchByComponentResultOut {
+  cas_number: string;
+  n_recipes: number;
+  matches: ComponentMatchOut[];
 }
 
 /** Compact recipe row in the dashboard's "recent activity" list. */

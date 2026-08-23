@@ -564,6 +564,32 @@ export const ru: Dict = {
   // navigation extra (v1.22)
   "nav.dq": "Здоровье данных",
 
+  // navigation extra (v1.25)
+  "nav.search": "Поиск по составу",
+
+  // component search (v1.25)
+  "search.title": "Поиск рецептов по составу",
+  "search.subtitle":
+    "Найти каждый рецепт, содержащий указанный CAS-номер. Массовые проценты суммируются по всем этапам одного рецепта — используется для промышленного вопроса «где мы применяем это вещество».",
+  "search.query.title": "Параметры запроса",
+  "search.quick": "Часто искомые:",
+  "search.run": "Найти",
+  "search.reset": "Сбросить",
+  "search.f.cas": "CAS-номер",
+  "search.f.min": "Мин. массовая доля (%)",
+  "search.f.max": "Макс. массовая доля (%)",
+  "search.f.category": "Категория (необязательно)",
+  "search.f.category.any": "Любая категория",
+  "search.results.title": "Найдено {n} рецептов с CAS {cas}",
+  "search.results.empty":
+    "Ни в одном рецепте нет компонента с таким CAS-номером — можно уточнить условия поиска.",
+  "search.col.category": "Категория",
+  "search.col.subcategory": "Подкатегория",
+  "search.col.status": "Статус",
+  "search.col.total": "Всего, %",
+  "search.col.stages": "Этапов",
+  "search.col.names": "Названия",
+
   // data quality dashboard (v1.22)
   "dq.title": "Здоровье данных каталога",
   "dq.subtitle":

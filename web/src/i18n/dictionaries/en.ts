@@ -547,6 +547,32 @@ export const en: Dict = {
   // navigation extra (v1.22)
   "nav.dq": "Data quality",
 
+  // navigation extra (v1.25)
+  "nav.search": "Search by component",
+
+  // component search (v1.25)
+  "search.title": "Reverse composition search",
+  "search.subtitle":
+    "Find every recipe containing a given CAS number. Mass-percent is summed across all stages of the same recipe — answers the industrial question «where do we use this substance».",
+  "search.query.title": "Query parameters",
+  "search.quick": "Quick picks:",
+  "search.run": "Search",
+  "search.reset": "Reset",
+  "search.f.cas": "CAS number",
+  "search.f.min": "Min mass-percent (%)",
+  "search.f.max": "Max mass-percent (%)",
+  "search.f.category": "Category (optional)",
+  "search.f.category.any": "Any category",
+  "search.results.title": "Found {n} recipes with CAS {cas}",
+  "search.results.empty":
+    "No recipe contains a component with this CAS number — try relaxing the filters.",
+  "search.col.category": "Category",
+  "search.col.subcategory": "Subcategory",
+  "search.col.status": "Status",
+  "search.col.total": "Total, %",
+  "search.col.stages": "Stages",
+  "search.col.names": "Names",
+
   // data quality dashboard (v1.22)
   "dq.title": "Catalogue data quality",
   "dq.subtitle":

@@ -10,6 +10,7 @@ import abc
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from ...application.use_cases.search_by_component import ComponentMatch
     from ...domain.entities.recipe import Recipe
     from ...domain.value_objects.verification_status import VerificationState
 
@@ -112,6 +113,27 @@ class RecipeRepository(abc.ABC):
         "recent activity" widget.  Independent of status — a freshly
         submitted Draft matters as much as a freshly Verified one for
         an operator scanning the timeline.
+        """
+
+    @abc.abstractmethod
+    async def find_by_component_cas(
+        self,
+        *,
+        cas_number: str,
+        min_mass_percent: float = 0.0,
+        max_mass_percent: float = 100.0,
+        category: str | None = None,
+        limit: int = 100,
+    ) -> list[ComponentMatch]:
+        """Reverse composition search: recipes containing this CAS.
+
+        Sums mass-percent across all stages of the same recipe (a
+        recipe may mention the same CAS in multiple stages —
+        we return one row per recipe with the total), and filters
+        recipes whose ``total_mass_percent`` falls into the
+        [min, max] range.  Sorted by total-mass-percent descending
+        so the operator's default question — «who uses the most» —
+        is answered by the first row.
         """
 
     @abc.abstractmethod

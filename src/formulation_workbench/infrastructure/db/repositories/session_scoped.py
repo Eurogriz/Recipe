@@ -108,6 +108,24 @@ class ScopedRecipeRepository(RecipeRepository):
         async with self._db.session() as session:
             return await SqlAlchemyRecipeRepository(session).list_recent(limit=limit)
 
+    async def find_by_component_cas(
+        self,
+        *,
+        cas_number: str,
+        min_mass_percent: float = 0.0,
+        max_mass_percent: float = 100.0,
+        category: str | None = None,
+        limit: int = 100,
+    ) -> list[Any]:
+        async with self._db.session() as session:
+            return await SqlAlchemyRecipeRepository(session).find_by_component_cas(
+                cas_number=cas_number,
+                min_mass_percent=min_mass_percent,
+                max_mass_percent=max_mass_percent,
+                category=category,
+                limit=limit,
+            )
+
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         async with self._db.session() as session:
             return await SqlAlchemyRecipeRepository(session).get_all_versions(recipe_id)

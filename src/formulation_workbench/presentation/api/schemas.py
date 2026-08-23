@@ -1242,6 +1242,34 @@ class DataQualityReportOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Component reverse-search (v1.25)
+# ---------------------------------------------------------------------------
+class ComponentMatchOut(BaseModel):
+    """One row of the «find recipes with CAS X» result table."""
+
+    recipe_id: str
+    recipe_category: str
+    recipe_subcategory: str
+    recipe_status: str
+    total_mass_percent: float = Field(examples=[15.0])
+    stage_names: list[str] = Field(default_factory=list)
+    n_stages: int
+
+
+class SearchByComponentResultOut(BaseModel):
+    """Response of ``GET /recipes/by-component``.
+
+    Returned matches are already sorted by ``total_mass_percent``
+    DESC — the operator's default question «who uses the most» is
+    answered by the first row.
+    """
+
+    cas_number: str
+    n_recipes: int
+    matches: list[ComponentMatchOut]
+
+
+# ---------------------------------------------------------------------------
 # Dashboard summary
 # ---------------------------------------------------------------------------
 class RecentRecipeOut(BaseModel):
@@ -1308,6 +1336,7 @@ __all__ = [
     "CitationOut",
     "ComponentBoundsIn",
     "ComponentIn",
+    "ComponentMatchOut",
     "ComponentOut",
     "CompositionStageIn",
     "CompositionStageOut",
@@ -1374,6 +1403,7 @@ __all__ = [
     "RejectRequest",
     "RuleBreakdownOut",
     "RuleFindingOut",
+    "SearchByComponentResultOut",
     "SearchResponse",
     "SensitivityPointOut",
     "SensitivityRequest",
