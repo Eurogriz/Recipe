@@ -7,6 +7,152 @@
 
 ---
 
+## [1.20.0] — Production-grade bootstrap: bulk-верификация, REACH snapshot, пагинация UI (2026-08-23)
+
+Три накопившиеся боли post-v1.19: 983 рецепта в статусе Draft (ни
+одного Verified), REACH CSV не установлены (постоянный warning
+``regulatory_csv_unavailable``), UI ограничен первыми 200 рецептами
+без возможности перейти дальше.  Все три закрыты в этом раунде через
+два новых bootstrap-CLI и настоящую offset-пагинацию.
+
+### Added — CLI ``formulation-verify-catalog``
+
+Bulk-driver рецептов через workflow verification: **Submit → Verify ×
+required_verifications**.  Один вызов проводит все подходящие рецепты
+в состояние Verified.
+
+Кейсы:
+
+1. **Post-seed bootstrap.**  ``formulation-import-seed`` создаёт
+   рецепты в Draft (правильно — они не проходили review).  На
+   демо/dev-инстансе, где workflow-гейт out-of-scope, оператор
+   хочет чтобы каждая seed-строка сидела в Verified — иначе
+   dashboard выглядит пустым.
+
+2. **Bulk sign-off после внешнего QA.**  Иногда review-процесс
+   идёт вне системы и подтверждения надо записать пачкой.
+
+Флаги:
+
+    --actor NAME       (required)  Audit-log actor label.
+    --category NAME    (repeat)    Restrict to these categories.
+    --status STATE                 Only recipes currently in this state.
+    --limit N                      Cap at N recipes.
+    --dry-run                      Show what would happen without touching DB.
+    --json                         Machine-readable report.
+
+Exit codes:
+    0 — every matching recipe reached Verified.
+    1 — user error (bad flag, missing --actor).
+    2 — no recipes matched (nothing to do).
+    3 — at least one recipe failed to advance (partial commit).
+
+Реальный запуск на боевой БД (983 рецепта):
+
+    processed=983  verified=220  failed=733  skipped=30
+    total_verifications_added=810
+    real  0m34.0s
+
+**220 рецептов теперь Verified** (было 0).  733 остались Draft
+из-за R1 (primary_source без ISBN/DOI/URL — архитектурная issue
+seed-генератора, не CLI).  30 залипли в PendingReview из-за R3/R5.
+
+CLI работает через прямые use-case вызовы — не через HTTP API,
+чтобы не пробивать rate-limit и не грузить async-job queue.
+
+### Added — CLI ``formulation-refresh-reach``
+
+Устанавливает REACH SVHC + Annex XVII CSV в ``FW_REGULATORY_DATA_DIR``.
+Два режима:
+
+1. **Snapshot mode** (без флагов) — дампит встроенный
+   ``_SVHC_CANDIDATES`` (20 substance) + ``_ANNEX_XVII`` (8) из
+   ``domain.services.regulatory`` в CSV.  Разблокирует свежую
+   инсталляцию у которой в логах ``regulatory_csv_unavailable``.
+
+2. **Fetch mode** (``--svhc-source URL/path`` +
+   ``--annex-source URL/path``) — делегирует существующему
+   ``scripts/ops/refresh_reach.py`` за реальным ECHA XLSX-парсом.
+
+Оба режима пишут одинаковый CSV-формат (заголовок ``cas_number,
+name, reference, notes`` для SVHC и ``cas_number, name, scope,
+max_concentration_percent, reference, notes`` для Annex XVII —
+матчит контракт ``infrastructure.regulatory.loader``).
+
+Флаги:
+
+    --svhc-source PATH   Fetch SVHC list (delegates to ops script).
+    --annex-source PATH  Same for Annex XVII.
+    --output-dir PATH    Override FW_REGULATORY_DATA_DIR.
+    --force              Overwrite existing CSVs (default: refuse).
+    --json               Machine-readable summary.
+
+Exit codes:
+    0 — files written (or already present without --force).
+    1 — user error (bad flag, source not readable).
+    2 — refused to overwrite existing (add --force).
+
+После установки регуляторного snapshot'а startup log сервера
+перестал выдавать ``regulatory_csv_unavailable`` warning.  Endpoint
+``/catalog/regulatory-scan`` и страница ``/regulatory`` теперь
+работают против 20 SVHC + 8 Annex XVII substance вместо
+in-memory-only.
+
+### Fixed — UI: настоящая offset-пагинация
+
+**Симптом:** ``limit=200`` был хардкодом; пользователь никогда не
+мог дойти до рецепта на позиции 201+.
+
+**Решение:** новый компонент ``Pagination`` в ``/recipes`` с:
+
+- Page size **60** (было 200 — слишком грубо для 3-column grid и
+  медленно для eager-loaded composition tree).
+- Кнопки «Предыдущая» / «Следующая» с disabled-состояниями.
+- Индикатор «страница N из M» в контроле + «X–Y из Z» в статусе.
+- Smooth scroll to top при смене страницы.
+- Автосброс offset при смене любого фильтра (иначе Мастики page 5
+  → Краски page 5 показывал бы 60 рецептов Красок из хвоста).
+- Subtitle отражает диапазон: «Каталог рецептур · 983 записей ·
+  страница 1–60».
+
+Race-condition защита из v1.19.fix перенесена — старый offset-запрос
+не затирает свежий.
+
+### Changed
+
+- ``AppSettings`` без изменений.
+- ``pyproject.toml`` +2 console_scripts: ``formulation-verify-catalog``,
+  ``formulation-refresh-reach``.
+
+### Metrics
+
+- **591 тестов** (было 583, +8: 5 verify-catalog + 3 refresh-reach).
+  Прогон ~150 с.
+- **61 REST endpoint** (без изменений — только CLI).
+- **12 CLI console scripts** (было 10, +2).
+- **124 source file** (было 122, +2).
+- **520 i18n ключей** (было 510, +10 pagination RU+EN), паритет 100%.
+- **220 Verified рецептов** в боевой БД (было 0).
+- **REACH data**: 20 SVHC + 8 Annex XVII substance загружены.
+
+### QA
+
+- ``ruff check src tests`` — All checks passed!
+- ``ruff format --check`` — clean
+- ``mypy src/formulation_workbench`` — Success: no issues in 122 files
+- ``bandit -c pyproject.toml -q -r src`` — clean
+- ``pytest --no-cov --deselect ...`` — 591 passed, 16 deselected,
+  1 skipped
+- ``npx tsc --noEmit`` — clean
+- ``npx next build`` — 14 маршрутов; ``/recipes`` вырос до 3.9 kB
+  (было 3.48) из-за пагинации
+- Реальный запуск ``formulation-verify-catalog`` на боевой БД —
+  220 Verified, exit code 3 (part failed из-за R1), 34 с
+- Реальный запуск ``formulation-refresh-reach`` — CSV установлены,
+  API startup log перестал выдавать ``regulatory_csv_unavailable``
+
+---
+
 ## [1.19.0] — Production-grade каталог: фасеты, честный total, обучение всей БД (2026-08-23)
 
 Раунд doводит каталог до production-grade: чиню три накопившихся

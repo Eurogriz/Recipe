@@ -91,6 +91,11 @@ export const ru: Dict = {
   "recipes.subtitle": "Каталог рецептур · {n} записей",
   "recipes.subtitle.total": "Каталог рецептур · {n} записей",
   "recipes.subtitle.filtered": "Показано {shown} из {total} рецептов каталога",
+  "recipes.subtitle.page": "страница {from}–{to}",
+  "recipes.pagination.prev": "Предыдущая",
+  "recipes.pagination.next": "Следующая",
+  "recipes.pagination.status": "{from}–{to} из {total}",
+  "recipes.pagination.page_of": "страница {page} из {total}",
   "recipes.filter.loading": "Загружаем список…",
   "recipes.facets.failed":
     "Не удалось загрузить фильтры: {msg}. Обновите страницу.",

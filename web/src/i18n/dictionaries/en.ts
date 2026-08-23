@@ -84,6 +84,11 @@ export const en: Dict = {
   "recipes.subtitle": "Recipe catalogue · {n} entries",
   "recipes.subtitle.total": "Recipe catalogue · {n} entries",
   "recipes.subtitle.filtered": "Showing {shown} of {total} recipes",
+  "recipes.subtitle.page": "page {from}–{to}",
+  "recipes.pagination.prev": "Prev",
+  "recipes.pagination.next": "Next",
+  "recipes.pagination.status": "{from}–{to} of {total}",
+  "recipes.pagination.page_of": "page {page} of {total}",
   "recipes.filter.loading": "Loading list…",
   "recipes.facets.failed":
     "Failed to load filters: {msg}. Please refresh the page.",

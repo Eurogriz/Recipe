@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Download, Filter, Loader2, Plus, Search } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Filter,
+  Loader2,
+  Plus,
+  Search,
+} from "lucide-react";
 import {
   api,
   type CatalogFacetsOut,
@@ -15,7 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/i18n/I18nProvider";
 
-const PAGE_SIZE = 200;
+// 60 fits neatly in a 3-col grid at any breakpoint and is small enough
+// to render at ~5 ms per page.  200 (v1.19) was too coarse — the user
+// couldn't reach recipes past the first page and paged searches were
+// slow because of the composition-tree eager loads.
+const PAGE_SIZE = 60;
 
 export default function RecipesPage() {
   const t = useT();
@@ -25,6 +37,7 @@ export default function RecipesPage() {
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [productClass, setProductClass] = useState<string | null>(null);
+  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Facets — fetched once and reused for every filter dropdown.  Was
@@ -64,6 +77,7 @@ export default function RecipesPage() {
       category: string | null;
       subcategory: string | null;
       productClass: string | null;
+      offset: number;
     }) => {
       const requestId = ++currentRequestId.current;
       setLoading(true);
@@ -75,6 +89,7 @@ export default function RecipesPage() {
           subcategory: args.subcategory ? [args.subcategory] : undefined,
           product_class: args.productClass ? [args.productClass] : undefined,
           limit: PAGE_SIZE,
+          offset: args.offset,
         })
         .then((r: SearchResponse) => {
           // Ignore stale responses — a slow request finishing after a
@@ -108,17 +123,26 @@ export default function RecipesPage() {
         setFacets(null);
         setFacetsError(e?.message ?? String(e));
       });
-    load({ q: "", category: null, subcategory: null, productClass: null });
+    load({ q: "", category: null, subcategory: null, productClass: null, offset: 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reload when any dropdown filter changes — no more manual "Search"
-  // click for filter selection.  The text search still needs Enter
-  // or the debounced hook below.
+  // Reload when filter or offset changes — no more manual "Search"
+  // click for filter selection.  Any filter change resets offset to
+  // 0 (see the effect below); offset changes on their own reload
+  // just the page.
   useEffect(() => {
-    load({ q, category, subcategory, productClass });
+    load({ q, category, subcategory, productClass, offset });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, subcategory, productClass]);
+  }, [category, subcategory, productClass, offset]);
+
+  // Any filter change resets to page 1 — a user on page 5 of Мастики
+  // who switches to Краски expects to see page 1 of Краски, not
+  // page 5 (which might not even exist).
+  useEffect(() => {
+    setOffset(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, subcategory, productClass, q]);
 
   // Reset subcategory when category changes — otherwise a stale
   // subcategory value from another category silently filters to 0.
@@ -127,10 +151,11 @@ export default function RecipesPage() {
   }, [category]);
 
   // Debounced text search — 350 ms after the user stops typing.
+  // Text change already reset offset to 0 via the effect above.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      load({ q, category, subcategory, productClass });
+      load({ q, category, subcategory, productClass, offset: 0 });
     }, 350);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -160,6 +185,15 @@ export default function RecipesPage() {
                   total: facets?.total ?? total,
                 })
               : t("recipes.subtitle.total", { n: total })}
+            {total > PAGE_SIZE && (
+              <span className="ml-2">
+                ·{" "}
+                {t("recipes.subtitle.page", {
+                  from: offset + 1,
+                  to: Math.min(offset + PAGE_SIZE, total),
+                })}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -200,7 +234,7 @@ export default function RecipesPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     if (debounceRef.current) clearTimeout(debounceRef.current);
-                    load({ q, category, subcategory, productClass });
+                    load({ q, category, subcategory, productClass, offset: 0 });
                   }
                 }}
                 placeholder={t("recipes.search_placeholder")}
@@ -356,6 +390,81 @@ export default function RecipesPage() {
                   )}
           </div>
         )}
+      </div>
+
+      {total > PAGE_SIZE && (
+        <Pagination
+          offset={offset}
+          pageSize={PAGE_SIZE}
+          total={total}
+          loading={loading}
+          onOffset={(next) => {
+            setOffset(next);
+            // Smooth scroll to top so the user sees the new page.
+            // Instant would also work but jarring in a long list.
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function Pagination({
+  offset,
+  pageSize,
+  total,
+  loading,
+  onOffset,
+}: {
+  offset: number;
+  pageSize: number;
+  total: number;
+  loading: boolean;
+  onOffset: (next: number) => void;
+}) {
+  const t = useT();
+  // Convert to 1-based page numbers for display — humans count
+  // pages from 1, not 0.
+  const currentPage = Math.floor(offset / pageSize) + 1;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const canPrev = offset > 0 && !loading;
+  const canNext = offset + pageSize < total && !loading;
+
+  return (
+    <div className="flex items-center justify-between gap-3 pt-2 border-t border-border">
+      <span className="text-xs text-muted-foreground">
+        {t("recipes.pagination.status", {
+          from: offset + 1,
+          to: Math.min(offset + pageSize, total),
+          total,
+        })}
+      </span>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!canPrev}
+          onClick={() => onOffset(Math.max(0, offset - pageSize))}
+        >
+          <ChevronLeft className="h-3 w-3 mr-1" />
+          {t("recipes.pagination.prev")}
+        </Button>
+        <span className="text-xs text-muted-foreground px-2">
+          {t("recipes.pagination.page_of", {
+            page: currentPage,
+            total: totalPages,
+          })}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!canNext}
+          onClick={() => onOffset(offset + pageSize)}
+        >
+          {t("recipes.pagination.next")}
+          <ChevronRight className="h-3 w-3 ml-1" />
+        </Button>
       </div>
     </div>
   );
