@@ -172,11 +172,53 @@ def compare_distributions(
     )
 
 
+def compare_feature_matrices(
+    reference: list[list[float]],
+    current: list[list[float]],
+    *,
+    feature_names: list[str],
+) -> list[DriftReport]:
+    """Run :func:`compare_distributions` on each column of the matrices.
+
+    ``reference`` and ``current`` are lists of *feature vectors* of
+    equal width; the returned list preserves the order of
+    ``feature_names`` so the caller can join back to metadata.  Columns
+    that are constant on the reference side are skipped and reported
+    with ``level=NO_DRIFT`` + statistics = 0 (nothing to compare).
+    """
+    if not reference:
+        return []
+    width = len(feature_names)
+    if any(len(row) != width for row in reference) or any(len(row) != width for row in current):
+        raise ValueError("all vectors must have the same width as feature_names")
+
+    reports: list[DriftReport] = []
+    for col in range(width):
+        ref_col = [row[col] for row in reference]
+        cur_col = [row[col] for row in current]
+        if len(set(ref_col)) <= 1 and len(set(cur_col)) <= 1:
+            reports.append(
+                DriftReport(
+                    feature_name=feature_names[col],
+                    psi=0.0,
+                    ks_statistic=0.0,
+                    ks_p_value=None,
+                    level=DriftLevel.NO_DRIFT,
+                    n_reference=len(ref_col),
+                    n_current=len(cur_col),
+                )
+            )
+            continue
+        reports.append(compare_distributions(ref_col, cur_col, feature_name=feature_names[col]))
+    return reports
+
+
 __all__ = [
     "DriftLevel",
     "DriftReport",
     "classify_psi",
     "compare_distributions",
+    "compare_feature_matrices",
     "ks_p_value",
     "ks_statistic",
     "population_stability_index",

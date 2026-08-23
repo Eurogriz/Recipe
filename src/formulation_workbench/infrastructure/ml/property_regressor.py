@@ -28,6 +28,7 @@ from .features import FEATURE_NAMES, to_vector
 if TYPE_CHECKING:
     from ...domain.entities.experiment import ExperimentRun
     from ...domain.entities.recipe import Recipe
+    from .calibration import CalibrationBundle
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,14 @@ class ModelMetadata:
 
 
 @dataclass(frozen=True, slots=True)
+class FeatureImpact:
+    feature_name: str
+    contribution: float
+    baseline_value: float
+    global_importance: float
+
+
+@dataclass(frozen=True, slots=True)
 class PropertyPrediction:
     property_code: str
     predicted_value: float
@@ -87,6 +96,9 @@ class PropertyPrediction:
     lower_bound: float | None = None
     upper_bound: float | None = None
     interval_alpha: float | None = None
+    # Top-k explanation of what drove the prediction.  Empty when
+    # explain=False or the model doesn't support attribution.
+    top_features: tuple[FeatureImpact, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -235,6 +247,7 @@ class PropertyRegressor:
         property_code: str,
         *,
         alpha: float | None = 0.1,
+        explain_top_k: int | None = None,
     ) -> PropertyPrediction | None:
         """Point prediction with an optional ``(1 - alpha)`` interval.
 
@@ -264,6 +277,32 @@ class PropertyRegressor:
             except Exception:  # pragma: no cover — never break a prediction
                 logger.exception("uncertainty_interval_failed")
 
+        # Apply calibration (both point + interval) if available.
+        bundle = self.get_calibration(property_code)
+        if bundle is not None:
+            if bundle.isotonic is not None:
+                value = bundle.isotonic.apply(value)
+            if bundle.interval is not None and lower is not None and upper is not None:
+                lower, upper = bundle.interval.apply(value, lower, upper)
+
+        top_features: tuple[FeatureImpact, ...] = ()
+        if explain_top_k is not None and explain_top_k > 0 and hasattr(model, "estimators_"):
+            try:
+                from .explainability import explain_prediction
+
+                attributions = explain_prediction(model, vector, top_k=explain_top_k)
+                top_features = tuple(
+                    FeatureImpact(
+                        feature_name=a.feature_name,
+                        contribution=a.contribution,
+                        baseline_value=a.baseline_value,
+                        global_importance=a.global_importance,
+                    )
+                    for a in attributions
+                )
+            except Exception:  # pragma: no cover — never break a prediction
+                logger.exception("explainability_failed")
+
         return PropertyPrediction(
             property_code=property_code,
             predicted_value=value,
@@ -272,7 +311,79 @@ class PropertyRegressor:
             lower_bound=lower,
             upper_bound=upper,
             interval_alpha=used_alpha,
+            top_features=top_features,
         )
+
+    # ------------------------------------------------------------------ calibration
+    def calibrate(
+        self,
+        property_code: str,
+        raw_predictions: list[float],
+        actual_values: list[float],
+        *,
+        lowers: list[float] | None = None,
+        uppers: list[float] | None = None,
+        target_coverage: float = 0.9,
+    ) -> CalibrationBundle:
+        """Fit isotonic + (optional) interval calibration and persist.
+
+        Requires the model for ``property_code`` to already exist on
+        disk (calibration references its version for auditability).
+        """
+        from datetime import datetime, timezone
+
+        from .calibration import (
+            CalibrationBundle,
+            CalibrationError,
+            fit_interval_calibration,
+            fit_isotonic,
+            write_bundle,
+        )
+
+        _, metadata = self._load_model(property_code)
+        if metadata is None:
+            raise CalibrationError(f"No model for property_code={property_code!r}; train first.")
+        isotonic = fit_isotonic(raw_predictions, actual_values)
+
+        interval_cal = None
+        if lowers is not None and uppers is not None and len(lowers) == len(actual_values):
+            interval_cal = fit_interval_calibration(
+                raw_predictions,
+                lowers,
+                uppers,
+                actual_values,
+                target_coverage=target_coverage,
+            )
+
+        version = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        bundle = CalibrationBundle(
+            property_code=property_code,
+            version=version,
+            isotonic=isotonic,
+            interval=interval_cal,
+            calibration_n=len(actual_values),
+            notes=(f"anchored to model version {metadata.version}",),
+        )
+        write_bundle(self._calibration_path(property_code), bundle)
+        logger.info(
+            "calibration_written",
+            extra={
+                "property_code": property_code,
+                "n": len(actual_values),
+                "coverage": (
+                    round(interval_cal.empirical_coverage, 3) if interval_cal is not None else None
+                ),
+            },
+        )
+        return bundle
+
+    def get_calibration(self, property_code: str) -> CalibrationBundle | None:
+        from .calibration import read_bundle
+
+        return read_bundle(self._calibration_path(property_code))
+
+    def _calibration_path(self, property_code: str) -> Path:
+        return self._storage / f"{property_code}.calibration.json"
 
     def get_training_vectors(self, property_code: str) -> list[list[float]] | None:
         """Return the feature vectors used to train ``property_code``.

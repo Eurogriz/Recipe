@@ -415,6 +415,13 @@ class TrainingResultOut(BaseModel):
     skipped: dict[str, str] = Field(default_factory=dict)
 
 
+class FeatureImpactOutBase(BaseModel):
+    feature_name: str
+    contribution: float
+    baseline_value: float
+    global_importance: float
+
+
 class PropertyPredictionOut(BaseModel):
     property_code: str
     predicted_value: float
@@ -424,6 +431,7 @@ class PropertyPredictionOut(BaseModel):
     lower_bound: float | None = None
     upper_bound: float | None = None
     interval_alpha: float | None = None
+    top_features: list[FeatureImpactOutBase] = Field(default_factory=list)
 
 
 class PredictionsOut(BaseModel):
@@ -532,6 +540,82 @@ class DriftCheckOut(BaseModel):
     reports: list[DriftReportOut]
 
 
+class DriftFullRequest(BaseModel):
+    """Full-feature drift check — send fresh feature vectors."""
+
+    current_vectors: list[list[float]] = Field(
+        min_length=2,
+        description=(
+            "One row per fresh sample.  Length must match FEATURE_NAMES "
+            "returned by the /ml/models registry."
+        ),
+    )
+
+
+class DriftFullOut(BaseModel):
+    property_code: str
+    reports: list[DriftReportOut]
+    worst_level: str
+
+
+# ---------------------------------------------------------------------------
+# Calibration
+# ---------------------------------------------------------------------------
+class CalibrationSample(BaseModel):
+    raw_prediction: float
+    actual: float
+    lower: float | None = None
+    upper: float | None = None
+
+
+class CalibrationRequest(BaseModel):
+    samples: list[CalibrationSample] = Field(min_length=2)
+    target_coverage: float = Field(default=0.9, gt=0.0, lt=1.0)
+
+
+class CalibrationOut(BaseModel):
+    property_code: str
+    version: str
+    n_samples: int
+    has_isotonic: bool
+    has_interval: bool
+    empirical_coverage: float | None = None
+    target_coverage: float | None = None
+    factor: float | None = None
+    notes: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Explainability — alias so callers importing FeatureImpactOut still work.
+# ---------------------------------------------------------------------------
+FeatureImpactOut = FeatureImpactOutBase
+
+
+# ---------------------------------------------------------------------------
+# Pareto
+# ---------------------------------------------------------------------------
+class ParetoRequestIn(BaseModel):
+    targets: list[PropertyTargetIn]
+    bounds: list[ComponentBoundsIn] = Field(default_factory=list)
+    population_size: int = Field(default=24, ge=8, le=200)
+    generations: int = Field(default=20, ge=1, le=200)
+    mutation_std: float = Field(default=0.5, gt=0.0, le=5.0)
+    seed: int | None = 42
+
+
+class ParetoPointOut(BaseModel):
+    mass_percent: dict[str, float]
+    objectives: dict[str, float]
+    rank: int
+    crowding_distance: float
+
+
+class ParetoResultOut(BaseModel):
+    base_recipe_id: str
+    front: list[ParetoPointOut]
+    generations: int
+
+
 class ValidationErrorResponse(BaseModel):
     detail: list[dict[str, Any]] = Field(
         examples=[
@@ -555,6 +639,9 @@ __all__ = [
     "BatchCostLineOut",
     "BatchCostOut",
     "BatchInfoIn",
+    "CalibrationOut",
+    "CalibrationRequest",
+    "CalibrationSample",
     "CatalogStats",
     "CitationIn",
     "ComponentBoundsIn",
@@ -566,16 +653,23 @@ __all__ = [
     "DeviationOut",
     "DriftCheckOut",
     "DriftCheckRequest",
+    "DriftFullOut",
+    "DriftFullRequest",
     "DriftReportOut",
     "ErrorResponse",
     "ExperimentCompletionIn",
     "ExperimentOut",
     "ExperimentPlanIn",
+    "FeatureImpactOut",
+    "FeatureImpactOutBase",
     "HealthResponse",
     "MassBalanceOut",
     "ModelMetadataOut",
     "OptimisationRequestIn",
     "OptimisationResultOut",
+    "ParetoPointOut",
+    "ParetoRequestIn",
+    "ParetoResultOut",
     "PredictionsOut",
     "PriceIn",
     "ProcessMeasuredIn",

@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 class PredictPropertyQuery:
     recipe_id: str
     property_codes: tuple[str, ...] = field(default_factory=tuple)
+    explain_top_k: int | None = None
 
 
 class PredictPropertiesUseCase:
@@ -40,15 +41,13 @@ class PredictPropertiesUseCase:
         if recipe is None:
             return None
 
-        # If no explicit property codes were requested, predict for every
-        # code that has a trained model available.
         codes = list(query.property_codes)
         if not codes:
             codes = [m.property_code for m in self._regressor.list_models()]
 
         predictions = []
         for code in codes:
-            pred = self._regressor.predict(recipe, code)
+            pred = self._regressor.predict(recipe, code, explain_top_k=query.explain_top_k)
             if pred is not None:
                 predictions.append(pred)
         logger.info(
@@ -57,6 +56,7 @@ class PredictPropertiesUseCase:
                 "recipe_id": query.recipe_id,
                 "n_predictions": len(predictions),
                 "requested_codes": codes,
+                "explain_top_k": query.explain_top_k,
             },
         )
         return predictions

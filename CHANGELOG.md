@@ -7,6 +7,105 @@
 
 ---
 
+## [1.6.0] — Feature drift, calibration, Pareto, explainability, ECHA ETL (2026-08-23)
+
+Девятый раунд — пять отложенных пунктов v1.5.
+
+### Added — Feature-level drift
+
+- `infrastructure/ml/drift.compare_feature_matrices(reference,
+  current, feature_names)` — per-column PSI + KS для каждой из
+  37 фичей `FEATURE_NAMES`.  Постоянные reference-колонки
+  автоматически пропускаются с `no_drift`.
+- **`POST /ml/models/{code}/drift-full`** — принимает матрицу
+  fresh-векторов, возвращает `DriftFullOut(reports[], worst_level)`.
+  Аргумент валидации: длина каждого вектора должна равняться
+  `len(FEATURE_NAMES)`, иначе 422.
+
+### Added — Model calibration
+
+- `infrastructure/ml/calibration.py`:
+  - `fit_isotonic(raw, target)` — Pool Adjacent Violators, чистый
+    Python без sklearn-зависимости; сохраняется как пары
+    `(anchor_predictions, calibrated_targets)` с линейной интерполяцией
+    между узлами и clamp на концах.
+  - `fit_interval_calibration(means, lowers, uppers, actual,
+    target_coverage=0.9)` — quantile-based factor: находит
+    наименьшее `k`, при котором empirical coverage ≥ target.
+  - `CalibrationBundle` — `isotonic`, `interval`, `calibration_n`,
+    `notes`, ISO-timestamp `version`; JSON-персист рядом с моделью
+    как `<code>.calibration.json`.
+- `PropertyRegressor.calibrate(...)` / `.get_calibration(code)`;
+  `.predict(...)` автоматически применяет калибровку когда bundle есть.
+- **`POST /ml/models/{code}/calibrate`** (writer) — принимает список
+  `{raw_prediction, actual, lower?, upper?}` и `target_coverage`.
+- +12 unit-тестов на isotonic + interval + bundle roundtrip.
+
+### Added — Multi-objective Pareto optimisation
+
+- `infrastructure/ml/pareto.py` — компактный NSGA-II:
+  - Deb's fast non-dominated sort + crowding distance.
+  - Поддержка направлений `maximise` / `minimise` / `match`
+    (`match` → минимизация |predicted − target|).
+  - Reuse candidate-builder из `optimiser.py` (нормализация к 100 %,
+    respect `Recipe` invariants).
+- `ParetoResult(front[], all_points[], generations)` — только
+  non-dominated фронт возвращается по умолчанию.
+- **`POST /recipes/{id}/pareto`** (writer) — принимает targets + bounds
+  + population/generations/mutation_std/seed, возвращает
+  `ParetoResultOut` с полным front-ом.
+- Live: `[gloss ↑, voc ↓]` → 1 non-dominated точка после 5 generations
+  на 10-recipe corpus.
+
+### Added — Explainability (SHAP + fallback)
+
+- `infrastructure/ml/explainability.py`:
+  - `explain_prediction(model, features, top_k=3)` — SHAP TreeExplainer
+    если пакет установлен, иначе Saabas-style path-based attribution
+    (walk по decision path, contribution = child_value − parent_value,
+    усреднённое по всем деревьям).
+  - `FeatureAttribution(feature_name, contribution, baseline_value,
+    global_importance)`.
+- `PropertyRegressor.predict(explain_top_k=3)` — attribution в
+  результате.
+- **`GET /recipes/{id}/predict?explain_top_k=3`** — Query-параметр в
+  диапазоне `[0..10]`; 0/omitted = без attributions.
+- Live: `explain_top_k=3` вернул `mass_percent_binder: -7.52,
+  mass_percent_vehicle: -4.68` — что логично для binder-doped модели.
+
+### Added — Real REACH ETL
+
+- `scripts/ops/refresh_reach.py`:
+  - Читает **URL или локальный файл**: `.csv`, `.xlsx`, `.tsv`.
+  - Толерантен к ECHA column-name churn (`_pick(row, "cas", "cas rn",
+    "cas number")` + fallback CAS-regex по всем ячейкам).
+  - Парсит `max_concentration_percent` из свободно-текстовых
+    строк типа `"0.03 %"`, `"<= 0.1%"`.
+  - Идемпотентный вывод (sorted by CAS, deduplicated, banner
+    с source URL + row count).
+  - Опция `--diff` печатает `git diff --stat` над обновлёнными файлами.
+- +4 integration-теста покрывают CSV parsing, XLSX heuristics,
+  determinism, `_parse_limit`.
+
+### Metrics after 1.6.0
+
+- **403 теста зелёные** (было 373, +30: 12 calibration + 4 explainability
+  + 4 drift/explain unit + 4 ETL + 6 pareto/drift/calibrate API).
+- **Ruff clean · Ruff-format clean · Bandit clean · MyPy clean**
+  (100 source files, +3 к 97).
+- **23 REST endpoints** доступны:
+  - `/health`, `/info`, `/catalog/stats`
+  - `/recipes` (GET/POST), `/recipes/{id}` (GET/PUT/DELETE),
+    `/recipes/{id}/{assessment,cost,optimise,predict,pareto,
+    submit-review,verify,reject}`
+  - `/experiments` (GET/POST), `/experiments/{id}`,
+    `/experiments/{id}/{complete,apply,batch-report}`
+  - `/ml/{train,models}`, `/ml/models/{code}/{drift,drift-full,calibrate}`
+- Live-цепочка: `create recipe → complete experiment × 10 → train →
+  predict?explain_top_k=3 → pareto` работает end-to-end.
+
+---
+
 ## [1.5.0] — Flory, ML uncertainty, batch analysis, optimisation, REACH loader (2026-08-23)
 
 Восьмой раунд — все пять отложенных пунктов v1.4.

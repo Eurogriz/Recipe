@@ -44,6 +44,8 @@ from .schemas import (
     BatchAnalysisRequest,
     BatchCostLineOut,
     BatchCostOut,
+    CalibrationOut,
+    CalibrationRequest,
     CatalogStats,
     CostLineOut,
     CostRequest,
@@ -51,16 +53,22 @@ from .schemas import (
     DeviationOut,
     DriftCheckOut,
     DriftCheckRequest,
+    DriftFullOut,
+    DriftFullRequest,
     DriftReportOut,
     ErrorResponse,
     ExperimentCompletionIn,
     ExperimentOut,
     ExperimentPlanIn,
+    FeatureImpactOutBase,
     HealthResponse,
     MassBalanceOut,
     ModelMetadataOut,
     OptimisationRequestIn,
     OptimisationResultOut,
+    ParetoPointOut,
+    ParetoRequestIn,
+    ParetoResultOut,
     PredictionsOut,
     ProcessMeasuredIn,
     PropertyPredictionOut,
@@ -786,6 +794,14 @@ async def predict_recipe(
     recipe_id: str,
     container: Annotated[Container, Depends(get_container)],
     property_code: list[str] = Query(default_factory=list),
+    explain_top_k: int = Query(
+        0,
+        ge=0,
+        le=10,
+        description=(
+            "If > 0, attach SHAP-style attributions for the top-k features driving each prediction."
+        ),
+    ),
 ) -> PredictionsOut:
     from ...application.use_cases.ml_predict import PredictPropertyQuery
 
@@ -793,6 +809,7 @@ async def predict_recipe(
         PredictPropertyQuery(
             recipe_id=recipe_id,
             property_codes=tuple(property_code),
+            explain_top_k=(explain_top_k or None),
         )
     )
     if result is None:
@@ -809,6 +826,15 @@ async def predict_recipe(
                 lower_bound=p.lower_bound,
                 upper_bound=p.upper_bound,
                 interval_alpha=p.interval_alpha,
+                top_features=[
+                    FeatureImpactOutBase(
+                        feature_name=fi.feature_name,
+                        contribution=round(fi.contribution, 6),
+                        baseline_value=round(fi.baseline_value, 6),
+                        global_importance=round(fi.global_importance, 6),
+                    )
+                    for fi in p.top_features
+                ],
             )
             for p in result
         ],
@@ -1014,6 +1040,187 @@ async def drift_check(
                 n_current=report.n_current,
             )
         ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — drift-full, calibrate, pareto
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/models/{property_code}/drift-full",
+    response_model=DriftFullOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="Per-feature drift across all model inputs",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def drift_full(
+    property_code: str,
+    payload: DriftFullRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> DriftFullOut:
+    from ...infrastructure.ml.drift import (
+        DriftLevel,
+        compare_feature_matrices,
+    )
+    from ...infrastructure.ml.features import FEATURE_NAMES
+
+    reference = container.property_regressor.get_training_vectors(property_code)
+    if reference is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"No training snapshot for property_code={property_code!r}",
+        )
+    if any(len(row) != len(FEATURE_NAMES) for row in payload.current_vectors):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"every current_vectors row must have {len(FEATURE_NAMES)} entries",
+        )
+
+    reports = compare_feature_matrices(
+        reference, payload.current_vectors, feature_names=list(FEATURE_NAMES)
+    )
+    # Aggregate worst level for a quick banner in the UI.
+    order = {DriftLevel.NO_DRIFT: 0, DriftLevel.MODERATE_DRIFT: 1, DriftLevel.SEVERE_DRIFT: 2}
+    worst = DriftLevel.NO_DRIFT
+    for report in reports:
+        if order[report.level] > order[worst]:
+            worst = report.level
+
+    return DriftFullOut(
+        property_code=property_code,
+        reports=[
+            DriftReportOut(
+                feature_name=r.feature_name,
+                psi=round(r.psi, 6),
+                ks_statistic=round(r.ks_statistic, 6),
+                ks_p_value=(round(r.ks_p_value, 6) if r.ks_p_value is not None else None),
+                level=r.level.value,
+                n_reference=r.n_reference,
+                n_current=r.n_current,
+            )
+            for r in reports
+        ],
+        worst_level=worst.value,
+    )
+
+
+@router.post(
+    "/ml/models/{property_code}/calibrate",
+    response_model=CalibrationOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Fit isotonic + interval calibration for a trained model",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_VALIDATION},
+)
+async def calibrate_model(
+    property_code: str,
+    payload: CalibrationRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> CalibrationOut:
+    from ...infrastructure.ml.calibration import CalibrationError
+
+    raw = [s.raw_prediction for s in payload.samples]
+    actual = [s.actual for s in payload.samples]
+    lowers = [s.lower for s in payload.samples if s.lower is not None]
+    uppers = [s.upper for s in payload.samples if s.upper is not None]
+    include_interval = len(lowers) == len(payload.samples) and len(uppers) == len(payload.samples)
+
+    try:
+        bundle = container.property_regressor.calibrate(
+            property_code,
+            raw_predictions=raw,
+            actual_values=actual,
+            lowers=(lowers if include_interval else None),
+            uppers=(uppers if include_interval else None),
+            target_coverage=payload.target_coverage,
+        )
+    except CalibrationError as exc:
+        # 404 when there's no matching model, 422 otherwise.
+        if "No model" in str(exc):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    return CalibrationOut(
+        property_code=bundle.property_code,
+        version=bundle.version,
+        n_samples=bundle.calibration_n,
+        has_isotonic=bundle.isotonic is not None,
+        has_interval=bundle.interval is not None,
+        empirical_coverage=(
+            round(bundle.interval.empirical_coverage, 4) if bundle.interval is not None else None
+        ),
+        target_coverage=(bundle.interval.target_coverage if bundle.interval is not None else None),
+        factor=(round(bundle.interval.factor, 4) if bundle.interval is not None else None),
+        notes=list(bundle.notes),
+    )
+
+
+@router.post(
+    "/recipes/{recipe_id}/pareto",
+    response_model=ParetoResultOut,
+    tags=["ml", "recipes"],
+    dependencies=[Depends(require_writer)],
+    summary="Multi-objective (Pareto) optimisation across property targets",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def pareto_optimise(
+    recipe_id: str,
+    payload: ParetoRequestIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> ParetoResultOut:
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...infrastructure.ml.optimiser import ComponentBounds, PropertyTarget
+    from ...infrastructure.ml.pareto import ParetoOptimiser, ParetoRequest
+
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    def _predict(candidate, code):  # type: ignore[no-untyped-def]
+        prediction = container.property_regressor.predict(candidate, code, alpha=None)
+        return prediction.predicted_value if prediction else None
+
+    optimiser = ParetoOptimiser(predictor=_predict)
+    result = optimiser.optimise(
+        recipe,
+        ParetoRequest(
+            targets=tuple(
+                PropertyTarget(
+                    property_code=t.property_code,
+                    target_value=t.target_value,
+                    tolerance=t.tolerance,
+                    direction=t.direction,
+                    weight=t.weight,
+                )
+                for t in payload.targets
+            ),
+            bounds=tuple(
+                ComponentBounds(
+                    component_name=b.component_name,
+                    min_percent=b.min_percent,
+                    max_percent=b.max_percent,
+                )
+                for b in payload.bounds
+            ),
+            population_size=payload.population_size,
+            generations=payload.generations,
+            mutation_std=payload.mutation_std,
+            seed=payload.seed,
+        ),
+    )
+    return ParetoResultOut(
+        base_recipe_id=result.base_recipe_id,
+        front=[
+            ParetoPointOut(
+                mass_percent={k: round(v, 4) for k, v in p.mass_percent.items()},
+                objectives={k: round(v, 4) for k, v in p.objectives.items()},
+                rank=p.rank,
+                crowding_distance=round(p.crowding_distance, 6),
+            )
+            for p in result.front
+        ],
+        generations=result.generations,
     )
 
 
