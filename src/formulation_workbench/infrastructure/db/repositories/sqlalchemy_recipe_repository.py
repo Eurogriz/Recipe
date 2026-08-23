@@ -239,6 +239,21 @@ class SqlAlchemyRecipeRepository:
         rows = (await self._session.execute(stmt)).scalars().all()
         return [str(r) for r in rows]
 
+    async def list_recent(self, *, limit: int = 10) -> list[Recipe]:
+        # Order by created_at DESC — the dashboard's "recent" widget
+        # needs the freshest activity first, regardless of category or
+        # status.  A NULL created_at (never happens in practice, but
+        # SQLAlchemy sometimes seeds one from a partial insert) sorts
+        # last via ``nulls_last``.
+        stmt = (
+            select(RecipeModel)
+            .options(*self._eager_options())
+            .order_by(RecipeModel.created_at.desc())
+            .limit(max(1, int(limit)))
+        )
+        result = await self._session.execute(stmt)
+        return [await self._to_entity(m) for m in result.scalars().all()]
+
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         # Walk back via previous_version_id chain
         result: list[Recipe] = []

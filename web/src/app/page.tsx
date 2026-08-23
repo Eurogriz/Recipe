@@ -3,16 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  Activity,
   Beaker,
   Boxes,
   CheckCircle2,
   Cpu,
   FlaskConical,
+  History,
   Layers,
 } from "lucide-react";
 import {
   api,
   type CatalogStats,
+  type DashboardSummaryOut,
   type Health,
   type Info,
   type ModelMetadata,
@@ -29,6 +32,12 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<CatalogStats | null>(null);
   const [models, setModels] = useState<ModelMetadata[] | null>(null);
   const [matrix, setMatrix] = useState<CalibrationMatrix | null>(null);
+  // v1.21: dashboard summary powers the "recent activity" widgets.
+  // The five other GETs above are kept for the widgets that already
+  // consume their shape (sysinfo card wants ``info``, calibrated card
+  // wants matrix.n_calibrated/n_models etc.) — we don't want to
+  // refactor the whole layout in one round.
+  const [summary, setSummary] = useState<DashboardSummaryOut | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,13 +47,15 @@ export default function DashboardPage() {
       api.catalogStats(),
       api.listModels(),
       api.calibrationMatrix(),
+      api.dashboardSummary(),
     ])
-      .then(([h, i, s, m, c]) => {
+      .then(([h, i, s, m, c, sum]) => {
         setHealth(h);
         setInfo(i);
         setStats(s);
         setModels(m);
         setMatrix(c);
+        setSummary(sum);
       })
       .catch((e) => setError(e.message ?? String(e)));
   }, []);
@@ -158,8 +169,127 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-4 w-4 text-primary" />
+              {t("dashboard.recent_recipes.title")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {summary === null ? (
+              <div className="text-muted-foreground">{t("common.loading")}</div>
+            ) : summary.recent_recipes.length === 0 ? (
+              <div className="text-muted-foreground">
+                {t("dashboard.recent_recipes.empty")}
+              </div>
+            ) : (
+              <ul className="divide-y divide-border/60">
+                {summary.recent_recipes.map((r) => (
+                  <li key={r.id} className="py-2 flex items-center gap-3">
+                    <StatusPill status={r.status} />
+                    <Link
+                      href={`/recipes/${encodeURIComponent(r.id)}`}
+                      className="flex-1 min-w-0 hover:text-primary"
+                    >
+                      <div className="font-medium truncate">
+                        {r.subcategory || r.id}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {r.category} · {r.product_class}
+                      </div>
+                    </Link>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {r.created_at
+                        ? new Date(r.created_at).toLocaleDateString()
+                        : "—"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" />
+              {t("dashboard.recent_audit.title")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            {summary === null ? (
+              <div className="text-muted-foreground">{t("common.loading")}</div>
+            ) : summary.recent_audit.length === 0 ? (
+              <div className="text-muted-foreground">
+                {t("dashboard.recent_audit.empty")}
+              </div>
+            ) : (
+              <ul className="divide-y divide-border/60">
+                {summary.recent_audit.map((e) => (
+                  <li key={e.id} className="py-2 flex items-center gap-3">
+                    <ActionPill action={e.action} />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-xs font-mono truncate">
+                        {e.actor_label}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {e.recipe_id
+                          ? `recipe ${e.recipe_id.slice(0, 8)}…`
+                          : t("dashboard.recent_audit.no_recipe")}
+                      </div>
+                    </div>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(e.timestamp).toLocaleTimeString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="pt-2 text-right">
+              <Link
+                href="/admin/audit"
+                className="text-xs text-primary hover:underline"
+              >
+                {t("dashboard.recent_audit.see_all")} →
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
+}
+
+function StatusPill({ status }: { status: string }) {
+  const v =
+    status === "Verified"
+      ? "success"
+      : status === "PendingReview"
+        ? "warning"
+        : status === "Rejected"
+          ? "destructive"
+          : "outline";
+  return <Badge variant={v}>{status}</Badge>;
+}
+
+function ActionPill({ action }: { action: string }) {
+  const a = action.toLowerCase();
+  const v =
+    a === "created" || a === "cloned" || a === "verified" || a === "login"
+      ? "success"
+      : a === "rejected" ||
+          a === "deleted" ||
+          a === "loginfailed" ||
+          a === "apikeyrevoked"
+        ? "destructive"
+        : a === "logout"
+          ? "info"
+          : "warning";
+  return <Badge variant={v}>{action}</Badge>;
 }
 
 function StatCard({

@@ -92,6 +92,8 @@ export const api = {
   catalogStats: () => request<CatalogStats>("/catalog/stats"),
   /** Full facet snapshot for filter dropdowns — every category + count. */
   catalogFacets: () => request<CatalogFacetsOut>("/catalog/facets"),
+  /** One-shot dashboard payload (v1.21) — replaces 5 independent GETs. */
+  dashboardSummary: () => request<DashboardSummaryOut>("/dashboard/summary"),
 
   // ml
   listModels: () => request<ModelMetadata[]>("/ml/models"),
@@ -533,6 +535,30 @@ export interface CatalogFacetsOut {
   by_subcategory: Record<string, Record<string, number>>;
   by_product_class: Record<string, number>;
   by_status: Record<string, number>;
+}
+
+/** Compact recipe row in the dashboard's "recent activity" list. */
+export interface RecentRecipeOut {
+  id: string;
+  category: string;
+  subcategory: string;
+  status: string;
+  product_class: string;
+  created_at: string;
+}
+
+/** Everything the dashboard renders in one round-trip
+ * (``GET /dashboard/summary``, v1.21). */
+export interface DashboardSummaryOut {
+  version: string;
+  environment: string;
+  total_recipes: number;
+  by_status: Record<string, number>;
+  by_category: Record<string, number>;
+  by_product_class: Record<string, number>;
+  trained_models: number;
+  recent_recipes: RecentRecipeOut[];
+  recent_audit: AuditLogEntry[];
 }
 
 export interface ModelMetadata {

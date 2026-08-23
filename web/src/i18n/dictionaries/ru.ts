@@ -86,6 +86,16 @@ export const ru: Dict = {
   "dashboard.quick.openapi.caption":
     "Все точки входа в интерактивном виде",
 
+  // ----- dashboard recent activity (v1.21)
+  "dashboard.recent_recipes.title": "Последние рецепты",
+  "dashboard.recent_recipes.empty":
+    "Каталог пустой. Заполните его через seed-скрипт или создайте первый рецепт.",
+  "dashboard.recent_audit.title": "Свежие события аудита",
+  "dashboard.recent_audit.empty":
+    "В журнале аудита пока пусто — сделайте первое действие.",
+  "dashboard.recent_audit.no_recipe": "системное событие",
+  "dashboard.recent_audit.see_all": "весь журнал",
+
   // ----- recipes list
   "recipes.title": "Рецепты",
   "recipes.subtitle": "Каталог рецептур · {n} записей",

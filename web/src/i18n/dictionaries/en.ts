@@ -79,6 +79,16 @@ export const en: Dict = {
   "dashboard.quick.openapi.label": "OpenAPI (Swagger UI)",
   "dashboard.quick.openapi.caption": "Explore every endpoint directly",
 
+  // ----- dashboard recent activity (v1.21)
+  "dashboard.recent_recipes.title": "Recent recipes",
+  "dashboard.recent_recipes.empty":
+    "Catalogue is empty. Load one via the seed script or create the first recipe.",
+  "dashboard.recent_audit.title": "Recent audit events",
+  "dashboard.recent_audit.empty":
+    "Audit log is empty — perform your first action.",
+  "dashboard.recent_audit.no_recipe": "system event",
+  "dashboard.recent_audit.see_all": "full log",
+
   // ----- recipes list
   "recipes.title": "Recipes",
   "recipes.subtitle": "Recipe catalogue · {n} entries",

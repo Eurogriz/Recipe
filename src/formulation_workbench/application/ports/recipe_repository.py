@@ -105,5 +105,15 @@ class RecipeRepository(abc.ABC):
         """
 
     @abc.abstractmethod
+    async def list_recent(self, *, limit: int = 10) -> list[Recipe]:
+        """Return the N most-recently-created recipes.
+
+        Sorted by ``created_at`` descending.  Used by the dashboard's
+        "recent activity" widget.  Independent of status — a freshly
+        submitted Draft matters as much as a freshly Verified one for
+        an operator scanning the timeline.
+        """
+
+    @abc.abstractmethod
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         """Get all versions of a recipe (latest first), including the given ID."""

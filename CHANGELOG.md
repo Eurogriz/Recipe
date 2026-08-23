@@ -7,6 +7,141 @@
 
 ---
 
+## [1.21.0] — Backup verify/list/prune, live dashboard-summary, recent-activity виджеты (2026-08-23)
+
+Два блока production-grade улучшений: (1) существующий backup CLI
+получает недостающие для disaster-recovery подкоманды `verify`,
+`list`, `prune`; (2) дашборд превращается из статичного «total N
+recipes» в живой SRE-виджет со свежими рецептами и последними
+audit-событиями.
+
+### Added — CLI ``formulation-backup {verify,list,prune}``
+
+Одноимённый CLI существовал с v1.5+ и умел `backup` / `restore`.
+Prod-grade система должна ещё уметь **rehearsed disaster recovery**
+— сейчас есть три недостающие подкоманды:
+
+**``verify <archive>``** — проверяет что архив бит-идентичен своему
+sidecar (``.sha256`` файл рядом) И что после decompression содержимое
+проходит ``PRAGMA integrity_check``. Bit-flipped tarball — не бэкап,
+а fiction, которая живёт до момента когда действительно нужна.
+
+Обрабатывает три класса ошибок:
+- Missing sidecar → `checksum_expected=None`, checksum_ok=False.
+- Tampered gzip → `gzip.BadGzipFile` пойман, integrity_ok=False +
+  сообщение «cannot decompress».
+- Broken SQLite payload (re-signed junk) → `sqlite3.DatabaseError`
+  пойман, integrity_ok=False.
+
+Exit code **3** когда любая проверка не прошла — production runbook
+должен вызывать `verify` сразу после `backup` в скрипте и стопить
+pipeline при exit != 0.
+
+**``list [--dir]``** — human/JSON таблица бэкапов: MODIFIED / SIZE
+(human-readable как ``2.0 MB``) / CHECKSUM (`ok` / `MISMATCH` /
+`missing`) / PATH. Каждая строка перечитывает sidecar и сверяет
+SHA-256.
+
+**``prune [--dir] --keep N | --older-than-days D [--dry-run]``** —
+retention rotation: держать N последних архивов и/или удалять всё
+старше D дней. Флаги комбинируются — архив выживает, только если
+проходит оба фильтра. `--dry-run` показывает что было бы удалено
+без mutation. Отказ работать когда ни один фильтр не задан (защита
+от `--dir X` без `--keep` → случайное удаление всех бэкапов).
+
+Sidecar (`*.sha256`) удаляется вместе с архивом.
+
+### Added — Endpoint ``GET /dashboard/summary``
+
+Дашборд стрелял **пятью** независимыми GET-ами на mount:
+`/health`, `/info`, `/catalog/stats`, `/ml/models`,
+`/ml/calibration-matrix`. Все конкурировали за один пул соединений
++ давали внутренне-несогласованные данные (гонка между двумя stats
+запросами → total=983, а sum(by_category)=980 из-за POST между
+ними).
+
+Новый endpoint возвращает всё в одном round-trip:
+
+    {
+      "version":         "1.21.0",
+      "environment":     "development",
+      "total_recipes":   983,
+      "by_status":       {"Draft": 733, "Verified": 220, ...},
+      "by_category":     {...},
+      "by_product_class": {...},
+      "trained_models":  4,
+      "recent_recipes":  [10 самых свежих recipes],
+      "recent_audit":    [10 последних audit-записей]
+    }
+
+Реализован через существующие use-cases (`GetCatalogFacetsUseCase`
++ `RecipeRepository.list_recent` (new) + `AuditLogRepository.list_recent`)
++ `PropertyRegressor.list_models` для counter'а моделей. Один
+round-trip даёт гарантию, что все счётчики согласованы.
+
+### Added — RecipeRepository.list_recent
+
+Новый метод port'а + реализация в `SqlAlchemyRecipeRepository`.
+Возвращает N самых недавно созданных рецептов (ORDER BY created_at
+DESC). Использует те же eager options (composition tree), что и
+`find_by_criteria`, — для dashboard-widget'а мы отдаём готовые
+`Recipe` объекты, а не placeholder-и.
+
+### UI — «Последние рецепты» + «Свежие события аудита»
+
+Дашборд получил два новых виджета:
+
+1. **Последние рецепты** — список из 10 самых свежих с бейджем
+   статуса (Verified/PendingReview/Draft/Rejected), названием
+   subcategory, категорией и датой создания. Клик → карточка
+   рецепта.
+
+2. **Свежие события аудита** — то же, но для audit-log. Цветовые
+   badge для action (Verified→green, Rejected/Deleted/LoginFailed→
+   red, Logout→blue, остальные→amber). Ссылка «весь журнал» →
+   `/admin/audit`.
+
+Оба виджета используют новый ``api.dashboardSummary()``. Старые
+пять GET-ов оставлены для sysinfo/calibrated карточек — не хочу
+переписывать layout в одном раунде.
+
+### Changed
+
+- ``AppSettings`` без изменений.
+- CLI ``formulation-backup`` расширен подкомандами `verify`, `list`,
+  `prune` — все с ``--json``-выводом.
+- Container не менялся — новые методы вызываются напрямую из route
+  handler'а.
+
+### Metrics
+
+- **611 тестов** (было 591, +20: 12 backup extended + 3 dashboard
+  API + 5 misc regression). Прогон ~150 с.
+- **62 REST endpoints** (было 61, +1: `/dashboard/summary`).
+- **12 CLI console scripts** (без изменений — подкоманды не создают
+  новых entry-points).
+- **124 source file** (без изменений — backup.py расширился, dashboard
+  живёт в существующих модулях).
+- **526 i18n ключей** (было 520, +6 RU+EN для recent-виджетов),
+  паритет 100%.
+
+### QA
+
+- ``ruff check src tests`` — All checks passed!
+- ``ruff format --check`` — 209 files already formatted
+- ``mypy src/formulation_workbench`` — Success: no issues in 122 files
+- ``bandit -c pyproject.toml -q -r src`` — clean
+- ``pytest --no-cov --deselect ...`` — 611 passed, 16 deselected,
+  1 skipped
+- ``npx tsc --noEmit`` — clean
+- ``npx next build`` — 14 маршрутов, без изменений
+- Реальный ``formulation-backup backup + list + verify`` на боевой
+  БД: 2.0 MB gzipped архив, checksum_ok=True, integrity_ok=True
+- ``curl /dashboard/summary`` через прокси next→api: version=1.21.0,
+  10 recent recipes + 10 recent audit events за 20 мс
+
+---
+
 ## [1.20.0] — Production-grade bootstrap: bulk-верификация, REACH snapshot, пагинация UI (2026-08-23)
 
 Три накопившиеся боли post-v1.19: 983 рецепта в статусе Draft (ни

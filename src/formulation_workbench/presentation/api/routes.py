@@ -68,6 +68,7 @@ from .schemas import (
     CostRequest,
     CreateNewVersionRequest,
     CreateRecipeRequest,
+    DashboardSummaryOut,
     DeviationOut,
     DriftAlertOut,
     DriftAlertRequest,
@@ -104,6 +105,7 @@ from .schemas import (
     ProductionVectorOut,
     ProductionVectorsListOut,
     PropertyPredictionOut,
+    RecentRecipeOut,
     RecipeAssessmentOut,
     RecipeCostOut,
     RecipeDiffComponentChange,
@@ -1493,6 +1495,73 @@ async def catalog_facets(
         by_subcategory=result.by_subcategory,
         by_product_class=result.by_product_class,
         by_status=result.by_status,
+    )
+
+
+@router.get(
+    "/dashboard/summary",
+    response_model=DashboardSummaryOut,
+    tags=["ops"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "One-shot aggregate for the dashboard — catalog counts + "
+        "trained-model count + last 10 recipes + last 10 audit rows"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def dashboard_summary(
+    container: Annotated[Container, Depends(get_container)],
+) -> DashboardSummaryOut:
+    """Aggregated snapshot for the dashboard.
+
+    The previous dashboard fired **five** independent GETs on mount
+    (``/health``, ``/info``, ``/catalog/stats``, ``/ml/models``,
+    ``/ml/calibration-matrix``) — every one of them contending for
+    the same connection pool.  This endpoint bundles the essentials
+    into one round-trip and, as a bonus, guarantees the numbers are
+    internally consistent (no race where ``total`` and ``sum(by_category)``
+    disagree because a POST landed between two calls).
+    """
+    from ... import __version__
+    from ...application.use_cases.search_recipes import GetCatalogFacetsQuery
+
+    facets = await container.catalog_facets.execute(GetCatalogFacetsQuery())
+    recent = await container.recipe_repository.list_recent(limit=10)
+    audit_page = await container.audit_log_repository.list_recent(limit=10)
+    trained_models = len(container.property_regressor.list_models())
+
+    return DashboardSummaryOut(
+        version=__version__,
+        environment=container.settings.environment,
+        total_recipes=facets.total,
+        by_status=facets.by_status,
+        by_category=facets.by_category,
+        by_product_class=facets.by_product_class,
+        trained_models=trained_models,
+        recent_recipes=[
+            RecentRecipeOut(
+                id=r.id,
+                category=r.category,
+                subcategory=r.subcategory,
+                status=r.status.state.value,
+                product_class=r.product_class.value,
+                created_at=r.created_at.isoformat() if r.created_at else "",
+            )
+            for r in recent
+        ],
+        recent_audit=[
+            AuditLogEntryOut(
+                id=e.id,
+                recipe_id=e.recipe_id,
+                user_id=e.user_id,
+                actor_label=e.actor_label,
+                action=e.action,
+                changes=e.changes,
+                timestamp=e.timestamp.isoformat(),
+                ip_address=e.ip_address,
+            )
+            for e in audit_page.entries
+        ],
     )
 
 

@@ -1198,6 +1198,42 @@ class AuditLogPageOut(BaseModel):
     )
 
 
+# ---------------------------------------------------------------------------
+# Dashboard summary
+# ---------------------------------------------------------------------------
+class RecentRecipeOut(BaseModel):
+    """Compact recipe row for the dashboard's "recent activity" list."""
+
+    id: str
+    category: str
+    subcategory: str
+    status: str
+    product_class: str
+    created_at: str
+
+
+class DashboardSummaryOut(BaseModel):
+    """Everything the dashboard renders in one round-trip.
+
+    Bundled to avoid the previous fan-out where the dashboard fired
+    five independent GETs, each contending for the same connection
+    pool.  One aggregate request also means the dashboard's numbers
+    are internally consistent — a race between two separate stats
+    calls could otherwise show total=983 but by_category summing to
+    980 when a recipe was created in-between.
+    """
+
+    version: str
+    environment: str
+    total_recipes: int
+    by_status: dict[str, int]
+    by_category: dict[str, int]
+    by_product_class: dict[str, int]
+    trained_models: int
+    recent_recipes: list[RecentRecipeOut]
+    recent_audit: list[AuditLogEntryOut]
+
+
 __all__ = [
     "AlertConfigOut",
     "ApiKeyCreateRequest",
@@ -1235,6 +1271,7 @@ __all__ = [
     "CostRequest",
     "CreateNewVersionRequest",
     "CreateRecipeRequest",
+    "DashboardSummaryOut",
     "DeviationOut",
     "DriftAlertOut",
     "DriftAlertRequest",
@@ -1276,6 +1313,7 @@ __all__ = [
     "ProductionVectorsListOut",
     "PropertyPredictionOut",
     "PropertyTargetIn",
+    "RecentRecipeOut",
     "RecipeAssessmentOut",
     "RecipeCostOut",
     "RecipeDiffComponentChange",

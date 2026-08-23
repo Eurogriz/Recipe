@@ -104,6 +104,10 @@ class ScopedRecipeRepository(RecipeRepository):
         async with self._db.session() as session:
             return await SqlAlchemyRecipeRepository(session).list_all_ids(limit=limit)
 
+    async def list_recent(self, *, limit: int = 10) -> list[Recipe]:
+        async with self._db.session() as session:
+            return await SqlAlchemyRecipeRepository(session).list_recent(limit=limit)
+
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         async with self._db.session() as session:
             return await SqlAlchemyRecipeRepository(session).get_all_versions(recipe_id)
