@@ -103,6 +103,7 @@ export const en: Dict = {
   "recipe.export.csv": "Download as CSV",
   "recipe.export.pdf": "Download as PDF",
   "recipes.export.csv": "Download catalog (CSV)",
+  "recipes.export.pdf": "Download catalog (PDF, up to 50 recipes)",
 
   // sensitivity heatmap (2D)
   "heatmap.title": "Heatmap: two components at once",
@@ -243,6 +244,21 @@ export const en: Dict = {
   "drift.production.count": "Production vectors on file: {n}",
   "drift.production.ingest_ok": "Ingested {n} vectors.",
   "drift.production.ingest_failed": "Ingestion failed: {msg}",
+
+  // alert / webhook settings
+  "alert.section": "Drift alerts",
+  "alert.status.configured": "Webhook configured: {hint}",
+  "alert.status.not_configured":
+    "No webhook configured. Set FW_ALERT_WEBHOOK_URL env — alerts fall back to logs only.",
+  "alert.format": "Format: {format}",
+  "alert.min_severity": "Minimum severity: {level}",
+  "alert.test.run": "Send test alert",
+  "alert.test.running": "Sending…",
+  "alert.test.result":
+    "Level: {level}, dispatched: {dispatched}, reason: {reason}",
+  "alert.test.failed": "Failed: {msg}",
+  "alert.test.hint":
+    "The test uses random vectors that reliably trigger severe drift.",
 
   // multi-property Pareto
   "optimise.pareto.axis_x": "X axis",

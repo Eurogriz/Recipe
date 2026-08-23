@@ -7,6 +7,138 @@
 
 ---
 
+## [1.15.0] — Два новых CLI, PDF-каталог, панель настроек webhook (2026-08-23)
+
+Три отложенных пункта: MLOps-CLI для plant IT + удобные ежедневные
+операции.
+
+### Added — `formulation-production-vectors` (CLI)
+
+Утилита для plant IT / cron:
+
+    formulation-production-vectors --source lots.csv
+    formulation-production-vectors --source lots.json --fail-on-any-skip
+
+Форматы:
+- **JSON** — массив `{recipe_id, features?, source, notes}` или
+  `{"items": [...]}`
+- **CSV** — обязательные `recipe_id`, `source`, `notes`; фичи
+  опционально столбцами `mass_percent_*`, `sum_*`, `weighted_*`,
+  `voc_*`, `stage_*`, `component_*`. **Порядок фич обязан совпадать
+  с FEATURE_NAMES** — иначе parser отвергает файл (защита от
+  силентного mis-alignment колонок).
+
+Exit-коды:
+- `0` — ≥1 строка принята
+- `1` — parse error / нечего принять
+- `2` — c `--fail-on-any-skip`: хотя бы одна строка пропущена
+
+### Added — `formulation-drift-check` (CLI)
+
+Для scheduled-check из cron / k8s CronJob:
+
+    formulation-drift-check --property gloss_60
+    formulation-drift-check --property gloss_60 --source catalog --dispatch-level severe_drift
+    formulation-drift-check --property gloss_60 --context plant=Tallinn-1 batch=42
+
+Считает per-feature PSI+KS против training snapshot, при worst-уровне
+≥ `--dispatch-level` шлёт alert через настроенный notifier. Exit-коды
+позволяют page-нуть из shell:
+
+- `0` — no drift / below threshold
+- `1` — model not found / no data
+- `3` — drift dispatched (или dry-run с alert'ом)
+- `4` — drift есть, но notifier отверг (webhook 5xx и т.п.)
+
+Поддерживает `--dry-run` (напечатать alert-JSON без POST) и
+`--context KEY=VALUE ...` (произвольные поля для Slack-payload).
+
+### Added — Полнокаталожный PDF-экспорт
+
+- `GET /catalog/export.pdf?category=&limit=50` — многостраничный PDF-формуляр
+  с TOC и стандартной вёрсткой одной рецептуры на страницу.
+- `render_catalog_pdf_bytes(recipes, title)` в `infrastructure/reporting/pdf`
+  — переиспользует существующий `_build_story` для каждой рецептуры;
+  вставляет `PageBreak` между ними.
+- Filename в HTTP header — ASCII slug + RFC-5987 `filename*` для
+  локализованной версии (иначе Cyrillic в category ломал latin-1
+  header encoding).
+- В UI: **«Скачать каталог (PDF, до 50 рецептов)»** на `/recipes`,
+  уважает текущий фильтр категории.
+
+### Added — Панель настроек webhook на `/ml/drift`
+
+- Endpoint `GET /info` расширен полем `alert`: `webhook_configured`,
+  `webhook_url_hint` (только `scheme://host`, без секретов),
+  `webhook_format`, `min_severity`.
+- В UI drift-страница получила блок **«Оповещения о дрейфе»**:
+  показывает текущий статус, подсказку про `FW_ALERT_WEBHOOK_URL`, и
+  кнопку **«Отправить тестовый alert»** — генерит 20 случайных
+  векторов гарантированно триггерящих severe drift и вызывает
+  `drift-full/alert`. Результат: уровень, был ли dispatched, причина.
+
+### Endpoints
+
+**47 REST endpoints** (+1 к v1.14.0):
+- `GET /catalog/export.pdf`
+
+Плюс существующий `/info` расширен полем `alert`.
+
+### CLI
+
+**7 console scripts** (+2 к v1.14.0):
+- `formulation-production-vectors`
+- `formulation-drift-check`
+
+### i18n
+
++11 новых ключей (alert panel + catalog PDF button). **Итого 381
+переведённых строк, паритет RU/EN 100 %.**
+
+### Tests
+
+- **7** для `formulation-production-vectors` (CSV/JSON parsing,
+  feature-order safety, exit codes, end-to-end ingest).
+- **6** для `formulation-drift-check` (exit codes для no training/no
+  data, dispatch success, notifier reject, dry-run, context parsing).
+- **5** для `/catalog/export.pdf` (валидный PDF, category filter, 404
+  empty, ASCII/RFC-5987 filename encoding).
+- **Итого: 501 passed, 0 failed** (+18 к v1.14.0).
+
+**Refactor:** оба новых CLI вынесены в pattern `_main_async()` +
+sync-обёртка `main()`, чтобы тесты могли `await` из pytest-asyncio
+event loop без `asyncio.run() cannot be called from a running loop`.
+
+### Metrics
+
+| | v1.14.0 | v1.15.0 |
+|---|---|---|
+| Тесты | 483 | **501** (+18) |
+| REST endpoints | 46 | **47** (+1) |
+| CLI-утилиты | 5 | **7** (+2) |
+| i18n ключей | 370 | **381** (+11) |
+| Source files | 109 | **111** (+2 CLI) |
+| ruff / mypy / bandit | clean | clean |
+
+### Files
+
+- src/formulation_workbench/presentation/commands/production_vectors.py       (new CLI)
+- src/formulation_workbench/presentation/commands/drift_check.py              (new CLI)
+- src/formulation_workbench/infrastructure/reporting/{__init__,pdf}.py        (+render_catalog_pdf_bytes)
+- src/formulation_workbench/presentation/api/routes.py                        (+catalog PDF endpoint + AlertConfigOut в /info + ASCII slug filenames)
+- src/formulation_workbench/presentation/api/schemas.py                       (+AlertConfigOut в AppInfo)
+- pyproject.toml                                                              (+2 console scripts, v1.15.0)
+- tests/integration/test_cli_production_vectors.py                            (new, 7 tests)
+- tests/integration/test_cli_drift_check.py                                   (new, 6 tests)
+- tests/integration/test_api_catalog_pdf.py                                   (new, 5 tests)
+- web/src/lib/api.ts                                                          (+AlertConfig, driftAlertTest, catalogPdfUrl)
+- web/src/i18n/dictionaries/{ru,en}.ts                                        (+11 keys)
+- web/src/app/recipes/page.tsx                                                (catalog PDF button)
+- web/src/app/ml/drift/page.tsx                                               (Alert panel + test button)
+- CHANGELOG.md, __init__.py, AppShell.tsx                                     (v1.15.0)
+
+---
+
 ## [1.14.0] — Workflow-кнопки, production-вектора для дрейфа, multi-property Парето (2026-08-23)
 
 Три отложенных пункта из v1.13 плана.

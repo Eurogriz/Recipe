@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, PlayCircle } from "lucide-react";
 import {
   api,
+  type AlertConfig,
   type DriftFullOut,
   type ModelMetadata,
 } from "@/lib/api";
@@ -31,6 +32,9 @@ export default function DriftPage() {
   const [ingestMsg, setIngestMsg] = useState<string | null>(null);
   const [ingesting, setIngesting] = useState<boolean>(false);
   const [catalogSize, setCatalogSize] = useState<number>(0);
+  const [alertCfg, setAlertCfg] = useState<AlertConfig | null>(null);
+  const [alertTestMsg, setAlertTestMsg] = useState<string | null>(null);
+  const [alertTesting, setAlertTesting] = useState<boolean>(false);
 
   useEffect(() => {
     api
@@ -48,8 +52,42 @@ export default function DriftPage() {
       .catalogStats()
       .then((s) => setCatalogSize(s.total))
       .catch(() => setCatalogSize(0));
+    api
+      .info()
+      .then((i) => setAlertCfg(i.alert ?? null))
+      .catch(() => setAlertCfg(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const sendTestAlert = async () => {
+    if (!selectedCode) return;
+    setAlertTesting(true);
+    setAlertTestMsg(null);
+    try {
+      // Build 20 random vectors of the correct width. Random noise on a
+      // model trained against a coherent catalog reliably shows severe
+      // drift on every feature — perfect for exercising the pipeline.
+      const vectors = Array.from({ length: 20 }, () =>
+        Array.from({ length: FEATURE_COUNT }, () => Math.random() * 25)
+      );
+      const r = await api.driftAlertTest(selectedCode, {
+        current_vectors: vectors,
+        dispatch_min_level: "moderate_drift",
+        context: { source: "ui-test" },
+      });
+      setAlertTestMsg(
+        t("alert.test.result", {
+          level: r.worst_level,
+          dispatched: r.alert_dispatched ? "✓" : "✗",
+          reason: r.dispatch_reason,
+        })
+      );
+    } catch (e: any) {
+      setAlertTestMsg(t("alert.test.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setAlertTesting(false);
+    }
+  };
 
   const run = async () => {
     if (!selectedCode) return;
@@ -274,6 +312,43 @@ export default function DriftPage() {
           </Card>
         </>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("alert.section")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {alertCfg === null ? (
+            <p className="text-muted-foreground">{t("common.loading")}</p>
+          ) : (
+            <>
+              <p>
+                {alertCfg.webhook_configured
+                  ? t("alert.status.configured", { hint: alertCfg.webhook_url_hint })
+                  : t("alert.status.not_configured")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("alert.format", { format: alertCfg.webhook_format })} ·{" "}
+                {t("alert.min_severity", { level: alertCfg.min_severity })}
+              </p>
+              <p className="text-xs text-muted-foreground">{t("alert.test.hint")}</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={sendTestAlert}
+                  disabled={alertTesting || !selectedCode}
+                >
+                  {alertTesting ? t("alert.test.running") : t("alert.test.run")}
+                </Button>
+                {alertTestMsg && (
+                  <span className="text-xs text-muted-foreground">{alertTestMsg}</span>
+                )}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

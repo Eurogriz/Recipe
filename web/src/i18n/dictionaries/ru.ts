@@ -112,6 +112,7 @@ export const ru: Dict = {
   "recipe.export.csv": "Скачать в CSV",
   "recipe.export.pdf": "Скачать в PDF",
   "recipes.export.csv": "Скачать каталог (CSV)",
+  "recipes.export.pdf": "Скачать каталог (PDF, до 50 рецептов)",
 
   // sensitivity heatmap (2D)
   "heatmap.title": "Тепловая карта: два компонента одновременно",
@@ -252,6 +253,21 @@ export const ru: Dict = {
   "drift.production.count": "Всего production-векторов: {n}",
   "drift.production.ingest_ok": "Загружено {n} векторов.",
   "drift.production.ingest_failed": "Не удалось загрузить: {msg}",
+
+  // alert / webhook settings
+  "alert.section": "Оповещения о дрейфе",
+  "alert.status.configured": "Webhook настроен: {hint}",
+  "alert.status.not_configured":
+    "Webhook не настроен. Задайте переменную окружения FW_ALERT_WEBHOOK_URL — пока alerts падают только в лог.",
+  "alert.format": "Формат: {format}",
+  "alert.min_severity": "Минимальный уровень: {level}",
+  "alert.test.run": "Отправить тестовый alert",
+  "alert.test.running": "Отправляем…",
+  "alert.test.result":
+    "Уровень: {level}, отправлено: {dispatched}, причина: {reason}",
+  "alert.test.failed": "Не удалось: {msg}",
+  "alert.test.hint":
+    "Тест использует случайные вектора, гарантированно триггерящие severe drift.",
 
   // multi-property Pareto
   "optimise.pareto.axis_x": "Ось X",

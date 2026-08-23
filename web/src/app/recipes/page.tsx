@@ -66,6 +66,16 @@ export default function RecipesPage() {
           >
             <Download className="h-4 w-4" /> {t("recipes.export.csv")}
           </a>
+          <a
+            href={api.catalogPdfUrl({
+              category: category ?? undefined,
+              limit: 50,
+            })}
+            download
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            <Download className="h-4 w-4" /> {t("recipes.export.pdf")}
+          </a>
         </div>
       </header>
 

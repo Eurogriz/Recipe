@@ -25,6 +25,20 @@ class HealthResponse(BaseModel):
     environment: str = Field(examples=["production"])
 
 
+class AlertConfigOut(BaseModel):
+    """What the UI needs to know about the alert notifier.
+
+    ``webhook_url_hint`` never exposes the full URL — only the scheme
+    + host (or ``""`` when no webhook is configured), so an operator
+    can eyeball «is Slack wired in?» without leaking a token.
+    """
+
+    webhook_configured: bool
+    webhook_url_hint: str
+    webhook_format: str
+    min_severity: str
+
+
 class AppInfo(BaseModel):
     """Build + runtime information (Spring-Boot ``/actuator/info``-style)."""
 
@@ -35,6 +49,7 @@ class AppInfo(BaseModel):
     platform: str = Field(examples=["Linux-6.1.0-x86_64-with-glibc2.36"])
     git_sha: str = Field(examples=["a1b2c3d4"])
     build_date: str = Field(examples=["2026-08-23"])
+    alert: AlertConfigOut | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -981,6 +996,7 @@ class ValidationErrorResponse(BaseModel):
 
 
 __all__ = [
+    "AlertConfigOut",
     "AppInfo",
     "ApplyLabResultsIn",
     "ApplyLabResultsOut",

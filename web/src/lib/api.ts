@@ -36,6 +36,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 // --------------------------------------------------------------------------- health
 
 export type Health = { status: string; version: string; environment: string };
+export type AlertConfig = {
+  webhook_configured: boolean;
+  webhook_url_hint: string;
+  webhook_format: string;
+  min_severity: string;
+};
 export type Info = {
   name: string;
   version: string;
@@ -44,6 +50,7 @@ export type Info = {
   platform: string;
   git_sha: string;
   build_date: string;
+  alert?: AlertConfig | null;
 };
 
 export const api = {
@@ -116,6 +123,13 @@ export const api = {
   recipeCsvUrl: (id: string) => `/api/recipes/${encodeURIComponent(id)}/export.csv`,
   recipePdfUrl: (id: string) => `/api/recipes/${encodeURIComponent(id)}/export.pdf`,
   catalogCsvUrl: () => `/api/catalog/export.csv`,
+  catalogPdfUrl: (params?: { category?: string; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.category) q.set("category", params.category);
+    if (params?.limit) q.set("limit", String(params.limit));
+    const qs = q.toString();
+    return `/api/catalog/export.pdf${qs ? "?" + qs : ""}`;
+  },
 
   // heatmap
   sensitivityHeatmap: (id: string, body: HeatmapRequest) =>
@@ -198,6 +212,18 @@ export const api = {
       `/ml/models/${code}/drift-from-catalog?${q.toString()}`
     );
   },
+  driftAlertTest: (
+    code: string,
+    body: {
+      current_vectors: number[][];
+      dispatch_min_level?: string;
+      context?: Record<string, string>;
+    }
+  ) =>
+    request<{ property_code: string; worst_level: string; alert_dispatched: boolean; dispatch_reason: string }>(
+      `/ml/models/${code}/drift-full/alert`,
+      { method: "POST", body: JSON.stringify(body) }
+    ),
 
   // similar recipes
   similarRecipes: (

@@ -149,6 +149,29 @@ async def app_info(settings: Annotated[AppSettings, Depends(get_settings)]) -> A
     import os
     import platform
     import sys
+    from urllib.parse import urlparse
+
+    from .schemas import AlertConfigOut
+
+    def _mask(url: str) -> str:
+        """Return ``scheme://host`` so the UI can confirm connectivity
+        without exposing the secret path segment of the webhook."""
+        if not url:
+            return ""
+        try:
+            parsed = urlparse(url)
+            if parsed.scheme and parsed.netloc:
+                return f"{parsed.scheme}://{parsed.netloc}"
+        except Exception:  # pragma: no cover — defensive
+            return "***"
+        return "***"
+
+    alert = AlertConfigOut(
+        webhook_configured=bool(settings.alert_webhook_url),
+        webhook_url_hint=_mask(settings.alert_webhook_url),
+        webhook_format=settings.alert_webhook_format,
+        min_severity=settings.alert_min_severity,
+    )
 
     return AppInfo(
         name="formulation-workbench",
@@ -158,6 +181,7 @@ async def app_info(settings: Annotated[AppSettings, Depends(get_settings)]) -> A
         platform=platform.platform(terse=True),
         git_sha=os.environ.get("FW_GIT_SHA", "unknown"),
         build_date=os.environ.get("FW_BUILD_DATE", "unknown"),
+        alert=alert,
     )
 
 
@@ -827,6 +851,80 @@ async def export_catalog_csv(
             "Content-Disposition": 'attachment; filename="catalog.csv"',
         },
     )
+
+
+@router.get(
+    "/catalog/export.pdf",
+    tags=["recipes", "catalog"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Render every recipe in the catalog (optionally filtered by category) "
+        "into a single multi-page PDF technical formulary"
+    ),
+    responses={
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "Multi-page PDF formulary of catalog recipes.",
+        },
+        **_UNAUTHORIZED,
+        **_NOT_FOUND,
+    },
+)
+async def export_catalog_pdf(
+    container: Annotated[Container, Depends(get_container)],
+    category: list[str] = Query(default_factory=list),
+    limit: int = Query(
+        default=50,
+        ge=1,
+        le=500,
+        description=(
+            "Hard cap on the number of recipes rendered.  Kept modest (default 50) "
+            "because ReportLab is CPU-bound and 500 pages takes seconds; use the "
+            "category filter to narrow the export."
+        ),
+    ),
+) -> Response:
+    from ...infrastructure.reporting import render_catalog_pdf_bytes
+
+    result = await container.search_recipes.execute(
+        SearchFilter(categories=tuple(category), limit=limit, offset=0)
+    )
+    if not result.recipes:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            "No recipes matched the requested filters.",
+        )
+
+    title = f"Recipe catalog — {', '.join(category)}" if category else "Recipe catalog"
+    try:
+        pdf_bytes = render_catalog_pdf_bytes(list(result.recipes), title=title)
+    except ImportError as exc:  # pragma: no cover
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "PDF renderer is not available (install 'reportlab').",
+        ) from exc
+
+    # HTTP header values must be latin-1 encodable — non-ASCII category
+    # names (e.g. Cyrillic) would blow up ``Response``.  Fall back to
+    # ASCII filename with RFC-5987 ``filename*`` for the localised name.
+    ascii_slug = _ascii_slug(category[0]) if category else ""
+    filename = "catalog.pdf" if not ascii_slug else f"catalog_{ascii_slug[:32]}.pdf"
+    disposition = f'attachment; filename="{filename}"'
+    if category:
+        from urllib.parse import quote
+
+        localised = f"catalog_{category[0]}.pdf"
+        disposition += f"; filename*=UTF-8''{quote(localised)}"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": disposition},
+    )
+
+
+def _ascii_slug(text: str) -> str:
+    """Reduce a category label to ASCII letters + digits for a filename."""
+    return "".join(ch if ch.isascii() and (ch.isalnum() or ch == "-") else "_" for ch in text)
 
 
 @router.get(
