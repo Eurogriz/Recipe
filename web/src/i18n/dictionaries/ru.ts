@@ -88,7 +88,14 @@ export const ru: Dict = {
 
   // ----- recipes list
   "recipes.title": "Рецепты",
-  "recipes.subtitle": "Верифицированный каталог · {n} записей",
+  "recipes.subtitle": "Каталог рецептур · {n} записей",
+  "recipes.subtitle.total": "Каталог рецептур · {n} записей",
+  "recipes.subtitle.filtered": "Показано {shown} из {total} рецептов каталога",
+  "recipes.filter.loading": "Загружаем список…",
+  "recipes.facets.failed":
+    "Не удалось загрузить фильтры: {msg}. Обновите страницу.",
+  "recipes.empty.filtered":
+    "По выбранным фильтрам ничего не нашлось. Сбросьте фильтры или измените запрос.",
   "recipes.search_placeholder":
     "Поиск по названию, категории, связующему…",
   "recipes.category.all": "Все категории",

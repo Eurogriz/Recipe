@@ -81,7 +81,14 @@ export const en: Dict = {
 
   // ----- recipes list
   "recipes.title": "Recipes",
-  "recipes.subtitle": "Verified catalog · {n} entries",
+  "recipes.subtitle": "Recipe catalogue · {n} entries",
+  "recipes.subtitle.total": "Recipe catalogue · {n} entries",
+  "recipes.subtitle.filtered": "Showing {shown} of {total} recipes",
+  "recipes.filter.loading": "Loading list…",
+  "recipes.facets.failed":
+    "Failed to load filters: {msg}. Please refresh the page.",
+  "recipes.empty.filtered":
+    "No recipes match the current filters. Reset filters or change your query.",
   "recipes.search_placeholder": "Search by name, category, binder…",
   "recipes.category.all": "All categories",
   "recipes.subcategory.all": "All subcategories",
