@@ -1058,11 +1058,68 @@ class ValidationErrorResponse(BaseModel):
     )
 
 
+# ---------------------------------------------------------------------------
+# Session auth (browser login-flow)
+# ---------------------------------------------------------------------------
+class LoginRequest(BaseModel):
+    """Payload for ``POST /auth/login``."""
+
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class LoginResponse(BaseModel):
+    """Result of a successful login.
+
+    The auth token is not returned to the client — it lives inside
+    the ``fw_session`` httpOnly cookie.  We only echo the resolved
+    principal so the SPA can populate its "logged in as" widget
+    without a second round-trip to ``GET /me``.
+    """
+
+    subject: str
+    role: str
+    scopes: list[str]
+    expires_at: int
+    mode: str = "session"
+
+
+# ---------------------------------------------------------------------------
+# Audit log
+# ---------------------------------------------------------------------------
+class AuditLogEntryOut(BaseModel):
+    """One row of the audit log rendered for the UI."""
+
+    id: str
+    recipe_id: str
+    user_id: str | None = None
+    actor_label: str
+    action: str
+    changes: dict[str, Any] | None = None
+    timestamp: str
+    ip_address: str | None = None
+
+
+class AuditLogPageOut(BaseModel):
+    """Paginated audit log response."""
+
+    total: int
+    limit: int
+    offset: int
+    entries: list[AuditLogEntryOut]
+    actions: list[str] = Field(
+        default_factory=list,
+        description="Every distinct action name (populated only on the first page).",
+    )
+
+
 __all__ = [
     "AlertConfigOut",
     "AppInfo",
     "ApplyLabResultsIn",
     "ApplyLabResultsOut",
+    "AuditLogEntryOut",
+    "AuditLogPageOut",
     "BatchAnalysisOut",
     "BatchAnalysisRequest",
     "BatchCostLineOut",
@@ -1107,6 +1164,8 @@ __all__ = [
     "HeatmapResultOut",
     "JobRecordOut",
     "JobsListOut",
+    "LoginRequest",
+    "LoginResponse",
     "MassBalanceOut",
     "MeOut",
     "ModelMetadataOut",

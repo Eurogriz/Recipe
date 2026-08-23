@@ -526,6 +526,53 @@ export const ru: Dict = {
   "jobs.field.finished": "завершено",
   "jobs.field.duration": "длительность",
 
+  // navigation extra (v1.17)
+  "nav.audit": "Журнал аудита",
+  "nav.login": "Войти",
+  "nav.logout": "Выйти",
+
+  // login page
+  "login.title": "Вход в Formulation Workbench",
+  "login.subtitle":
+    "Введите логин и пароль. При успешной проверке сервер поставит защищённый httpOnly cookie fw_session.",
+  "login.f.username": "Логин",
+  "login.f.password": "Пароль",
+  "login.submit": "Войти",
+  "login.submitting": "Проверяем…",
+  "login.failed": "Не удалось войти: {msg}",
+  "login.bad_credentials": "Неверный логин или пароль.",
+  "login.already_authed":
+    "Вы уже вошли как {who} (роль {role}). Перед сменой учётной записи выйдите из системы.",
+  "login.session_expires_in": "Сеанс истекает через {mins} мин.",
+  "login.after_login_hint":
+    "После успешного входа вы автоматически попадёте на главную страницу.",
+  "logout.confirm": "Выйти из системы?",
+  "logout.done": "Вы вышли из системы.",
+  "logout.failed": "Не удалось выйти: {msg}",
+
+  // audit log
+  "audit.title": "Журнал аудита",
+  "audit.subtitle":
+    "Полная история изменений: создание, редактирование, отправка на верификацию, подтверждение, отклонение, клонирование. Только для администраторов.",
+  "audit.filter.recipe_id": "ID рецепта",
+  "audit.filter.actor": "Автор изменения",
+  "audit.filter.action": "Действие",
+  "audit.filter.any": "любое",
+  "audit.filter.apply": "Применить",
+  "audit.filter.reset": "Сбросить",
+  "audit.loading": "Загружаем записи…",
+  "audit.empty": "По заданным фильтрам записей нет.",
+  "audit.col.time": "Время",
+  "audit.col.actor": "Автор",
+  "audit.col.action": "Действие",
+  "audit.col.recipe": "Рецепт",
+  "audit.col.changes": "Изменения",
+  "audit.changes.none": "—",
+  "audit.summary": "Найдено: {total} · показано {shown}",
+  "audit.page.prev": "Назад",
+  "audit.page.next": "Вперёд",
+  "audit.failed": "Не удалось загрузить: {msg}",
+
   // time
   "time.s_ago": "{n} с назад",
   "time.m_ago": "{n} мин назад",

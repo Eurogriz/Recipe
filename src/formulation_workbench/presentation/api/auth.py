@@ -37,6 +37,11 @@ from fastapi import Depends, Header, HTTPException, Request, status
 from ...infrastructure.config import AppSettings
 from ...infrastructure.db.repositories.users import role_scopes
 from .dependencies import get_settings
+from .session_auth import (
+    SESSION_COOKIE_NAME,
+    SessionTokenError,
+    decode_session_token,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +191,27 @@ async def get_principal(
     every request is an ``anonymous`` principal with all scopes.  The
     production invariants check refuses this configuration.
     """
-    # Basic auth is tried first — it's the only mode backed by a real
+    # Session cookie takes highest priority — a signed-in browser
+    # should not need to re-negotiate on every request, and a stale
+    # cookie must not silently downgrade to another auth mode.
+    cookie_token = request.cookies.get(SESSION_COOKIE_NAME)
+    if cookie_token:
+        try:
+            payload = decode_session_token(cookie_token, settings)
+        except SessionTokenError as exc:
+            logger.debug("session_cookie_invalid", extra={"error": repr(exc)})
+            # Fall through: an invalid cookie should not block Basic /
+            # bearer callers.  Browsers usually resend the cookie
+            # unconditionally, so the ``/auth/logout`` endpoint is the
+            # canonical way to drop it.
+        else:
+            return Principal(
+                subject=f"user:{payload.subject}",
+                scopes=role_scopes(payload.role),
+                mode="session",
+            )
+
+    # Basic auth is tried next — it's the only mode backed by a real
     # user table with per-user roles.  Falls through when the header
     # isn't ``Basic`` at all.
     if authorization and authorization.lower().startswith("basic "):

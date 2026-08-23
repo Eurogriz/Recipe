@@ -509,6 +509,53 @@ export const en: Dict = {
   "jobs.field.finished": "finished",
   "jobs.field.duration": "duration",
 
+  // navigation extra (v1.17)
+  "nav.audit": "Audit log",
+  "nav.login": "Log in",
+  "nav.logout": "Log out",
+
+  // login page
+  "login.title": "Sign in to Formulation Workbench",
+  "login.subtitle":
+    "Enter your credentials. On success the server sets a secure httpOnly cookie named fw_session.",
+  "login.f.username": "Username",
+  "login.f.password": "Password",
+  "login.submit": "Sign in",
+  "login.submitting": "Checking…",
+  "login.failed": "Login failed: {msg}",
+  "login.bad_credentials": "Invalid username or password.",
+  "login.already_authed":
+    "You are already signed in as {who} (role {role}). Log out before switching account.",
+  "login.session_expires_in": "Session expires in {mins} min.",
+  "login.after_login_hint":
+    "You will be redirected to the dashboard on success.",
+  "logout.confirm": "Log out?",
+  "logout.done": "You are signed out.",
+  "logout.failed": "Logout failed: {msg}",
+
+  // audit log
+  "audit.title": "Audit log",
+  "audit.subtitle":
+    "Full change history — create, update, submit-for-review, verify, reject, clone. Admin only.",
+  "audit.filter.recipe_id": "Recipe ID",
+  "audit.filter.actor": "Actor",
+  "audit.filter.action": "Action",
+  "audit.filter.any": "any",
+  "audit.filter.apply": "Apply",
+  "audit.filter.reset": "Reset",
+  "audit.loading": "Loading entries…",
+  "audit.empty": "No entries match this filter.",
+  "audit.col.time": "Time",
+  "audit.col.actor": "Actor",
+  "audit.col.action": "Action",
+  "audit.col.recipe": "Recipe",
+  "audit.col.changes": "Changes",
+  "audit.changes.none": "—",
+  "audit.summary": "Total {total} · shown {shown}",
+  "audit.page.prev": "Prev",
+  "audit.page.next": "Next",
+  "audit.failed": "Failed to load: {msg}",
+
   // time
   "time.s_ago": "{n}s ago",
   "time.m_ago": "{n}m ago",

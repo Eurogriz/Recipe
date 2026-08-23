@@ -166,6 +166,32 @@ export const api = {
   deleteUser: (id: string) =>
     request<void>(`/users/${id}`, { method: "DELETE" }),
 
+  // session auth (browser login-flow, v1.17)
+  login: (body: LoginBody) =>
+    request<LoginOut>(`/auth/login`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  logout: () => request<void>(`/auth/logout`, { method: "POST" }),
+
+  // audit log (Admin only, v1.17)
+  listAuditLog: (params?: {
+    recipe_id?: string;
+    actor?: string;
+    action?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const q = new URLSearchParams();
+    if (params?.recipe_id) q.set("recipe_id", params.recipe_id);
+    if (params?.actor) q.set("actor", params.actor);
+    if (params?.action) q.set("action", params.action);
+    if (params?.limit) q.set("limit", String(params.limit));
+    if (params?.offset !== undefined) q.set("offset", String(params.offset));
+    const qs = q.toString();
+    return request<AuditLogPageOut>(`/audit-log${qs ? "?" + qs : ""}`);
+  },
+
   // clone recipe
   cloneRecipe: (id: string) =>
     request<RecipeSummary>(`/recipes/${id}/clone`, { method: "POST" }),
@@ -654,6 +680,40 @@ export interface MeOut {
   mode: string;
   scopes: string[];
   role: string | null;
+}
+
+// ---- Session auth (browser login-flow) ------------------------------------
+export interface LoginBody {
+  username: string;
+  password: string;
+}
+
+export interface LoginOut {
+  subject: string;
+  role: string;
+  scopes: string[];
+  expires_at: number;
+  mode: string;
+}
+
+// ---- Audit log -------------------------------------------------------------
+export interface AuditLogEntry {
+  id: string;
+  recipe_id: string;
+  user_id: string | null;
+  actor_label: string;
+  action: string;
+  changes: Record<string, unknown> | null;
+  timestamp: string;
+  ip_address: string | null;
+}
+
+export interface AuditLogPageOut {
+  total: number;
+  limit: number;
+  offset: number;
+  entries: AuditLogEntry[];
+  actions: string[];
 }
 
 // ---- Regulatory scan -------------------------------------------------------

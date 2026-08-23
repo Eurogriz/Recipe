@@ -7,6 +7,195 @@
 
 ---
 
+## [1.17.0] — Bootstrap-CLI, сеансовые cookie, журнал аудита в UI (2026-08-23)
+
+Раунд закрывает три остатка roadmap-минимума: CLI для первого админа
+без SQL, полноценный login-flow с httpOnly cookie (уходим от popup HTTP
+Basic в браузере), и наконец видимый интерфейс для существующей с
+v1.1.0 таблицы `audit_log_entry`.
+
+### Added — CLI `formulation-admin-users`
+
+Новый console-script для управления таблицей `user` из shell без
+необходимости открывать SQL-клиент или Python-shell. Основной кейс —
+bootstrap первого администратора на чистой инсталляции.
+
+Восемь подкоманд:
+
+- `create-admin --username U --password P [--email ...]` — создать
+  Admin-пользователя (bootstrap).
+- `create --username U --password P --role R [--email ...]` — с любой
+  ролью (`argparse choices=` защищает от опечаток).
+- `list [--limit N]` — таблица `USERNAME | ROLE | ACTIVE | EMAIL |
+  CREATED | LAST LOGIN`.
+- `set-password --username U --password P` — ротация пароля.
+- `set-role --username U --role R` — повышение/понижение роли.
+- `activate --username U` / `deactivate --username U` — сохраняют
+  `user.id` FK в audit-логе (мягкая деактивация вместо hard delete).
+- `delete --username U` — жёсткое удаление (audit-строки выживают
+  благодаря `ON DELETE SET NULL`).
+
+Использует те же `FW_*` env-vars что и сервер — направить в staging
+или production можно через `FW_DATABASE_URL=...` перед вызовом.
+
+Exit codes: `0` успех · `1` пользовательская ошибка (неизвестная
+роль, короткий пароль, дубликат, отсутствующий user) · `2` I/O или
+внутренняя ошибка БД.
+
+Пример bootstrap:
+
+```bash
+FW_DATABASE_URL=sqlite+aiosqlite:///./data/formulation.db \
+  formulation-admin-users create-admin --username root --password $(pwgen 16 1)
+# → created user: root  role=Admin  id=6e2b3f...
+```
+
+Регистрация: `pyproject.toml → [project.scripts]` +
+`presentation/commands/admin_users.py` (паттерн `_main_async()` + sync
+`main()` — идентичен `production_vectors` и `drift_check`).
+
+Тесты: `tests/integration/test_cli_admin_users.py` (11 тестов, каждая
+подкоманда, все exit-коды).
+
+### Added — Session cookies (`POST /auth/login` + `POST /auth/logout`)
+
+HTTP Basic работает, но браузер рисует нативный popup — некрасиво в
+SPA, невозможно сбросить программно. Новый login-flow: форма →
+`POST /auth/login` → сервер ставит httpOnly cookie `fw_session`.
+
+**Формат токена** (stateless, никакого server-side session-store):
+
+```
+base64url({sub, role, exp, iat}) . base64url(HMAC-SHA256)
+```
+
+- Секрет подписи — `FW_SESSION_SECRET` (fallback: `FW_JWT_SECRET` →
+  `FW_ENCRYPTION_KEY_HEX` → static dev-secret на процесс).
+- TTL по умолчанию — 12 часов (`DEFAULT_SESSION_TTL_SECONDS`).
+- Cookie: `HttpOnly` (XSS-proof), `SameSite=Lax` (CSRF-safe для
+  navigations), `Secure` в non-development, `Path=/`.
+
+**Auth-приоритет** в `get_principal` теперь: **cookie → Basic → JWT
+Bearer → static Bearer → open**. Невалидный cookie не блокирует
+Basic/Bearer — просто игнорируется (браузеры шлют cookie
+безусловно, `POST /auth/logout` — канонический способ его сбросить).
+
+**Новые endpoints:**
+
+- `POST /auth/login` `{username, password}` → 200 `{subject, role,
+  scopes, expires_at, mode="session"}` + `Set-Cookie: fw_session=…`.
+- `POST /auth/logout` → 204, `Set-Cookie: fw_session=; Max-Age=0`.
+  Идемпотентен (безопасен из скрипта).
+
+**UI:**
+
+- Новая страница `/login` — форма username+password с ARIA-корректной
+  формой, autocomplete-подсказками для менеджеров паролей,
+  предупреждением если уже есть активный сеанс (login под другим
+  логином молча меняет actor в audit-логе — опасно без warning'а).
+- WhoAmI-виджет в сайдбаре: кнопка «Выйти» показывается только для
+  `mode=="session"` (для static/JWT она была бы враньём); ссылка
+  «Войти» — только для `mode=="open"`.
+- Первый пользовательский тест-набор: `test_api_session_auth.py`
+  (12 тестов, включая tampering + expiry + wrong-secret).
+
+### Added — RBAC audit log в UI
+
+Таблица `audit_log_entry` наполнялась с v1.1.0, но UI-читалки не
+было — доступ был только через прямые SQL-запросы. Теперь есть:
+
+**Backend:**
+
+- Новый `AuditLogRepository` (read-only, отдельный от write-side
+  `SqlAlchemyAuditLogger`).
+- Метод `list_recent(recipe_id?, actor?, action?, limit, offset)` +
+  `distinct_actions()` для дропдаунов фильтров.
+- `changes_json` парсится в `dict` на стороне репозитория (UI не
+  дублирует `JSON.parse`).
+- Границы: `limit` [1..500], `offset` >= 0 (защита от DoS через
+  подмену URL).
+
+**Новый endpoint** (Admin only):
+
+```
+GET /audit-log?recipe_id=&actor=&action=&limit=100&offset=0
+```
+
+Ответ:
+
+```jsonc
+{
+  "total": 42,
+  "limit": 100,
+  "offset": 0,
+  "entries": [
+    {"id": "...", "recipe_id": "...", "actor_label": "user:root",
+     "action": "Verified", "changes": {"reason": "batch OK"},
+     "timestamp": "2026-08-23T14:12:00+00:00", "ip_address": null},
+    ...
+  ],
+  "actions": ["Created", "Updated", "Verified", "Rejected", ...]
+}
+```
+
+Поле `actions` отдаётся только на первой странице (`offset=0`),
+чтобы наполнить дропдаун без extra-запроса; на последующих
+страницах — пустое, экономит трафик.
+
+**UI:** новая страница `/admin/audit`:
+
+- Три фильтра (recipe_id / actor / action) + пагинация по 25 строк.
+- Цветовое кодирование action-бейджей: success (Created/Cloned/
+  Verified), destructive (Rejected/Deleted), warning (Updated/
+  Submitted/PropertyMeasured).
+- Клик на строку → раскрытие JSON-changes ниже таблицы (pretty-print).
+- Линк с `recipe_id` ведёт на карточку рецепта.
+- Гейт Admin-only с человеческим сообщением если роль ниже.
+
+Тесты: `tests/integration/test_api_audit_log.py` (7 тестов —
+пустой лог, реальный create/update, фильтры по recipe_id/action,
+пагинация с проверкой disjoint id, 403 для Viewer, 422 для
+некорректной пагинации).
+
+### Changed
+
+- `AppSettings.session_secret: str = ""` — новое поле, опциональное.
+- `get_principal` теперь трижды вложенный fallback: session cookie
+  (наивысший приоритет) → HTTP Basic → JWT/static Bearer → open.
+- `WhoAmI` виджет: подписан на `me.mode`, разные кнопки для session
+  vs open vs static/JWT.
+- Навигация: добавлен пункт «Журнал аудита» (`ClipboardList` icon).
+- Container получил поле `audit_log_repository: AuditLogRepository`.
+
+### Metrics
+
+- **547 тестов** (было 517, +30 новых: 11 CLI admin-users + 12 session
+  cookies + 7 audit-log). Реально после прогона:
+  `547 passed, 16 deselected, 1 skipped` за ~130 с.
+- **57 REST endpoints** (было 54, +3: `/auth/login`, `/auth/logout`,
+  `/audit-log`).
+- **10 UI-страниц** (было 8, +2: `/login`, `/admin/audit`).
+- **8 CLI console scripts** (было 7, +1: `formulation-admin-users`).
+- **119 source files** (было 114, +5: `session_auth.py`,
+  `commands/admin_users.py`, `repositories/audit_log.py` + два
+  `__init__.py` для новых пакетов).
+- **471 i18n ключ** (было 434, +37 для login/logout/audit RU+EN).
+- Паритет RU/EN: 100% (471 == 471).
+
+### QA
+
+- `ruff check src tests` — clean
+- `ruff format --check src tests` — clean
+- `mypy src/formulation_workbench` — Success (117 files)
+- `bandit -c pyproject.toml -q -r src` — clean
+- `pytest --no-cov --deselect tests/integration/test_regulatory_loader.py`
+  — 547 passed, 16 deselected, 1 skipped
+- `npx tsc --noEmit` (web) — clean
+- `npx next build` — 13 маршрутов (было 11), все ○ Static, кроме
+  `/recipes/[id]` ƒ Dynamic
+
+---
+
 ## [1.16.0] — Пользователи и роли, клонирование рецептов, регуляторная проверка (2026-08-23)
 
 Три большие фичи закрывают последний блок отложенного плана.

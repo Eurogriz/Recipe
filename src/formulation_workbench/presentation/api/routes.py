@@ -42,6 +42,8 @@ from .schemas import (
     AppInfo,
     ApplyLabResultsIn,
     ApplyLabResultsOut,
+    AuditLogEntryOut,
+    AuditLogPageOut,
     BatchAnalysisOut,
     BatchAnalysisRequest,
     BatchCostLineOut,
@@ -78,6 +80,8 @@ from .schemas import (
     HeatmapResultOut,
     JobRecordOut,
     JobsListOut,
+    LoginRequest,
+    LoginResponse,
     MassBalanceOut,
     MeOut,
     ModelMetadataOut,
@@ -328,6 +332,149 @@ async def delete_user(
     ok = await container.user_repository.delete(user_id)
     if not ok:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+
+
+# ---------------------------------------------------------------------------
+# Session auth (browser login-flow)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/auth/login",
+    response_model=LoginResponse,
+    tags=["auth"],
+    summary="Log in with username + password; sets the ``fw_session`` cookie",
+)
+async def auth_login(
+    payload: LoginRequest,
+    response: Response,
+    settings: Annotated[AppSettings, Depends(get_settings)],
+    container: Annotated[Container, Depends(get_container)],
+) -> LoginResponse:
+    """Authenticate a user and start a browser session.
+
+    Unlike ``GET /me`` (which merely reports the current principal),
+    this endpoint verifies the password against the ``user`` table
+    and, on success, issues a signed session cookie.  The cookie is
+    ``HttpOnly`` and ``SameSite=Lax``; JavaScript never sees the
+    token.
+    """
+    from ...infrastructure.db.repositories.users import role_scopes
+    from .session_auth import (
+        DEFAULT_SESSION_TTL_SECONDS,
+        SESSION_COOKIE_NAME,
+        issue_session_token,
+        session_cookie_is_secure,
+    )
+
+    record = await container.user_repository.authenticate(payload.username, payload.password)
+    if record is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
+
+    token = issue_session_token(
+        subject=record.username,
+        role=record.role,
+        settings=settings,
+        ttl_seconds=DEFAULT_SESSION_TTL_SECONDS,
+    )
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=token,
+        max_age=DEFAULT_SESSION_TTL_SECONDS,
+        httponly=True,
+        secure=session_cookie_is_secure(settings),
+        samesite="lax",
+        path="/",
+    )
+    scopes = sorted(role_scopes(record.role))
+    import time as _time
+
+    return LoginResponse(
+        subject=f"user:{record.username}",
+        role=record.role,
+        scopes=scopes,
+        expires_at=int(_time.time()) + DEFAULT_SESSION_TTL_SECONDS,
+    )
+
+
+@router.post(
+    "/auth/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["auth"],
+    summary="Clear the ``fw_session`` cookie",
+)
+async def auth_logout(
+    response: Response,
+    settings: Annotated[AppSettings, Depends(get_settings)],
+) -> None:
+    """Drop the browser session cookie.
+
+    Idempotent — repeated calls (or calls from a client with no
+    cookie) still succeed.  Since the token is stateless we simply
+    tell the browser to forget it; a stolen copy would remain valid
+    until its ``exp`` claim passes.
+    """
+    from .session_auth import SESSION_COOKIE_NAME, session_cookie_is_secure
+
+    response.delete_cookie(
+        key=SESSION_COOKIE_NAME,
+        path="/",
+        httponly=True,
+        secure=session_cookie_is_secure(settings),
+        samesite="lax",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Audit log
+# ---------------------------------------------------------------------------
+@router.get(
+    "/audit-log",
+    response_model=AuditLogPageOut,
+    tags=["audit"],
+    dependencies=[Depends(require_admin)],
+    summary="List audit-log entries with optional filters (Admin only)",
+)
+async def list_audit_log(
+    container: Annotated[Container, Depends(get_container)],
+    recipe_id: str | None = Query(default=None, description="Filter by recipe UUID."),
+    actor: str | None = Query(default=None, description="Filter by ``actor_label`` (exact match)."),
+    action: str | None = Query(
+        default=None,
+        description="Filter by action verb (Created, Updated, Verified, …).",
+    ),
+    limit: int = Query(default=100, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> AuditLogPageOut:
+    """Read the audit log with paging.
+
+    The response includes the ``actions`` list only on the first page
+    (``offset=0``) so the UI can populate its filter dropdown without
+    an extra request.  Later pages skip it to keep the response tight.
+    """
+    page = await container.audit_log_repository.list_recent(
+        recipe_id=recipe_id, actor=actor, action=action, limit=limit, offset=offset
+    )
+    actions: list[str] = []
+    if offset == 0:
+        actions = await container.audit_log_repository.distinct_actions()
+    return AuditLogPageOut(
+        total=page.total,
+        limit=limit,
+        offset=offset,
+        entries=[
+            AuditLogEntryOut(
+                id=e.id,
+                recipe_id=e.recipe_id,
+                user_id=e.user_id,
+                actor_label=e.actor_label,
+                action=e.action,
+                changes=e.changes,
+                timestamp=e.timestamp.isoformat(),
+                ip_address=e.ip_address,
+            )
+            for e in page.entries
+        ],
+        actions=actions,
+    )
 
 
 # ---------------------------------------------------------------------------

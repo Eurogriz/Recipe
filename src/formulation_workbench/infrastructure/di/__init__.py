@@ -40,6 +40,7 @@ from ...application.use_cases.verification_workflow import (
 )
 from ..config import AppSettings, get_settings
 from ..db.connection import Database
+from ..db.repositories.audit_log import AuditLogRepository
 from ..db.repositories.production_vectors import ProductionVectorRepository
 from ..db.repositories.session_scoped import ScopedAuditLogger, ScopedRecipeRepository
 from ..db.repositories.sqlalchemy_experiment_repository import ScopedExperimentRepository
@@ -93,6 +94,7 @@ class Container:
     experiment_repository: ExperimentRepository
     production_vector_repository: ProductionVectorRepository
     user_repository: UserRepository
+    audit_log_repository: AuditLogRepository
     property_regressor: PropertyRegressor
     train_property_models: TrainPropertyModelsUseCase
     predict_properties: PredictPropertiesUseCase
@@ -123,6 +125,7 @@ class Container:
         experiment_repository = ScopedExperimentRepository(database)
         production_vector_repository = ProductionVectorRepository(database)
         user_repository = UserRepository(database)
+        audit_log_repository = AuditLogRepository(database)
         property_regressor = PropertyRegressor(storage_dir=settings.model_dir)
 
         # Alerts + async jobs — process-local resources, no external
@@ -162,6 +165,7 @@ class Container:
             experiment_repository=experiment_repository,
             production_vector_repository=production_vector_repository,
             user_repository=user_repository,
+            audit_log_repository=audit_log_repository,
             create_recipe=CreateRecipeUseCase(recipe_repository, audit_logger),
             update_recipe=UpdateRecipeUseCase(recipe_repository, audit_logger),
             delete_recipe=DeleteRecipeUseCase(recipe_repository, audit_logger),

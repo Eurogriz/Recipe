@@ -5,9 +5,12 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   Beaker,
+  ClipboardList,
   Cpu,
   ExternalLink,
   LayoutDashboard,
+  LogIn,
+  LogOut,
   Shield,
   ShieldCheck,
   Waves,
@@ -35,6 +38,7 @@ const NAV = [
   { href: "/ml/drift", labelKey: "nav.drift", icon: Waves },
   { href: "/ml/jobs", labelKey: "nav.jobs", icon: Activity },
   { href: "/admin/users", labelKey: "nav.admin", icon: Shield },
+  { href: "/admin/audit", labelKey: "nav.audit", icon: ClipboardList },
 ] as const;
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -53,7 +57,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-semibold leading-tight group-hover:text-primary transition-colors">
                 {t("app.brand")}
               </div>
-              <div className="text-xs text-muted-foreground">v1.16.0</div>
+              <div className="text-xs text-muted-foreground">v1.17.0</div>
             </div>
           </Link>
         </div>
@@ -130,6 +134,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 function WhoAmI() {
   const t = useT();
   const [me, setMe] = useState<MeOut | null>(null);
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
     api.me().then(setMe).catch(() => setMe(null));
   }, []);
@@ -140,13 +145,61 @@ function WhoAmI() {
   const cleanSubject = me.subject.startsWith("user:")
     ? me.subject.slice("user:".length)
     : me.subject;
+
+  // Only offer "log out" when there's actually a session cookie to
+  // clear.  For open-mode / static-token / JWT modes the button
+  // would be a lie — the auth state lives elsewhere.
+  const canLogout = me.mode === "session";
+  // Show a "log in" nudge only when the user is genuinely anonymous
+  // (open mode).  Basic/JWT users pass their creds on every request
+  // and don't need a login page.
+  const showLogin = me.mode === "open";
+
+  const logout = async () => {
+    if (!window.confirm(t("logout.confirm"))) return;
+    setBusy(true);
+    try {
+      await api.logout();
+      window.location.href = "/login";
+    } catch (e: any) {
+      window.alert(
+        t("logout.failed").replace("{msg}", e?.message ?? String(e))
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-      <Shield className="h-4 w-4" />
-      <div className="min-w-0">
-        <div className="font-medium text-foreground truncate">{cleanSubject}</div>
-        <div className="truncate">{roleLabel}</div>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Shield className="h-4 w-4" />
+        <div className="min-w-0">
+          <div className="font-medium text-foreground truncate">
+            {cleanSubject}
+          </div>
+          <div className="truncate">{roleLabel}</div>
+        </div>
       </div>
+      {canLogout ? (
+        <button
+          onClick={logout}
+          disabled={busy}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 disabled:opacity-50"
+        >
+          <LogOut className="h-3 w-3" />
+          {t("nav.logout")}
+        </button>
+      ) : null}
+      {showLogin ? (
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 underline underline-offset-2"
+        >
+          <LogIn className="h-3 w-3" />
+          {t("nav.login")}
+        </Link>
+      ) : null}
     </div>
   );
 }

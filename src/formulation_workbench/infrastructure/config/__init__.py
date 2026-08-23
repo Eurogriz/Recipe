@@ -66,6 +66,12 @@ class AppSettings(BaseSettings):
     jwt_issuer: str = ""
     jwt_require_exp: bool = True
 
+    # Signing secret for the browser-facing ``fw_session`` cookie
+    # (login-flow via ``POST /auth/login``).  Falls back to
+    # ``jwt_secret`` / ``encryption_key_hex`` when empty; production
+    # invariants require *some* secret to be set.
+    session_secret: str = ""
+
     # ---- Paths ---------------------------------------------------------------
     data_dir: Path = Path("./data")
     export_dir: Path = Path("./exports")
