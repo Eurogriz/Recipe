@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   Beaker,
   Cpu,
-  LayoutDashboard,
-  Activity,
   ExternalLink,
+  LayoutDashboard,
+  Shield,
+  ShieldCheck,
   Waves,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { api, type MeOut } from "@/lib/api";
 import { I18nProvider, useT } from "@/i18n/I18nProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
@@ -26,9 +30,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 const NAV = [
   { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
   { href: "/recipes", labelKey: "nav.recipes", icon: Beaker },
+  { href: "/regulatory", labelKey: "nav.regulatory", icon: ShieldCheck },
   { href: "/ml", labelKey: "nav.ml", icon: Cpu },
   { href: "/ml/drift", labelKey: "nav.drift", icon: Waves },
   { href: "/ml/jobs", labelKey: "nav.jobs", icon: Activity },
+  { href: "/admin/users", labelKey: "nav.admin", icon: Shield },
 ] as const;
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -47,7 +53,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-semibold leading-tight group-hover:text-primary transition-colors">
                 {t("app.brand")}
               </div>
-              <div className="text-xs text-muted-foreground">v1.15.0</div>
+              <div className="text-xs text-muted-foreground">v1.16.0</div>
             </div>
           </Link>
         </div>
@@ -86,6 +92,9 @@ function Layout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div className="px-4 py-3 border-t border-border">
+          <WhoAmI />
+        </div>
+        <div className="px-4 py-3 border-t border-border">
           <LanguageSwitcher />
         </div>
         <div className="px-4 py-3 border-t border-border text-xs text-muted-foreground">
@@ -114,6 +123,30 @@ function Layout({ children }: { children: React.ReactNode }) {
 
         {children}
       </main>
+    </div>
+  );
+}
+
+function WhoAmI() {
+  const t = useT();
+  const [me, setMe] = useState<MeOut | null>(null);
+  useEffect(() => {
+    api.me().then(setMe).catch(() => setMe(null));
+  }, []);
+  if (!me) return null;
+  const roleLabel = me.role
+    ? t(`me.role.${me.role.toLowerCase()}` as any)
+    : t("me.anonymous");
+  const cleanSubject = me.subject.startsWith("user:")
+    ? me.subject.slice("user:".length)
+    : me.subject;
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <Shield className="h-4 w-4" />
+      <div className="min-w-0">
+        <div className="font-medium text-foreground truncate">{cleanSubject}</div>
+        <div className="truncate">{roleLabel}</div>
+      </div>
     </div>
   );
 }

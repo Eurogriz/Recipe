@@ -25,6 +25,69 @@ class HealthResponse(BaseModel):
     environment: str = Field(examples=["production"])
 
 
+# ---------------------------------------------------------------------------
+# Users & roles
+# ---------------------------------------------------------------------------
+class UserOut(BaseModel):
+    """Public representation of a user — never leaks the password hash."""
+
+    id: str
+    username: str
+    email: str | None = None
+    role: str = Field(examples=["Technologist"])
+    is_active: bool = True
+    created_at: str
+    last_login_at: str | None = None
+
+
+class UsersListOut(BaseModel):
+    users: list[UserOut]
+
+
+class UserCreateRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=64, examples=["alice"])
+    password: str = Field(min_length=6, max_length=128)
+    role: str = Field(examples=["Technologist"])
+    email: str | None = None
+    is_active: bool = True
+
+
+class UserUpdateRequest(BaseModel):
+    email: str | None = None
+    role: str | None = Field(default=None, examples=["Auditor"])
+    is_active: bool | None = None
+    new_password: str | None = Field(default=None, min_length=6, max_length=128)
+
+
+class MeOut(BaseModel):
+    """The result of ``GET /me`` — who the caller is + what they can do."""
+
+    subject: str
+    mode: str = Field(examples=["basic", "jwt", "static", "open"])
+    scopes: list[str]
+    role: str | None = None
+
+
+# ---------------------------------------------------------------------------
+# Regulatory scan
+# ---------------------------------------------------------------------------
+class RegulatoryScanFindingOut(BaseModel):
+    recipe_id: str
+    category: str
+    subcategory: str
+    status: str
+    total_findings: int
+    errors: int
+    warnings: int
+    top_substances: list[str] = Field(default_factory=list)
+
+
+class RegulatoryScanOut(BaseModel):
+    n_scanned: int
+    n_offending: int
+    findings: list[RegulatoryScanFindingOut]
+
+
 class AlertConfigOut(BaseModel):
     """What the UI needs to know about the alert notifier.
 
@@ -1045,6 +1108,7 @@ __all__ = [
     "JobRecordOut",
     "JobsListOut",
     "MassBalanceOut",
+    "MeOut",
     "ModelMetadataOut",
     "OptimisationRequestIn",
     "OptimisationResultOut",
@@ -1073,6 +1137,8 @@ __all__ = [
     "RecipeVersionOut",
     "RecipeVersionsOut",
     "RegulatoryFindingOut",
+    "RegulatoryScanFindingOut",
+    "RegulatoryScanOut",
     "RejectRequest",
     "RuleFindingOut",
     "SearchResponse",
@@ -1087,6 +1153,10 @@ __all__ = [
     "TrainModelsRequest",
     "TrainingResultOut",
     "UpdateRecipeRequest",
+    "UserCreateRequest",
+    "UserOut",
+    "UserUpdateRequest",
+    "UsersListOut",
     "ValidationErrorResponse",
     "VerificationViolationOut",
     "VerifyRequest",

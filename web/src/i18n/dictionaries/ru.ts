@@ -269,6 +269,76 @@ export const ru: Dict = {
   "alert.test.hint":
     "Тест использует случайные вектора, гарантированно триггерящие severe drift.",
 
+  // navigation extras
+  "nav.admin": "Пользователи",
+  "nav.regulatory": "Регуляторика",
+
+  // whoami widget
+  "me.anonymous": "аноним (открытый режим)",
+  "me.role.viewer": "Наблюдатель",
+  "me.role.technologist": "Технолог",
+  "me.role.auditor": "Аудитор",
+  "me.role.admin": "Администратор",
+
+  // admin / users
+  "admin.title": "Управление пользователями",
+  "admin.subtitle":
+    "Учётные записи с ролями. Роли задают набор разрешений; полный список разрешений виден в столбце.",
+  "admin.forbidden":
+    "Только администратор видит эту страницу. Ваша текущая роль: {role}.",
+  "admin.loading": "Загружаем список пользователей…",
+  "admin.new": "Новый пользователь",
+  "admin.col.username": "Логин",
+  "admin.col.role": "Роль",
+  "admin.col.email": "Email",
+  "admin.col.active": "Активен",
+  "admin.col.last_login": "Последний вход",
+  "admin.col.created": "Создан",
+  "admin.col.actions": "Действия",
+  "admin.dialog.create": "Создать пользователя",
+  "admin.dialog.edit": "Изменить пользователя",
+  "admin.dialog.confirm_delete": "Удалить пользователя {username}?",
+  "admin.f.username": "Логин",
+  "admin.f.password": "Пароль (не менее 6 символов)",
+  "admin.f.password.change": "Новый пароль (оставьте пустым, чтобы не менять)",
+  "admin.f.role": "Роль",
+  "admin.f.email": "Email (необязательно)",
+  "admin.f.active": "Активная учётная запись",
+  "admin.create_ok": "Создан пользователь {username}",
+  "admin.update_ok": "Обновлён пользователь {username}",
+  "admin.delete_ok": "Удалён",
+  "admin.failed": "Не удалось: {msg}",
+
+  // clone recipe
+  "recipe.clone": "Клонировать",
+  "recipe.clone.hint":
+    "Создаст независимый черновик с тем же составом. Не связан с цепочкой версий исходного рецепта.",
+  "recipe.clone.ok": "Клон создан: {id}",
+  "recipe.clone.failed": "Не удалось клонировать: {msg}",
+
+  // regulatory scan
+  "regulatory.title": "Регуляторная проверка каталога",
+  "regulatory.subtitle":
+    "Массовая проверка всех рецептов по REACH SVHC и Annex XVII. Показывает только рецепты с найденными нарушениями, отсортированные по количеству ошибок.",
+  "regulatory.run": "Проверить каталог",
+  "regulatory.running": "Проверяем…",
+  "regulatory.min_severity": "Минимальная серьёзность",
+  "regulatory.severity.warning": "предупреждение",
+  "regulatory.severity.error": "ошибка",
+  "regulatory.limit": "Проверить рецептов",
+  "regulatory.summary":
+    "Просканировано: {scanned} · с нарушениями: {offending}",
+  "regulatory.empty":
+    "Не найдено рецептов с регуляторными нарушениями (или REACH-данные не загружены).",
+  "regulatory.no_data":
+    "Регуляторные CSV не загружены. Задайте FW_REGULATORY_DATA_DIR со снапшотами REACH и перезапустите сервис.",
+  "regulatory.col.recipe": "Рецепт",
+  "regulatory.col.category": "Категория",
+  "regulatory.col.errors": "Ошибок",
+  "regulatory.col.warnings": "Предупр.",
+  "regulatory.col.substances": "Вещества",
+  "regulatory.failed": "Не удалось: {msg}",
+
   // multi-property Pareto
   "optimise.pareto.axis_x": "Ось X",
   "optimise.pareto.axis_y": "Ось Y",

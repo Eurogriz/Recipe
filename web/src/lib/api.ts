@@ -156,6 +156,36 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  // users & roles
+  me: () => request<MeOut>(`/me`),
+  listUsers: () => request<UsersListOut>(`/users`),
+  createUser: (body: UserCreateBody) =>
+    request<User>(`/users`, { method: "POST", body: JSON.stringify(body) }),
+  updateUser: (id: string, body: UserUpdateBody) =>
+    request<User>(`/users/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  deleteUser: (id: string) =>
+    request<void>(`/users/${id}`, { method: "DELETE" }),
+
+  // clone recipe
+  cloneRecipe: (id: string) =>
+    request<RecipeSummary>(`/recipes/${id}/clone`, { method: "POST" }),
+
+  // regulatory scan
+  regulatoryScan: (params?: {
+    category?: string;
+    min_severity?: "warning" | "error";
+    limit?: number;
+  }) => {
+    const q = new URLSearchParams();
+    if (params?.category) q.set("category", params.category);
+    if (params?.min_severity) q.set("min_severity", params.min_severity);
+    if (params?.limit) q.set("limit", String(params.limit));
+    const qs = q.toString();
+    return request<RegulatoryScanResult>(
+      `/catalog/regulatory-scan${qs ? "?" + qs : ""}`
+    );
+  },
+
   // workflow — draft → pending review → verified/rejected
   submitReview: (id: string, body: { actor: string; comment?: string }) =>
     request<RecipeSummary>(`/recipes/${id}/submit-review`, {
@@ -587,6 +617,61 @@ export interface SimilarRecipe {
   binder_type: string;
   product_class: string;
   similarity: number;
+}
+
+// ---- Users & roles ---------------------------------------------------------
+export interface User {
+  id: string;
+  username: string;
+  email: string | null;
+  role: string;
+  is_active: boolean;
+  created_at: string;
+  last_login_at: string | null;
+}
+
+export interface UsersListOut {
+  users: User[];
+}
+
+export interface UserCreateBody {
+  username: string;
+  password: string;
+  role: string;
+  email?: string;
+  is_active?: boolean;
+}
+
+export interface UserUpdateBody {
+  email?: string | null;
+  role?: string;
+  is_active?: boolean;
+  new_password?: string;
+}
+
+export interface MeOut {
+  subject: string;
+  mode: string;
+  scopes: string[];
+  role: string | null;
+}
+
+// ---- Regulatory scan -------------------------------------------------------
+export interface RegulatoryScanFinding {
+  recipe_id: string;
+  category: string;
+  subcategory: string;
+  status: string;
+  total_findings: number;
+  errors: number;
+  warnings: number;
+  top_substances: string[];
+}
+
+export interface RegulatoryScanResult {
+  n_scanned: number;
+  n_offending: number;
+  findings: RegulatoryScanFinding[];
 }
 
 // ---- Versions + diff -------------------------------------------------------

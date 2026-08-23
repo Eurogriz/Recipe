@@ -32,9 +32,10 @@ import time
 from dataclasses import dataclass, field
 from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 
 from ...infrastructure.config import AppSettings
+from ...infrastructure.db.repositories.users import role_scopes
 from .dependencies import get_settings
 
 logger = logging.getLogger(__name__)
@@ -127,14 +128,73 @@ def _extract_scopes(claims: dict[str, object]) -> frozenset[str]:
     return frozenset()
 
 
+async def _try_basic(request: Request, header: str) -> Principal | None:
+    """Decode a ``Basic base64(user:pass)`` header and look up the user.
+
+    Returns ``None`` on any decoding/lookup/auth failure so the caller
+    can 401 the request rather than swallowing the error.  We take
+    ``request`` so we can reach the DI container without importing it
+    at module load (avoids a circular import chain through the app
+    factory).
+    """
+    try:
+        raw = header.split(" ", 1)[1].strip()
+        decoded = base64.b64decode(raw).decode("utf-8", errors="strict")
+        username, _, password = decoded.partition(":")
+        if not username or not password:
+            return None
+    except (ValueError, UnicodeDecodeError):
+        return None
+
+    container = getattr(request.app.state, "container", None)
+    if container is None:
+        return None
+    user_repo = getattr(container, "user_repository", None)
+    if user_repo is None:
+        return None
+    record = await user_repo.authenticate(username, password)
+    if record is None:
+        return None
+    return Principal(
+        subject=f"user:{record.username}",
+        scopes=role_scopes(record.role),
+        mode="basic",
+    )
+
+
 # ---------------------------------------------------------------------------
 # FastAPI dependency
 # ---------------------------------------------------------------------------
-def get_principal(
+async def get_principal(
     settings: Annotated[AppSettings, Depends(get_settings)],
+    request: Request,
     authorization: str | None = Header(default=None),
 ) -> Principal:
-    """Resolve the caller identity based on the current settings."""
+    """Resolve the caller identity based on the current settings.
+
+    Supports three orthogonal auth modes:
+
+    1. **HTTP Basic** (``Authorization: Basic base64(user:pass)``) →
+       lookup in the ``user`` table; the user's role determines the
+       granted scopes (via :func:`role_scopes`).
+    2. **JWT Bearer** (``FW_JWT_SECRET`` set) → decode + trust claim
+       ``scope``/``scopes``.
+    3. **Static Bearer** (``FW_API_TOKEN`` set) — legacy 1.1.x
+       compatibility, grants read+write.
+
+    In open mode (no ``FW_API_TOKEN`` / ``FW_JWT_SECRET`` / users) —
+    every request is an ``anonymous`` principal with all scopes.  The
+    production invariants check refuses this configuration.
+    """
+    # Basic auth is tried first — it's the only mode backed by a real
+    # user table with per-user roles.  Falls through when the header
+    # isn't ``Basic`` at all.
+    if authorization and authorization.lower().startswith("basic "):
+        principal = await _try_basic(request, authorization)
+        if principal is not None:
+            return principal
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid basic credentials")
+
     if not settings.api_token and not settings.jwt_secret:
         # Development / test mode — allow everything, log at debug once.
         return Principal(subject="anonymous", scopes=frozenset({"*"}), mode="open")
@@ -189,11 +249,16 @@ def require_scope(scope: str):  # type: ignore[no-untyped-def]
 
 require_reader = require_scope(_READ_SCOPE)
 require_writer = require_scope(_WRITE_SCOPE)
+# Admin scope is `*` — granted only to the Admin role.  Anyone with
+# `*` passes every guard, so `require_admin` is effectively "must be
+# an Admin user (or the open-mode anonymous system principal)".
+require_admin = require_scope("*")
 
 
 __all__ = [
     "Principal",
     "get_principal",
+    "require_admin",
     "require_reader",
     "require_scope",
     "require_writer",

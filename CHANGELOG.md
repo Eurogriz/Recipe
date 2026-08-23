@@ -7,6 +7,131 @@
 
 ---
 
+## [1.16.0] — Пользователи и роли, клонирование рецептов, регуляторная проверка (2026-08-23)
+
+Три большие фичи закрывают последний блок отложенного плана.
+
+### Added — Users & roles (полная модель)
+
+- Новый repository `UserRepository` (CRUD, scrypt-хэши паролей с
+  версионируемым форматом `scrypt$n$r$p$salt$hash`).
+- Четыре канонические роли: **Viewer** (read), **Technologist**
+  (read+write), **Auditor** (read+write+verify), **Admin** (`*`).
+- Новый auth-mode: **HTTP Basic** — токен `Authorization: Basic <b64>`
+  ищется в таблице `user`, роль → набор scopes через `role_scopes()`.
+  Существующие Bearer/JWT-режимы работают без изменений.
+- Новый scope-guard `require_admin` для CRUD-пользователей.
+- **Новые endpoints:**
+  - `GET /me` — «кто я», mode/scopes/role;
+  - `GET /users` — список (Admin only);
+  - `POST /users` — создать;
+  - `PUT /users/{id}` — обновить (email/role/password/is_active);
+  - `DELETE /users/{id}` — удалить.
+- **UI:**
+  - Виджет **WhoAmI** в сайдбаре — имя + роль.
+  - Новая страница **/admin/users** — таблица + диалог создания/
+    редактирования с валидацией; для не-Admin показывается баннер
+    «недостаточно прав» и кнопки блокируются.
+
+### Added — Recipe cloning (независимая копия)
+
+- Новый use case `CloneRecipeUseCase` — копирует любой рецепт (Draft,
+  Verified, PendingReview, Rejected) в свежий Draft с новым UUID.
+- **В отличие от `new-version`** клон **не** связан цепочкой
+  `previous_version_id` со своим источником — это отдельная
+  формулировка, наследующая только состав.
+- Аудит-лог `Cloned` + `source_recipe_id`, так что trace-цепочка
+  всё равно сохраняется (за пределами domain-модели версий).
+- **Новый endpoint** `POST /recipes/{id}/clone` (требует scope
+  `recipes:write`).
+- **UI:** кнопка **«Клонировать»** в шапке карточки рецепта рядом с
+  CSV/PDF; после успеха автоматический редирект на новый рецепт.
+
+### Added — Bulk regulatory scan
+
+- Новый use case `RegulatoryScanUseCase` — прогоняет каждый рецепт
+  из каталога через `RegulatoryComplianceChecker`, аккумулирует
+  ошибки/предупреждения, топ-3 offending substances на рецепт.
+- **Новый endpoint** `GET /catalog/regulatory-scan?category=&min_severity=&limit=`
+  — параметры позволяют фильтровать по категории и минимальной
+  серьёзности (`warning`/`error`).
+- **UI:** новая страница **/regulatory** — dropdown категорий,
+  фильтр серьёзности, лимит, кнопка «Проверить каталог»; результат —
+  таблица оффендеров, отсортированная по количеству ошибок, с
+  гиперссылками на рецепты.
+- Пункт **«Регуляторика»** в главной навигации.
+
+### Migration
+
+- **0005_audit_action_cloned.py** — расширяет CHECK-constraint
+  `ck_audit_action_valid` для `audit_log_entry.action`: добавлены
+  `'Cloned'` и `'PropertyMeasured'` (последнее — задел для лаб-workflow,
+  чтобы не делать вторую SQLite-миграцию через месяц). SQLite не
+  поддерживает `ALTER TABLE DROP CONSTRAINT`, поэтому используется
+  `batch_alter_table` — стандартная Alembic-техника пересборки
+  таблицы.
+
+### Endpoints
+
+**54 REST endpoints** (+7 к v1.15.0):
+- `GET /me`
+- `GET /users`, `POST /users`, `PUT /users/{id}`, `DELETE /users/{id}`
+- `POST /recipes/{id}/clone`
+- `GET /catalog/regulatory-scan`
+
+### i18n
+
+**+53 новых ключа** (users, admin, clone, regulatory + виджет
+whoami). **Итого 434 переведённые строки, паритет RU/EN 100 %.**
+
+### Tests
+
+- **6 unit + integration для users/roles:**
+  hash+verify roundtrip, отказ на короткий пароль, mapping ролей,
+  отказ на unknown role, /me в open+basic mode, CRUD flow
+  (создать/логин/обновить/удалить), 422 на плохую роль, 401 на
+  неверный Basic, 403 для non-Admin.
+- **3 integration для clone:** свежий Draft с новым id, состав
+  сохраняется, 404 на unknown source.
+- **3 integration для regulatory scan:** empty при отсутствии
+  данных, находит DEHP-содержащие рецепты, `min_severity=error`
+  фильтр.
+- **Итого: 517 passed, 0 failed** (+16 к v1.15.0).
+
+### Metrics
+
+| | v1.15.0 | v1.16.0 |
+|---|---|---|
+| Тесты | 501 | **517** (+16) |
+| REST endpoints | 47 | **54** (+7) |
+| Миграции БД | 4 | **5** |
+| i18n ключей | 381 | **434** (+53) |
+| Страниц UI | 6 | **8** (+ regulatory + admin/users) |
+| Source files | 111 | **114** (+3: users, clone, regulatory_scan) |
+| ruff / mypy / bandit | clean | clean |
+
+### Files
+
+- migrations/versions/0005_audit_action_cloned.py                            (new)
+- src/formulation_workbench/infrastructure/db/repositories/users.py          (new, scrypt + role mapping)
+- src/formulation_workbench/application/use_cases/clone_recipe.py            (new)
+- src/formulation_workbench/application/use_cases/regulatory_scan.py         (new)
+- src/formulation_workbench/infrastructure/di/__init__.py                    (регистрация)
+- src/formulation_workbench/presentation/api/auth.py                         (+HTTP Basic, +require_admin)
+- src/formulation_workbench/presentation/api/routes.py                       (+7 endpoints, /me, /users×4, /clone, /regulatory-scan, AlertConfigOut в /info)
+- src/formulation_workbench/presentation/api/schemas.py                      (+8 DTOs: UserOut, UserCreateRequest, UserUpdateRequest, UsersListOut, MeOut, RegulatoryScanFindingOut, RegulatoryScanOut)
+- tests/integration/test_api_users.py                                        (new, 10 tests)
+- tests/integration/test_api_clone_and_regulatory.py                         (new, 6 tests)
+- web/src/lib/api.ts                                                         (+users/clone/regulatory api + types)
+- web/src/i18n/dictionaries/{ru,en}.ts                                       (+53 keys)
+- web/src/app/admin/users/page.tsx                                           (new)
+- web/src/app/regulatory/page.tsx                                            (new)
+- web/src/app/recipes/[id]/page.tsx                                          (Clone button)
+- web/src/components/AppShell.tsx                                            (nav entries + WhoAmI widget)
+- CHANGELOG.md, __init__.py, AppShell.tsx                                    (v1.16.0)
+
+---
+
 ## [1.15.0] — Два новых CLI, PDF-каталог, панель настроек webhook (2026-08-23)
 
 Три отложенных пункта: MLOps-CLI для plant IT + удобные ежедневные

@@ -16,12 +16,14 @@ from typing import TYPE_CHECKING
 from ...application.use_cases.apply_lab_results import ApplyLabResultsUseCase
 from ...application.use_cases.assess_recipe import AssessRecipeUseCase
 from ...application.use_cases.calculate_cost import CalculateRecipeCostUseCase
+from ...application.use_cases.clone_recipe import CloneRecipeUseCase
 from ...application.use_cases.create_recipe import CreateRecipeUseCase
 from ...application.use_cases.delete_recipe import DeleteRecipeUseCase
 from ...application.use_cases.get_recipe import GetAllRecipeVersionsUseCase, GetRecipeByIdUseCase
 from ...application.use_cases.ml_predict import PredictPropertiesUseCase
 from ...application.use_cases.ml_train import TrainPropertyModelsUseCase
 from ...application.use_cases.optimise_recipe import OptimiseRecipeUseCase
+from ...application.use_cases.regulatory_scan import RegulatoryScanUseCase
 from ...application.use_cases.search_recipes import (
     GetCatalogStatisticsUseCase,
     SearchRecipesUseCase,
@@ -41,6 +43,7 @@ from ..db.connection import Database
 from ..db.repositories.production_vectors import ProductionVectorRepository
 from ..db.repositories.session_scoped import ScopedAuditLogger, ScopedRecipeRepository
 from ..db.repositories.sqlalchemy_experiment_repository import ScopedExperimentRepository
+from ..db.repositories.users import UserRepository
 from ..ml.jobs import JobRegistry
 from ..ml.property_regressor import PropertyRegressor
 from ..notifications import AlertNotifier, build_notifier
@@ -82,11 +85,14 @@ class Container:
     verify_recipe: VerifyRecipeUseCase
     reject_recipe: RejectRecipeUseCase
     create_new_version: CreateNewVersionUseCase
+    clone_recipe: CloneRecipeUseCase
+    regulatory_scan: RegulatoryScanUseCase
     assess_recipe: AssessRecipeUseCase
     calculate_cost: CalculateRecipeCostUseCase
     apply_lab_results: ApplyLabResultsUseCase
     experiment_repository: ExperimentRepository
     production_vector_repository: ProductionVectorRepository
+    user_repository: UserRepository
     property_regressor: PropertyRegressor
     train_property_models: TrainPropertyModelsUseCase
     predict_properties: PredictPropertiesUseCase
@@ -116,6 +122,7 @@ class Container:
         audit_logger = ScopedAuditLogger(database)
         experiment_repository = ScopedExperimentRepository(database)
         production_vector_repository = ProductionVectorRepository(database)
+        user_repository = UserRepository(database)
         property_regressor = PropertyRegressor(storage_dir=settings.model_dir)
 
         # Alerts + async jobs — process-local resources, no external
@@ -154,6 +161,7 @@ class Container:
             audit_logger=audit_logger,
             experiment_repository=experiment_repository,
             production_vector_repository=production_vector_repository,
+            user_repository=user_repository,
             create_recipe=CreateRecipeUseCase(recipe_repository, audit_logger),
             update_recipe=UpdateRecipeUseCase(recipe_repository, audit_logger),
             delete_recipe=DeleteRecipeUseCase(recipe_repository, audit_logger),
@@ -168,6 +176,8 @@ class Container:
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),
             reject_recipe=RejectRecipeUseCase(recipe_repository, audit_logger),
             create_new_version=CreateNewVersionUseCase(recipe_repository, audit_logger),
+            clone_recipe=CloneRecipeUseCase(recipe_repository, audit_logger),
+            regulatory_scan=RegulatoryScanUseCase(recipe_repository, regulatory_checker),
             assess_recipe=AssessRecipeUseCase(recipe_repository, regulatory_checker),
             calculate_cost=CalculateRecipeCostUseCase(recipe_repository),
             apply_lab_results=ApplyLabResultsUseCase(

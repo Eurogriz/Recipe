@@ -35,7 +35,7 @@ from ...domain.entities.recipe import InvalidRecipeError
 from ...domain.exceptions import DomainError
 from ...infrastructure.config import AppSettings
 from ...infrastructure.di import Container
-from .auth import Principal, require_reader, require_writer
+from .auth import Principal, get_principal, require_admin, require_reader, require_writer
 from .dependencies import get_container, get_settings
 from .mappers import to_recipe
 from .schemas import (
@@ -79,6 +79,7 @@ from .schemas import (
     JobRecordOut,
     JobsListOut,
     MassBalanceOut,
+    MeOut,
     ModelMetadataOut,
     OptimisationRequestIn,
     OptimisationResultOut,
@@ -103,6 +104,8 @@ from .schemas import (
     RecipeVersionOut,
     RecipeVersionsOut,
     RegulatoryFindingOut,
+    RegulatoryScanFindingOut,
+    RegulatoryScanOut,
     RejectRequest,
     RuleFindingOut,
     SearchResponse,
@@ -117,6 +120,10 @@ from .schemas import (
     TrainingResultOut,
     TrainModelsRequest,
     UpdateRecipeRequest,
+    UserCreateRequest,
+    UserOut,
+    UsersListOut,
+    UserUpdateRequest,
     ValidationErrorResponse,
     VerificationViolationOut,
     VerifyRequest,
@@ -183,6 +190,144 @@ async def app_info(settings: Annotated[AppSettings, Depends(get_settings)]) -> A
         build_date=os.environ.get("FW_BUILD_DATE", "unknown"),
         alert=alert,
     )
+
+
+# ---------------------------------------------------------------------------
+# Users, roles, self-identification
+# ---------------------------------------------------------------------------
+def _user_out(record) -> UserOut:  # type: ignore[no-untyped-def]
+    """Convert a repository UserRecord into the API DTO."""
+    return UserOut(
+        id=record.id,
+        username=record.username,
+        email=record.email,
+        role=record.role,
+        is_active=bool(record.is_active),
+        created_at=record.created_at.isoformat() if record.created_at else "",
+        last_login_at=(record.last_login_at.isoformat() if record.last_login_at else None),
+    )
+
+
+@router.get(
+    "/me",
+    response_model=MeOut,
+    tags=["ops"],
+    summary="Who am I? — returns the resolved principal + scopes",
+)
+async def whoami(
+    principal: Annotated[Principal, Depends(get_principal)],
+    container: Annotated[Container, Depends(get_container)],
+) -> MeOut:
+    """Handy for the UI to render "logged in as …" and hide admin
+    controls from non-admin users without having to guess.
+    """
+    role: str | None = None
+    if principal.subject.startswith("user:"):
+        username = principal.subject.removeprefix("user:")
+        record = await container.user_repository.get_by_username(username)
+        if record is not None:
+            role = record.role
+    return MeOut(
+        subject=principal.subject,
+        mode=principal.mode,
+        scopes=sorted(principal.scopes),
+        role=role,
+    )
+
+
+@router.get(
+    "/users",
+    response_model=UsersListOut,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="List all users (Admin only)",
+)
+async def list_users(
+    container: Annotated[Container, Depends(get_container)],
+) -> UsersListOut:
+    records = await container.user_repository.list_all(limit=500)
+    return UsersListOut(users=[_user_out(r) for r in records])
+
+
+@router.post(
+    "/users",
+    response_model=UserOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="Create a user (Admin only)",
+)
+async def create_user(
+    payload: UserCreateRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> UserOut:
+    from ...infrastructure.db.repositories.users import UnknownRoleError
+
+    try:
+        record = await container.user_repository.create(
+            username=payload.username,
+            password=payload.password,
+            role=payload.role,
+            email=payload.email,
+            is_active=payload.is_active,
+        )
+    except UnknownRoleError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except ValueError as exc:  # duplicate username or short password
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+    return _user_out(record)
+
+
+@router.put(
+    "/users/{user_id}",
+    response_model=UserOut,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="Update user attributes / role / password (Admin only)",
+)
+async def update_user(
+    user_id: str,
+    payload: UserUpdateRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> UserOut:
+    from ...infrastructure.db.repositories.users import UnknownRoleError
+
+    try:
+        # We only forward fields that were actually set — passing None
+        # explicitly on ``email`` clears it, which is a legitimate action.
+        kwargs: dict[str, object] = {}
+        if payload.email is not None or "email" in payload.model_fields_set:
+            kwargs["email"] = payload.email
+        if payload.role is not None:
+            kwargs["role"] = payload.role
+        if payload.is_active is not None:
+            kwargs["is_active"] = payload.is_active
+        if payload.new_password is not None:
+            kwargs["new_password"] = payload.new_password
+        record = await container.user_repository.update(user_id, **kwargs)  # type: ignore[arg-type]
+    except LookupError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    except UnknownRoleError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    return _user_out(record)
+
+
+@router.delete(
+    "/users/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["users"],
+    dependencies=[Depends(require_admin)],
+    summary="Delete a user (Admin only)",
+)
+async def delete_user(
+    user_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> None:
+    ok = await container.user_repository.delete(user_id)
+    if not ok:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
 
 
 # ---------------------------------------------------------------------------
@@ -944,6 +1089,47 @@ async def catalog_stats(
     )
 
 
+@router.get(
+    "/catalog/regulatory-scan",
+    response_model=RegulatoryScanOut,
+    tags=["catalog", "assessment"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Bulk REACH/Annex XVII scan over the catalog — one row per "
+        "offending recipe, sorted errors-first"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def regulatory_scan(
+    container: Annotated[Container, Depends(get_container)],
+    limit: int = Query(default=500, ge=1, le=5000),
+    category: str | None = Query(default=None),
+    min_severity: str = Query(default="warning", pattern=r"^(warning|error)$"),
+) -> RegulatoryScanOut:
+    from ...application.use_cases.regulatory_scan import RegulatoryScanQuery
+
+    result = await container.regulatory_scan.execute(
+        RegulatoryScanQuery(limit=limit, category=category, min_severity=min_severity)
+    )
+    return RegulatoryScanOut(
+        n_scanned=result.n_scanned,
+        n_offending=result.n_offending,
+        findings=[
+            RegulatoryScanFindingOut(
+                recipe_id=f.recipe_id,
+                category=f.category,
+                subcategory=f.subcategory,
+                status=f.status,
+                total_findings=f.total_findings,
+                errors=f.errors,
+                warnings=f.warnings,
+                top_substances=list(f.top_substances),
+            )
+            for f in result.findings
+        ],
+    )
+
+
 # ---------------------------------------------------------------------------
 # Recipes — write
 # ---------------------------------------------------------------------------
@@ -1138,6 +1324,37 @@ async def create_new_recipe_version(
             raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
     return _recipe_summary(result)
+
+
+@router.post(
+    "/recipes/{recipe_id}/clone",
+    response_model=RecipeSummary,
+    status_code=status.HTTP_201_CREATED,
+    tags=["recipes"],
+    dependencies=[Depends(require_writer)],
+    summary=(
+        "Duplicate any recipe into a fresh Draft (unlike new-version, works "
+        "on Draft/Rejected/PendingReview sources and does not set previous_version_id)"
+    ),
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND},
+)
+async def clone_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    from ...application.use_cases.clone_recipe import (
+        CloneRecipeCommand,
+        RecipeNotFoundError,
+    )
+
+    try:
+        cloned = await container.clone_recipe.execute(
+            CloneRecipeCommand(source_recipe_id=recipe_id, actor=principal.subject)
+        )
+    except RecipeNotFoundError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    return _recipe_summary(cloned)
 
 
 @router.get(

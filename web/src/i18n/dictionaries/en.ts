@@ -260,6 +260,76 @@ export const en: Dict = {
   "alert.test.hint":
     "The test uses random vectors that reliably trigger severe drift.",
 
+  // navigation extras
+  "nav.admin": "Users",
+  "nav.regulatory": "Regulatory",
+
+  // whoami widget
+  "me.anonymous": "anonymous (open mode)",
+  "me.role.viewer": "Viewer",
+  "me.role.technologist": "Technologist",
+  "me.role.auditor": "Auditor",
+  "me.role.admin": "Admin",
+
+  // admin / users
+  "admin.title": "User management",
+  "admin.subtitle":
+    "User accounts with roles. Roles map to permission scopes; see the Scopes column for the full list.",
+  "admin.forbidden":
+    "Only admins can see this page. Your current role: {role}.",
+  "admin.loading": "Loading users…",
+  "admin.new": "New user",
+  "admin.col.username": "Username",
+  "admin.col.role": "Role",
+  "admin.col.email": "Email",
+  "admin.col.active": "Active",
+  "admin.col.last_login": "Last login",
+  "admin.col.created": "Created",
+  "admin.col.actions": "Actions",
+  "admin.dialog.create": "Create user",
+  "admin.dialog.edit": "Edit user",
+  "admin.dialog.confirm_delete": "Delete user {username}?",
+  "admin.f.username": "Username",
+  "admin.f.password": "Password (min 6 chars)",
+  "admin.f.password.change": "New password (leave blank to keep)",
+  "admin.f.role": "Role",
+  "admin.f.email": "Email (optional)",
+  "admin.f.active": "Active account",
+  "admin.create_ok": "Created user {username}",
+  "admin.update_ok": "Updated user {username}",
+  "admin.delete_ok": "Deleted",
+  "admin.failed": "Failed: {msg}",
+
+  // clone recipe
+  "recipe.clone": "Clone",
+  "recipe.clone.hint":
+    "Creates an independent draft with the same composition. Not linked to the source recipe's version chain.",
+  "recipe.clone.ok": "Clone created: {id}",
+  "recipe.clone.failed": "Failed to clone: {msg}",
+
+  // regulatory scan
+  "regulatory.title": "Regulatory catalog scan",
+  "regulatory.subtitle":
+    "Bulk REACH SVHC + Annex XVII check across all recipes. Only recipes with findings are shown, sorted errors-first.",
+  "regulatory.run": "Scan catalog",
+  "regulatory.running": "Scanning…",
+  "regulatory.min_severity": "Minimum severity",
+  "regulatory.severity.warning": "warning",
+  "regulatory.severity.error": "error",
+  "regulatory.limit": "Limit",
+  "regulatory.summary":
+    "Scanned: {scanned} · offending: {offending}",
+  "regulatory.empty":
+    "No regulatory findings in the catalog (or REACH data is not loaded).",
+  "regulatory.no_data":
+    "REACH CSV data is not loaded. Set FW_REGULATORY_DATA_DIR with snapshots and restart the service.",
+  "regulatory.col.recipe": "Recipe",
+  "regulatory.col.category": "Category",
+  "regulatory.col.errors": "Errors",
+  "regulatory.col.warnings": "Warnings",
+  "regulatory.col.substances": "Substances",
+  "regulatory.failed": "Failed: {msg}",
+
   // multi-property Pareto
   "optimise.pareto.axis_x": "X axis",
   "optimise.pareto.axis_y": "Y axis",

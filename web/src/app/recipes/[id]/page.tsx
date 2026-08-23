@@ -86,6 +86,7 @@ export default function RecipeDetailPage() {
           <ArrowLeft className="h-4 w-4" /> {t("recipe.back")}
         </Link>
         <div className="flex items-center gap-3">
+          <CloneButton id={id} />
           <a
             href={api.recipeCsvUrl(id)}
             className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
@@ -2681,6 +2682,42 @@ function DialogInput({
     </div>
   );
 }
+
+function CloneButton({ id }: { id: string }) {
+  const t = useT();
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const doClone = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      const clone = await api.cloneRecipe(id);
+      // Navigate straight into the fresh draft so the user can edit.
+      router.push(`/recipes/${encodeURIComponent(clone.id)}`);
+    } catch (e: any) {
+      setErr(t("recipe.clone.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="inline-flex items-center gap-2">
+      <button
+        onClick={doClone}
+        disabled={busy}
+        title={t("recipe.clone.hint")}
+        className="inline-flex items-center gap-1 text-sm text-primary hover:underline disabled:opacity-50"
+      >
+        <GitBranch className="h-4 w-4" /> {t("recipe.clone")}
+      </button>
+      {err && <span className="text-xs text-red-700">{err}</span>}
+    </div>
+  );
+}
+
 
 function defaultPrice(fn: string): string {
   const table: Record<string, string> = {
