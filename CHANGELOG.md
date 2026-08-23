@@ -7,6 +7,106 @@
 
 ---
 
+## [1.4.0] — Persistent experiments, 2K stoichiometry, ML regressor (2026-08-23)
+
+Седьмой раунд — три отложенных пункта из плана v1.3.
+
+### Added — SQLAlchemy backend for experiments
+
+- **Alembic 0003_experiment_run**: две новые таблицы
+  `experiment_run` + `measured_value` с индексами по `recipe_id`,
+  `status`, `created_at`, `property_code` и `UNIQUE(run_id,
+  property_code)`. FK на recipe *не* устанавливается — Run должен
+  переживать удаление рецепта для forensic purposes.
+- `SqlAlchemyExperimentRepository` + `ScopedExperimentRepository` —
+  session-per-operation обёртка; полный round-trip
+  `ExperimentRun ↔ ExperimentRunModel + MeasuredValueModel[]` с
+  eager-load, batch-flatten (`batch_number`, `batch_target_mass_kg`,
+  …), JSON-сериализацией `target_properties` и `lot_numbers`.
+- **In-memory реализация удалена** — DI-контейнер теперь использует
+  persistent backend по умолчанию.
+- +5 integration тестов покрывают save/get/list/replace + missing.
+
+### Added — 2K stoichiometry
+
+- `domain/services/stoichiometry.py`:
+  - `ChemicalGroup` enum (EPOXIDE, HYDROXYL, ISOCYANATE, AMINE_HYDROGEN,
+    CARBOXYL, NONE) с эвристикой распознавания по name/INCI/notes.
+  - `GroupContribution` — сколько эквивалентов реактивной группы
+    приносит компонент; equivalent weight читается из
+    `PhysicalProperties.equivalent_weight_g_per_eq` с fallback на
+    `_DEFAULT_EW` по `(functional_role, chemical_group)`.
+  - `analyse(recipe)` возвращает `StoichiometryReport`:
+    - авто-детекция системы (polyurethane / epoxy_amine / epoxy_carboxyl),
+    - reactive/co-reactive эквиваленты на 100 г,
+    - ratio, `is_balanced` (окно 0.95-1.10 по умолчанию),
+    - findings S0-S4 (info/warning/error) с ссылкой на Wicks/Vincentz.
+  - `batch_mix_ratio(report)` — идеальное соотношение массы A:B для
+    2K-упаковки.
+- **Интегрирован в `RecipeAssessment`**:
+  - penalty `STOICHIOMETRY_ERROR=20`, `WARNING=4`.
+  - Stoichiometry error автоматически ограничивает Maturity до DRAFT.
+  - Assessment response обогащён `stoichiometry: {system, ratio,
+    is_balanced, findings[]}` и `summary.stoichiometry_*`.
+- Live: 2K PU polyol+HDI показал `system:polyurethane ratio:3.333
+  balanced:False` + `S4 WARNING: over-crosslinking, brittleness likely`.
+- +8 unit-тестов покрывают все три системы + edge-кейсы (nesting,
+  hardener без binder-группы, batch-ratio 1:1).
+
+### Added — ML regression pipeline
+
+- `infrastructure/ml/features.py`:
+  - `FEATURE_NAMES` — 37 стабильных фичей (mass_% per function,
+    sum_pigment, sum_extender, weighted_density, weighted_tg,
+    voc_component_fraction, stage_count, component_count).
+  - `extract_features(recipe)` / `to_vector(recipe)`.
+- `infrastructure/ml/property_regressor.py`:
+  - `PropertyRegressor(storage_dir)` — file-backed model registry
+    (pickle + `<code>.meta.json`).
+  - `RandomForestRegressor` per property code (n_estimators=100,
+    random_state=42), `KFold(shuffle=True, random_state=42)` для
+    стабильной кросс-валидации на монотонных lab-сканах.
+  - `MIN_SAMPLES=6` — модели ниже порога попадают в
+    `TrainingResult.skipped[code]` с причиной.
+  - `ModelMetadata` фиксирует version (ISO timestamp),
+    `cv_mean_r2` + `cv_std_r2`, `training_recipe_ids`, sha256-подобный
+    `fingerprint` тренировочного набора.
+  - `predict(recipe, property_code)` → `PropertyPrediction(value,
+    model_version, model_cv_r2)`.
+- Use cases:
+  - `TrainPropertyModelsUseCase` — принимает `recipe_ids` +
+    `property_codes` фильтры, вызывает `PropertyRegressor.train`.
+  - `PredictPropertiesUseCase` — предсказывает по всем моделям или
+    списку кодов.
+- Live-тест: 15 синтетических рецептов с известной зависимостью
+  `gloss = 15 + 1.6 × binder_pct` → обученная модель предсказывает в
+  диапазоне 70-100 GU для binder=45%.
+
+### Added — REST endpoints
+
+- `POST /ml/train` — тренировка моделей (writer scope).
+- `GET  /ml/models` — реестр моделей.
+- `GET  /recipes/{id}/predict?property_code=…` — предсказание значений.
+- Assessment response расширен полем `stoichiometry` и `summary` полями
+  `stoichiometry_system`, `stoichiometry_balanced`.
+- +5 API-тестов + +5 experiment-repo + +8 stoichiometry + +8 ML =
+  **26 новых тестов**.
+
+### Config
+
+- Новая настройка `FW_MODEL_DIR` (по умолчанию `./data/models`) —
+  директория для persist трениованных моделей.
+
+### Metrics after 1.4.0
+
+- **327 тестов зелёные** (+26 к 301).
+- **Coverage 83.13%** (было 81.64%, gate 60%).
+- **Ruff clean · Ruff-format clean · Bandit clean · MyPy clean**
+  (89 source files).
+- 3 миграции Alembic катятся чисто (0001→0002→0003).
+
+---
+
 ## [1.3.0] — Cost, REACH compliance, and lab-loop apply (2026-08-23)
 
 Шестой раунд — расширение доменного слоя v1.2 в сторону *денег*,

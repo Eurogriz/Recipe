@@ -50,7 +50,10 @@ from .schemas import (
     ExperimentOut,
     ExperimentPlanIn,
     HealthResponse,
+    ModelMetadataOut,
+    PredictionsOut,
     ProcessMeasuredIn,
+    PropertyPredictionOut,
     RecipeAssessmentOut,
     RecipeCostOut,
     RecipeSummary,
@@ -58,7 +61,11 @@ from .schemas import (
     RejectRequest,
     RuleFindingOut,
     SearchResponse,
+    StoichiometryFindingOut,
+    StoichiometryOut,
     SubmitReviewRequest,
+    TrainingResultOut,
+    TrainModelsRequest,
     UpdateRecipeRequest,
     ValidationErrorResponse,
     VerificationViolationOut,
@@ -414,6 +421,28 @@ async def assess_recipe(
             )
             for r in assessment.regulatory_findings
         ],
+        stoichiometry=(
+            StoichiometryOut(
+                detected_system=assessment.stoichiometry.detected_system,
+                reactive_equivalents_per_100g=assessment.stoichiometry.reactive_equivalents,
+                co_reactive_equivalents_per_100g=assessment.stoichiometry.co_reactive_equivalents,
+                ratio_reactive_to_co=assessment.stoichiometry.ratio_reactive_to_co,
+                recommended_ratio_low=assessment.stoichiometry.recommended_ratio_low,
+                recommended_ratio_high=assessment.stoichiometry.recommended_ratio_high,
+                is_balanced=assessment.stoichiometry.is_balanced,
+                findings=[
+                    StoichiometryFindingOut(
+                        rule_id=f.rule_id,
+                        severity=f.severity.value,
+                        message=f.message,
+                        reference=f.reference,
+                    )
+                    for f in assessment.stoichiometry.findings
+                ],
+            )
+            if assessment.stoichiometry is not None
+            else None
+        ),
         summary=assessment.summary(),
     )
 
@@ -657,6 +686,118 @@ def _experiment_out(run) -> ExperimentOut:  # type: ignore[no-untyped-def]
                 notes=mv.notes,
             )
             for mv in run.measured_properties
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# ML — training + prediction + registry
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/train",
+    response_model=TrainingResultOut,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary="Train / retrain per-property regressors from experiment data",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN},
+)
+async def train_models(
+    payload: TrainModelsRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> TrainingResultOut:
+    from ...application.use_cases.ml_train import TrainPropertyModelsCommand
+
+    try:
+        result = await container.train_property_models.execute(
+            TrainPropertyModelsCommand(
+                recipe_ids=tuple(payload.recipe_ids),
+                property_codes=tuple(payload.property_codes),
+            )
+        )
+    except Exception as exc:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
+    return TrainingResultOut(
+        trained=[
+            ModelMetadataOut(
+                property_code=m.property_code,
+                version=m.version,
+                n_samples=m.n_samples,
+                n_features=m.n_features,
+                feature_names=list(m.feature_names),
+                cv_mean_r2=round(m.cv_mean_r2, 4),
+                cv_std_r2=round(m.cv_std_r2, 4),
+                training_recipe_ids=list(m.training_recipe_ids),
+                algorithm=m.algorithm,
+                fingerprint=m.fingerprint,
+            )
+            for m in result.trained
+        ],
+        skipped=result.skipped,
+    )
+
+
+@router.get(
+    "/ml/models",
+    response_model=list[ModelMetadataOut],
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="List regression models currently registered",
+    responses={**_UNAUTHORIZED},
+)
+async def list_models(
+    container: Annotated[Container, Depends(get_container)],
+) -> list[ModelMetadataOut]:
+    return [
+        ModelMetadataOut(
+            property_code=m.property_code,
+            version=m.version,
+            n_samples=m.n_samples,
+            n_features=m.n_features,
+            feature_names=list(m.feature_names),
+            cv_mean_r2=round(m.cv_mean_r2, 4),
+            cv_std_r2=round(m.cv_std_r2, 4),
+            training_recipe_ids=list(m.training_recipe_ids),
+            algorithm=m.algorithm,
+            fingerprint=m.fingerprint,
+        )
+        for m in container.property_regressor.list_models()
+    ]
+
+
+@router.get(
+    "/recipes/{recipe_id}/predict",
+    response_model=PredictionsOut,
+    tags=["ml", "recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Predict property values for a recipe using trained models",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def predict_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    property_code: list[str] = Query(default_factory=list),
+) -> PredictionsOut:
+    from ...application.use_cases.ml_predict import PredictPropertyQuery
+
+    result = await container.predict_properties.execute(
+        PredictPropertyQuery(
+            recipe_id=recipe_id,
+            property_codes=tuple(property_code),
+        )
+    )
+    if result is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return PredictionsOut(
+        recipe_id=recipe_id,
+        predictions=[
+            PropertyPredictionOut(
+                property_code=p.property_code,
+                predicted_value=p.predicted_value,
+                model_version=p.model_version,
+                model_cv_r2=p.model_cv_r2,
+                unit=p.unit,
+            )
+            for p in result
         ],
     )
 

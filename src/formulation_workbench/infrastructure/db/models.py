@@ -293,3 +293,79 @@ class AuditLogEntryModel(Base):
         Index("idx_audit_log_recipe_time", "recipe_id", "timestamp"),
         Index("idx_audit_log_user_time", "user_id", "timestamp"),
     )
+
+
+# ==============================================================================
+# Experiments
+# ==============================================================================
+class ExperimentRunModel(Base):
+    """One physical lab run against a specific ``(recipe_id, version)``."""
+
+    __tablename__ = "experiment_run"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid_str)
+    # Not a FK: recipes can be replaced (via create_new_version), migrated,
+    # or seeded from outside the ``recipe`` table — an ExperimentRun must
+    # survive those events for forensic purposes.  The relationship is
+    # enforced logically by ``recipe_repository`` reads.
+    recipe_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    recipe_version: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    title: Mapped[str] = mapped_column(String(256), nullable=False, default="")
+    hypothesis: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="planned", index=True)
+    verdict: Mapped[str | None] = mapped_column(String(32))
+    operator: Mapped[str] = mapped_column(String(128), nullable=False, default="")
+    notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+    # Batch fields — flattened to keep the schema simple.  We only ever
+    # need at most one batch per run.
+    batch_number: Mapped[str | None] = mapped_column(String(64))
+    batch_target_mass_kg: Mapped[float | None] = mapped_column(Float)
+    batch_actual_mass_kg: Mapped[float | None] = mapped_column(Float)
+    batch_equipment_used: Mapped[str | None] = mapped_column(String(128))
+    batch_lot_numbers_json: Mapped[str | None] = mapped_column(Text)
+
+    # target_properties is a JSON blob (list of TargetSpecification dumps).
+    # We denormalise here rather than modelling a full spec table because
+    # specs live *inside* recipes anyway.
+    target_properties_json: Mapped[str | None] = mapped_column(Text)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_utc_now, index=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    measured_values: Mapped[list[MeasuredValueModel]] = relationship(
+        "MeasuredValueModel",
+        back_populates="run",
+        cascade="all, delete-orphan",
+        order_by="MeasuredValueModel.property_code",
+    )
+
+
+class MeasuredValueModel(Base):
+    __tablename__ = "measured_value"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid_str)
+    run_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("experiment_run.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    property_code: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    value: Mapped[float] = mapped_column(Float, nullable=False)
+    unit: Mapped[str] = mapped_column(String(32), nullable=False, default="")
+    method_standard: Mapped[str | None] = mapped_column(String(64))
+    measured_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    operator: Mapped[str] = mapped_column(String(128), nullable=False, default="")
+    notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+    run: Mapped[ExperimentRunModel] = relationship(
+        "ExperimentRunModel", back_populates="measured_values"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("run_id", "property_code", name="uq_measured_value_run_property"),
+    )

@@ -18,6 +18,9 @@ from typing import TYPE_CHECKING
 
 from .regulatory import RegulatoryComplianceChecker, RegulatoryFinding
 from .regulatory import Severity as _RegSeverity
+from .stoichiometry import Severity as _StoichSeverity
+from .stoichiometry import StoichiometryReport
+from .stoichiometry import analyse as analyse_stoich
 from .technological_rules import RuleFinding, Severity
 from .technological_rules import evaluate as evaluate_tech
 from .verification_rules import VerificationRules, VerificationRuleViolation
@@ -43,6 +46,7 @@ class RecipeAssessment:
     findings: tuple[RuleFinding, ...]
     verification_violations: tuple[VerificationRuleViolation, ...] = field(default_factory=tuple)
     regulatory_findings: tuple[RegulatoryFinding, ...] = field(default_factory=tuple)
+    stoichiometry: StoichiometryReport | None = None
 
     @property
     def has_errors(self) -> bool:
@@ -56,19 +60,41 @@ class RecipeAssessment:
             return True
         return any(f.severity is _RegSeverity.WARNING for f in self.regulatory_findings)
 
-    def summary(self) -> dict[str, int | float | str]:
+    def summary(self) -> dict[str, int | float | str | bool | None]:
         """Compact dict useful for logging / metrics / API responses."""
         reg_err = sum(1 for f in self.regulatory_findings if f.severity is _RegSeverity.ERROR)
         reg_warn = sum(1 for f in self.regulatory_findings if f.severity is _RegSeverity.WARNING)
+        stoich_err = sum(
+            1
+            for f in (self.stoichiometry.findings if self.stoichiometry else ())
+            if f.severity is _StoichSeverity.ERROR
+        )
+        stoich_warn = sum(
+            1
+            for f in (self.stoichiometry.findings if self.stoichiometry else ())
+            if f.severity is _StoichSeverity.WARNING
+        )
         return {
             "score": self.score,
             "maturity": self.maturity.value,
-            "errors": sum(1 for f in self.findings if f.severity is Severity.ERROR) + reg_err,
-            "warnings": sum(1 for f in self.findings if f.severity is Severity.WARNING) + reg_warn,
+            "errors": (
+                sum(1 for f in self.findings if f.severity is Severity.ERROR) + reg_err + stoich_err
+            ),
+            "warnings": (
+                sum(1 for f in self.findings if f.severity is Severity.WARNING)
+                + reg_warn
+                + stoich_warn
+            ),
             "info": sum(1 for f in self.findings if f.severity is Severity.INFO),
             "verification_violations": len(self.verification_violations),
             "regulatory_errors": reg_err,
             "regulatory_warnings": reg_warn,
+            "stoichiometry_system": (
+                self.stoichiometry.detected_system if self.stoichiometry else "none"
+            ),
+            "stoichiometry_balanced": (
+                self.stoichiometry.is_balanced if self.stoichiometry else None
+            ),
         }
 
 
@@ -82,6 +108,8 @@ class RecipeAssessmentService:
     _PENALTY_VERIFICATION = 8.0
     _PENALTY_REGULATORY_ERROR = 30.0  # regulatory violations are the harshest
     _PENALTY_REGULATORY_WARNING = 5.0
+    _PENALTY_STOICHIOMETRY_ERROR = 20.0
+    _PENALTY_STOICHIOMETRY_WARNING = 4.0
 
     @classmethod
     def assess(
@@ -95,6 +123,7 @@ class RecipeAssessmentService:
         _, verif_violations = VerificationRules.can_be_verified(recipe)
         reg_checker = regulatory_checker or RegulatoryComplianceChecker()
         reg_findings = reg_checker.check(recipe, consumer_use=consumer_use)
+        stoich = analyse_stoich(recipe)
 
         score = 100.0
         for finding in tech_findings:
@@ -114,10 +143,17 @@ class RecipeAssessmentService:
                 score -= cls._PENALTY_REGULATORY_ERROR
             elif reg.severity is _RegSeverity.WARNING:
                 score -= cls._PENALTY_REGULATORY_WARNING
+        for sf in stoich.findings:
+            if sf.severity is _StoichSeverity.ERROR:
+                score -= cls._PENALTY_STOICHIOMETRY_ERROR
+            elif sf.severity is _StoichSeverity.WARNING:
+                score -= cls._PENALTY_STOICHIOMETRY_WARNING
 
         score = max(0.0, min(100.0, score))
-        has_errors = any(f.severity is Severity.ERROR for f in tech_findings) or any(
-            r.severity is _RegSeverity.ERROR for r in reg_findings
+        has_errors = (
+            any(f.severity is Severity.ERROR for f in tech_findings)
+            or any(r.severity is _RegSeverity.ERROR for r in reg_findings)
+            or any(sf.severity is _StoichSeverity.ERROR for sf in stoich.findings)
         )
         maturity = cls._maturity(score, has_errors=has_errors)
 
@@ -127,6 +163,7 @@ class RecipeAssessmentService:
             regulatory_findings=tuple(reg_findings),
             findings=tuple(tech_findings),
             verification_violations=tuple(verif_violations),
+            stoichiometry=stoich,
         )
 
     @staticmethod

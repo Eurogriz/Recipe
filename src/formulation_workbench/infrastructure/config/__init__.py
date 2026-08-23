@@ -69,6 +69,7 @@ class AppSettings(BaseSettings):
     # ---- Paths ---------------------------------------------------------------
     data_dir: Path = Path("./data")
     export_dir: Path = Path("./exports")
+    model_dir: Path = Path("./data/models")
 
     # ---- Observability -------------------------------------------------------
     metrics_enabled: bool = True

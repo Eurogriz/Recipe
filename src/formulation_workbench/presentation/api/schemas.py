@@ -250,6 +250,24 @@ class RegulatoryFindingOut(BaseModel):
     reference: str = ""
 
 
+class StoichiometryFindingOut(BaseModel):
+    rule_id: str = Field(examples=["S3"])
+    severity: str = Field(examples=["warning"])
+    message: str
+    reference: str = ""
+
+
+class StoichiometryOut(BaseModel):
+    detected_system: str = Field(examples=["polyurethane"])
+    reactive_equivalents_per_100g: float
+    co_reactive_equivalents_per_100g: float
+    ratio_reactive_to_co: float | None = None
+    recommended_ratio_low: float
+    recommended_ratio_high: float
+    is_balanced: bool
+    findings: list[StoichiometryFindingOut] = Field(default_factory=list)
+
+
 class RecipeAssessmentOut(BaseModel):
     """Full quality report of one recipe."""
 
@@ -259,7 +277,8 @@ class RecipeAssessmentOut(BaseModel):
     findings: list[RuleFindingOut]
     verification_violations: list[VerificationViolationOut] = Field(default_factory=list)
     regulatory_findings: list[RegulatoryFindingOut] = Field(default_factory=list)
-    summary: dict[str, int | float | str]
+    stoichiometry: StoichiometryOut | None = None
+    summary: dict[str, int | float | str | bool | None]
 
 
 # ---------------------------------------------------------------------------
@@ -363,6 +382,52 @@ class ApplyLabResultsOut(BaseModel):
     deviations: list[DeviationOut] = Field(default_factory=list)
 
 
+# ---------------------------------------------------------------------------
+# ML
+# ---------------------------------------------------------------------------
+class TrainModelsRequest(BaseModel):
+    recipe_ids: list[str] = Field(
+        default_factory=list,
+        description="Recipe IDs whose experiments feed the training set. "
+        "Empty = no cross-recipe training (repository does not expose 'list all').",
+    )
+    property_codes: list[str] = Field(
+        default_factory=list,
+        description="Restrict training to a subset of property codes. Empty = all.",
+    )
+
+
+class ModelMetadataOut(BaseModel):
+    property_code: str
+    version: str = Field(examples=["20260823T103011Z"])
+    n_samples: int
+    n_features: int
+    feature_names: list[str]
+    cv_mean_r2: float = Field(examples=[0.87])
+    cv_std_r2: float = Field(examples=[0.04])
+    training_recipe_ids: list[str] = Field(default_factory=list)
+    algorithm: str
+    fingerprint: str
+
+
+class TrainingResultOut(BaseModel):
+    trained: list[ModelMetadataOut]
+    skipped: dict[str, str] = Field(default_factory=dict)
+
+
+class PropertyPredictionOut(BaseModel):
+    property_code: str
+    predicted_value: float
+    model_version: str
+    model_cv_r2: float
+    unit: str = ""
+
+
+class PredictionsOut(BaseModel):
+    recipe_id: str
+    predictions: list[PropertyPredictionOut]
+
+
 class ValidationErrorResponse(BaseModel):
     detail: list[dict[str, Any]] = Field(
         examples=[
@@ -395,9 +460,12 @@ __all__ = [
     "ExperimentOut",
     "ExperimentPlanIn",
     "HealthResponse",
+    "ModelMetadataOut",
+    "PredictionsOut",
     "PriceIn",
     "ProcessMeasuredIn",
     "ProcessParamsIn",
+    "PropertyPredictionOut",
     "RecipeAssessmentOut",
     "RecipeCostOut",
     "RecipeSummary",
@@ -405,7 +473,11 @@ __all__ = [
     "RejectRequest",
     "RuleFindingOut",
     "SearchResponse",
+    "StoichiometryFindingOut",
+    "StoichiometryOut",
     "SubmitReviewRequest",
+    "TrainModelsRequest",
+    "TrainingResultOut",
     "UpdateRecipeRequest",
     "ValidationErrorResponse",
     "VerificationViolationOut",

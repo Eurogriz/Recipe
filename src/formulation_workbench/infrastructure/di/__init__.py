@@ -19,6 +19,8 @@ from ...application.use_cases.calculate_cost import CalculateRecipeCostUseCase
 from ...application.use_cases.create_recipe import CreateRecipeUseCase
 from ...application.use_cases.delete_recipe import DeleteRecipeUseCase
 from ...application.use_cases.get_recipe import GetAllRecipeVersionsUseCase, GetRecipeByIdUseCase
+from ...application.use_cases.ml_predict import PredictPropertiesUseCase
+from ...application.use_cases.ml_train import TrainPropertyModelsUseCase
 from ...application.use_cases.search_recipes import (
     GetCatalogStatisticsUseCase,
     SearchRecipesUseCase,
@@ -32,8 +34,9 @@ from ...application.use_cases.verification_workflow import (
 )
 from ..config import AppSettings, get_settings
 from ..db.connection import Database
-from ..db.repositories.inmemory_experiment_repository import InMemoryExperimentRepository
 from ..db.repositories.session_scoped import ScopedAuditLogger, ScopedRecipeRepository
+from ..db.repositories.sqlalchemy_experiment_repository import ScopedExperimentRepository
+from ..ml.property_regressor import PropertyRegressor
 
 if TYPE_CHECKING:
     from ...application.ports.audit_logger import AuditLogger
@@ -72,6 +75,9 @@ class Container:
     calculate_cost: CalculateRecipeCostUseCase
     apply_lab_results: ApplyLabResultsUseCase
     experiment_repository: ExperimentRepository
+    property_regressor: PropertyRegressor
+    train_property_models: TrainPropertyModelsUseCase
+    predict_properties: PredictPropertiesUseCase
 
     @classmethod
     async def build(cls, settings: AppSettings | None = None) -> Container:
@@ -93,7 +99,8 @@ class Container:
 
         recipe_repository = ScopedRecipeRepository(database)
         audit_logger = ScopedAuditLogger(database)
-        experiment_repository = InMemoryExperimentRepository()
+        experiment_repository = ScopedExperimentRepository(database)
+        property_regressor = PropertyRegressor(storage_dir=settings.model_dir)
 
         return cls(
             settings=settings,
@@ -117,6 +124,11 @@ class Container:
             apply_lab_results=ApplyLabResultsUseCase(
                 experiment_repository, recipe_repository, audit_logger
             ),
+            property_regressor=property_regressor,
+            train_property_models=TrainPropertyModelsUseCase(
+                experiment_repository, recipe_repository, property_regressor
+            ),
+            predict_properties=PredictPropertiesUseCase(recipe_repository, property_regressor),
         )
 
     async def close(self) -> None:
