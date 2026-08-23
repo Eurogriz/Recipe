@@ -7,6 +7,77 @@
 
 ---
 
+## [1.3.0] — Cost, REACH compliance, and lab-loop apply (2026-08-23)
+
+Шестой раунд — расширение доменного слоя v1.2 в сторону *денег*,
+*регуляторики* и *замыкания лабораторного цикла*.
+
+### Added — Cost model
+
+- `Price` value object (`amount`, `currency`, `unit`) с валидацией:
+  ISO 4217 alphabetic currency, unit из `{kg, g, t, l, ml, m3}`. Метод
+  `per_kg(density_g_per_cm3=…)` конвертирует объёмные цены в массовые
+  когда есть density.
+- `RecipeCostCalculator` (domain-сервис) — считает
+  `RecipeCost(currency, total_cost_per_kg, total_cost_per_litre,
+  priced_fraction, lines, missing_prices)`. Строит корректный breakdown
+  даже когда часть цен отсутствует (по `priced_fraction`).
+- `CalculateRecipeCostUseCase` + endpoint
+  **`POST /recipes/{id}/cost`** — принимает список цен, возвращает
+  разбивку.
+
+### Added — REACH / SVHC compliance
+
+- `RegulatoryComplianceChecker` (domain-сервис) — проверяет
+  compact-snapshot ECHA SVHC candidate list (20 записей) и REACH
+  Annex XVII (8 записей, из ~80 применимых к coatings). Injection
+  альтернативных списков через конструктор для тестов и обновления
+  без релиза.
+- `SubstanceRestriction` value object (CAS + name + max_concentration
+  + scope + reference).
+- `RegulatoryFinding(rule_id, severity, substance, cas_number, message,
+  reference)` с 3 severity уровнями.
+- **Интеграция с `RecipeAssessment`**: penalty
+  `REGULATORY_ERROR=30`, `REGULATORY_WARNING=5`. Regulatory-error
+  автоматически ограничивает `Maturity` до `DRAFT` максимум, даже при
+  высоком score. Live: рецепт с 0.1 % свинца получил
+  `score 56.0 / draft` + REACH-XVII ERROR + REACH-SVHC WARNING.
+- Assessment response обогащён `regulatory_findings`.
+
+### Added — Lab loop apply
+
+- `ExperimentRepository` port + `InMemoryExperimentRepository`
+  реализация (полноценный SQLAlchemy backend — в следующей миграции).
+- `ApplyLabResultsUseCase` с тремя режимами:
+  - **`annotate`** — audit-log only.
+  - **`branch`** — создаёт новую версию рецепта (`create_new_version()`
+    для Verified, ручной bump для остальных) с тегом
+    `branched-from-exp-{id}`.
+  - **`promote`** — принудительно проводит рецепт через
+    `submit_for_review()` → 3× `verify()` → VERIFIED. Требует
+    `verdict=PASSED`. Ограничен writer-scope на HTTP-уровне.
+- Deviations вычисляются автоматически из
+  `MeasuredValue × TargetSpecification`.
+- Полный API-контур для лаборатории:
+  - **`POST /experiments`** — планирование run.
+  - **`GET /experiments/{id}`** — детали.
+  - **`POST /experiments/{id}/complete`** — batch + measurements +
+    auto-verdict. Backfill `target_properties` из рецепта если
+    experiment был запланирован без них.
+  - **`POST /experiments/{id}/apply`** — применить результаты.
+
+### Metrics after 1.3.0
+
+- **301 тест зелёные** (+28 к 273: 6 cost, 12 regulatory, 8 API
+  cost/experiments/apply, 2 tuning).
+- **Coverage 81.64 %** (было 80.48 %, gate 60 %).
+- **Ruff clean · Ruff-format clean · Bandit clean · MyPy clean**
+  (84 source files).
+- Live: полный flow POST recipe → GET assessment (score/reg) → POST cost
+  → POST experiment → complete → apply работает через API.
+
+---
+
 ## [1.2.0] — Formulation domain production-grade (2026-08-23)
 
 Пятый раунд — качество разработки самих рецептур, а не инфраструктуры.

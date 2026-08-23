@@ -239,6 +239,17 @@ class VerificationViolationOut(BaseModel):
     message: str
 
 
+class RegulatoryFindingOut(BaseModel):
+    """One regulatory (REACH / Annex XVII) finding."""
+
+    rule_id: str = Field(examples=["REACH-XVII"])
+    severity: str = Field(examples=["error"])
+    substance: str
+    cas_number: str = Field(examples=["7439-92-1"])
+    message: str
+    reference: str = ""
+
+
 class RecipeAssessmentOut(BaseModel):
     """Full quality report of one recipe."""
 
@@ -247,7 +258,109 @@ class RecipeAssessmentOut(BaseModel):
     maturity: str = Field(examples=["production_ready"])
     findings: list[RuleFindingOut]
     verification_violations: list[VerificationViolationOut] = Field(default_factory=list)
+    regulatory_findings: list[RegulatoryFindingOut] = Field(default_factory=list)
     summary: dict[str, int | float | str]
+
+
+# ---------------------------------------------------------------------------
+# Cost
+# ---------------------------------------------------------------------------
+class PriceIn(BaseModel):
+    """Price of a raw material (POST body element)."""
+
+    component_name: str = Field(examples=["Water"])
+    amount: float = Field(examples=[3.00])
+    currency: str = Field(examples=["EUR"], min_length=3, max_length=3)
+    unit: str = Field(examples=["kg"], pattern=r"^(kg|g|t|l|ml|m3)$")
+
+
+class CostRequest(BaseModel):
+    """POST body for /recipes/{id}/cost."""
+
+    prices: list[PriceIn]
+
+
+class CostLineOut(BaseModel):
+    component_name: str
+    mass_percent: float
+    unit_price_amount: float | None = None
+    unit_price_currency: str | None = None
+    unit_price_unit: str | None = None
+    cost_per_kg_recipe: float | None = None
+
+
+class RecipeCostOut(BaseModel):
+    recipe_id: str
+    currency: str
+    cost_per_kg: float
+    cost_per_litre: float | None = None
+    priced_fraction: float
+    lines: list[CostLineOut]
+    missing_prices: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Experiments
+# ---------------------------------------------------------------------------
+class ProcessMeasuredIn(BaseModel):
+    property_code: str = Field(examples=["gloss_60"])
+    value: float
+    unit: str = ""
+    operator: str = ""
+    notes: str = ""
+
+
+class BatchInfoIn(BaseModel):
+    batch_number: str = Field(examples=["B-2026-001"])
+    target_mass_kg: float = Field(gt=0)
+    actual_mass_kg: float | None = None
+    lot_numbers: dict[str, str] = Field(default_factory=dict)
+    equipment_used: str = ""
+
+
+class ExperimentPlanIn(BaseModel):
+    recipe_id: str
+    recipe_version: int = Field(ge=1)
+    title: str = ""
+    hypothesis: str = ""
+    operator: str = ""
+
+
+class ExperimentCompletionIn(BaseModel):
+    batch: BatchInfoIn
+    measured_properties: list[ProcessMeasuredIn]
+
+
+class ExperimentOut(BaseModel):
+    id: str
+    recipe_id: str
+    recipe_version: int
+    title: str
+    status: str
+    verdict: str | None
+    operator: str
+    measured_properties: list[ProcessMeasuredIn] = Field(default_factory=list)
+
+
+class ApplyLabResultsIn(BaseModel):
+    actor: str = Field(examples=["editor@example.com"])
+    mode: str = Field(default="annotate", pattern=r"^(annotate|branch|promote)$")
+    change_note: str = ""
+
+
+class DeviationOut(BaseModel):
+    property_code: str
+    target_value: float
+    measured_value: float
+    unit: str = ""
+
+
+class ApplyLabResultsOut(BaseModel):
+    original_recipe_id: str
+    resulting_recipe_id: str
+    verdict: str
+    mode: str
+    deviations: list[DeviationOut] = Field(default_factory=list)
 
 
 class ValidationErrorResponse(BaseModel):
@@ -266,16 +379,29 @@ class ValidationErrorResponse(BaseModel):
 
 __all__ = [
     "AppInfo",
+    "ApplyLabResultsIn",
+    "ApplyLabResultsOut",
+    "BatchInfoIn",
     "CatalogStats",
     "CitationIn",
     "ComponentIn",
     "CompositionStageIn",
+    "CostLineOut",
+    "CostRequest",
     "CreateRecipeRequest",
+    "DeviationOut",
     "ErrorResponse",
+    "ExperimentCompletionIn",
+    "ExperimentOut",
+    "ExperimentPlanIn",
     "HealthResponse",
+    "PriceIn",
+    "ProcessMeasuredIn",
     "ProcessParamsIn",
     "RecipeAssessmentOut",
+    "RecipeCostOut",
     "RecipeSummary",
+    "RegulatoryFindingOut",
     "RejectRequest",
     "RuleFindingOut",
     "SearchResponse",

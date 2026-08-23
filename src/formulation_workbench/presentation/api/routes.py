@@ -38,12 +38,23 @@ from .dependencies import get_container, get_settings
 from .mappers import to_recipe
 from .schemas import (
     AppInfo,
+    ApplyLabResultsIn,
+    ApplyLabResultsOut,
     CatalogStats,
+    CostLineOut,
+    CostRequest,
     CreateRecipeRequest,
+    DeviationOut,
     ErrorResponse,
+    ExperimentCompletionIn,
+    ExperimentOut,
+    ExperimentPlanIn,
     HealthResponse,
+    ProcessMeasuredIn,
     RecipeAssessmentOut,
+    RecipeCostOut,
     RecipeSummary,
+    RegulatoryFindingOut,
     RejectRequest,
     RuleFindingOut,
     SearchResponse,
@@ -392,7 +403,261 @@ async def assess_recipe(
             VerificationViolationOut(rule=v.rule, message=v.message)
             for v in assessment.verification_violations
         ],
+        regulatory_findings=[
+            RegulatoryFindingOut(
+                rule_id=r.rule_id,
+                severity=r.severity.value,
+                substance=r.substance,
+                cas_number=r.cas_number,
+                message=r.message,
+                reference=r.reference,
+            )
+            for r in assessment.regulatory_findings
+        ],
         summary=assessment.summary(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Cost
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/cost",
+    response_model=RecipeCostOut,
+    tags=["recipes", "cost"],
+    dependencies=[Depends(require_reader)],
+    summary="Calculate per-kg / per-litre cost for a supplied price list",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def cost_recipe(
+    recipe_id: str,
+    payload: CostRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeCostOut:
+    from ...application.use_cases.calculate_cost import CalculateRecipeCostCommand
+    from ...domain.value_objects.cost import InvalidPriceError, Price
+
+    prices: dict[str, Price] = {}
+    for item in payload.prices:
+        try:
+            prices[item.component_name] = Price(
+                amount=item.amount, currency=item.currency, unit=item.unit
+            )
+        except InvalidPriceError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    cost = await container.calculate_cost.execute(
+        CalculateRecipeCostCommand(recipe_id=recipe_id, prices=prices)
+    )
+    if cost is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    return RecipeCostOut(
+        recipe_id=recipe_id,
+        currency=cost.currency,
+        cost_per_kg=round(cost.total_cost_per_kg, 6),
+        cost_per_litre=(round(cost.total_cost_per_litre, 6) if cost.total_cost_per_litre else None),
+        priced_fraction=cost.priced_fraction,
+        lines=[
+            CostLineOut(
+                component_name=ln.component_name,
+                mass_percent=ln.mass_percent,
+                unit_price_amount=(ln.unit_price.amount if ln.unit_price else None),
+                unit_price_currency=(ln.unit_price.currency if ln.unit_price else None),
+                unit_price_unit=(ln.unit_price.unit if ln.unit_price else None),
+                cost_per_kg_recipe=ln.cost_per_kg_recipe,
+            )
+            for ln in cost.lines
+        ],
+        missing_prices=list(cost.missing_prices),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Experiments
+# ---------------------------------------------------------------------------
+@router.post(
+    "/experiments",
+    response_model=ExperimentOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["experiments"],
+    dependencies=[Depends(require_writer)],
+    summary="Plan a new experiment against a recipe version",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_VALIDATION},
+)
+async def plan_experiment(
+    payload: ExperimentPlanIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> ExperimentOut:
+    from ...domain.entities.experiment import ExperimentRun
+
+    run = ExperimentRun(
+        recipe_id=payload.recipe_id,
+        recipe_version=payload.recipe_version,
+        title=payload.title,
+        hypothesis=payload.hypothesis,
+        operator=payload.operator,
+    )
+    await container.experiment_repository.save(run)
+    return _experiment_out(run)
+
+
+@router.get(
+    "/experiments/{experiment_id}",
+    response_model=ExperimentOut,
+    tags=["experiments"],
+    dependencies=[Depends(require_reader)],
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_experiment(
+    experiment_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> ExperimentOut:
+    run = await container.experiment_repository.get_by_id(experiment_id)
+    if run is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Experiment not found")
+    return _experiment_out(run)
+
+
+@router.post(
+    "/experiments/{experiment_id}/complete",
+    response_model=ExperimentOut,
+    tags=["experiments"],
+    dependencies=[Depends(require_writer)],
+    summary="Record batch + measured properties, compute verdict",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT, **_VALIDATION},
+)
+async def complete_experiment(
+    experiment_id: str,
+    payload: ExperimentCompletionIn,
+    container: Annotated[Container, Depends(get_container)],
+) -> ExperimentOut:
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...domain.entities.experiment import BatchInfo, InvalidExperimentError, MeasuredValue
+
+    run = await container.experiment_repository.get_by_id(experiment_id)
+    if run is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Experiment not found")
+    # Backfill target_properties from the recipe if the experiment was
+    # planned without them (which we allow for free-form exploratory runs).
+    if not run.target_properties:
+        recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=run.recipe_id))
+        if recipe is not None:
+            run = run.__class__(  # type: ignore[misc]
+                recipe_id=run.recipe_id,
+                recipe_version=run.recipe_version,
+                id=run.id,
+                title=run.title,
+                hypothesis=run.hypothesis,
+                status=run.status,
+                target_properties=recipe.target_properties,
+                operator=run.operator,
+                created_at=run.created_at,
+            )
+    try:
+        completed = run.complete(
+            BatchInfo(
+                batch_number=payload.batch.batch_number,
+                target_mass_kg=payload.batch.target_mass_kg,
+                actual_mass_kg=payload.batch.actual_mass_kg,
+                lot_numbers=payload.batch.lot_numbers,
+                equipment_used=payload.batch.equipment_used,
+            ),
+            tuple(
+                MeasuredValue(
+                    property_code=m.property_code,
+                    value=m.value,
+                    unit=m.unit,
+                    operator=m.operator,
+                    notes=m.notes,
+                )
+                for m in payload.measured_properties
+            ),
+        )
+    except InvalidExperimentError as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+
+    await container.experiment_repository.save(completed)
+    return _experiment_out(completed)
+
+
+@router.post(
+    "/experiments/{experiment_id}/apply",
+    response_model=ApplyLabResultsOut,
+    tags=["experiments"],
+    dependencies=[Depends(require_writer)],
+    summary="Apply lab results to the recipe (annotate / branch / promote)",
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT},
+)
+async def apply_lab_results(
+    experiment_id: str,
+    payload: ApplyLabResultsIn,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> ApplyLabResultsOut:
+    from ...application.use_cases.apply_lab_results import (
+        ApplyLabResultsCommand,
+        ApplyLabResultsError,
+        ApplyMode,
+    )
+
+    try:
+        mode = ApplyMode(payload.mode)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    try:
+        result = await container.apply_lab_results.execute(
+            ApplyLabResultsCommand(
+                experiment_id=experiment_id,
+                actor=payload.actor or principal.subject,
+                mode=mode,
+                change_note=payload.change_note,
+            )
+        )
+    except ApplyLabResultsError as exc:
+        # Distinguish 404 vs 409.
+        detail = str(exc)
+        if "not found" in detail.lower():
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, detail) from exc
+
+    return ApplyLabResultsOut(
+        original_recipe_id=result.original_recipe_id,
+        resulting_recipe_id=result.resulting_recipe_id,
+        verdict=result.verdict.value,
+        mode=result.mode.value,
+        deviations=[
+            DeviationOut(
+                property_code=d.property_code,
+                target_value=d.target_value,
+                measured_value=d.measured_value,
+                unit=d.unit,
+            )
+            for d in result.deviations
+        ],
+    )
+
+
+def _experiment_out(run) -> ExperimentOut:  # type: ignore[no-untyped-def]
+    return ExperimentOut(
+        id=run.id,
+        recipe_id=run.recipe_id,
+        recipe_version=run.recipe_version,
+        title=run.title,
+        status=run.status.value,
+        verdict=run.verdict.value if run.verdict is not None else None,
+        operator=run.operator,
+        measured_properties=[
+            ProcessMeasuredIn(
+                property_code=mv.property_code,
+                value=mv.value,
+                unit=mv.unit,
+                operator=mv.operator,
+                notes=mv.notes,
+            )
+            for mv in run.measured_properties
+        ],
     )
 
 

@@ -13,7 +13,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from ...application.use_cases.apply_lab_results import ApplyLabResultsUseCase
 from ...application.use_cases.assess_recipe import AssessRecipeUseCase
+from ...application.use_cases.calculate_cost import CalculateRecipeCostUseCase
 from ...application.use_cases.create_recipe import CreateRecipeUseCase
 from ...application.use_cases.delete_recipe import DeleteRecipeUseCase
 from ...application.use_cases.get_recipe import GetAllRecipeVersionsUseCase, GetRecipeByIdUseCase
@@ -30,10 +32,12 @@ from ...application.use_cases.verification_workflow import (
 )
 from ..config import AppSettings, get_settings
 from ..db.connection import Database
+from ..db.repositories.inmemory_experiment_repository import InMemoryExperimentRepository
 from ..db.repositories.session_scoped import ScopedAuditLogger, ScopedRecipeRepository
 
 if TYPE_CHECKING:
     from ...application.ports.audit_logger import AuditLogger
+    from ...application.ports.experiment_repository import ExperimentRepository
     from ...application.ports.recipe_repository import RecipeRepository
 
 logger = logging.getLogger(__name__)
@@ -65,6 +69,9 @@ class Container:
     reject_recipe: RejectRecipeUseCase
     create_new_version: CreateNewVersionUseCase
     assess_recipe: AssessRecipeUseCase
+    calculate_cost: CalculateRecipeCostUseCase
+    apply_lab_results: ApplyLabResultsUseCase
+    experiment_repository: ExperimentRepository
 
     @classmethod
     async def build(cls, settings: AppSettings | None = None) -> Container:
@@ -86,12 +93,14 @@ class Container:
 
         recipe_repository = ScopedRecipeRepository(database)
         audit_logger = ScopedAuditLogger(database)
+        experiment_repository = InMemoryExperimentRepository()
 
         return cls(
             settings=settings,
             database=database,
             recipe_repository=recipe_repository,
             audit_logger=audit_logger,
+            experiment_repository=experiment_repository,
             create_recipe=CreateRecipeUseCase(recipe_repository, audit_logger),
             update_recipe=UpdateRecipeUseCase(recipe_repository, audit_logger),
             delete_recipe=DeleteRecipeUseCase(recipe_repository, audit_logger),
@@ -104,6 +113,10 @@ class Container:
             reject_recipe=RejectRecipeUseCase(recipe_repository, audit_logger),
             create_new_version=CreateNewVersionUseCase(recipe_repository, audit_logger),
             assess_recipe=AssessRecipeUseCase(recipe_repository),
+            calculate_cost=CalculateRecipeCostUseCase(recipe_repository),
+            apply_lab_results=ApplyLabResultsUseCase(
+                experiment_repository, recipe_repository, audit_logger
+            ),
         )
 
     async def close(self) -> None:
