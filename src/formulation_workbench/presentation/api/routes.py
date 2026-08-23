@@ -8,6 +8,7 @@ principal (see :mod:`.auth`).
 
 from __future__ import annotations
 
+import logging
 from dataclasses import asdict
 from typing import Annotated, Any
 
@@ -63,6 +64,12 @@ from .schemas import (
     CatalogStats,
     CategoryBreakdownOut,
     CitationOut,
+    CompareComponentCellOut,
+    CompareComponentRowOut,
+    ComparePropertyCellOut,
+    ComparePropertyRowOut,
+    CompareRecipeHeaderOut,
+    CompareResultOut,
     ComponentMatchOut,
     ComponentOut,
     CompositionStageOut,
@@ -145,6 +152,8 @@ from .schemas import (
     VerificationViolationOut,
     VerifyRequest,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -840,6 +849,231 @@ async def recipes_by_component(
             )
             for m in result.matches
         ],
+    )
+
+
+# --------------------------------------------------------------------------- compare
+
+
+_COMPARE_MAX_RECIPES = 4
+_COMPARE_DIFF_THRESHOLD_PERCENT = 0.1
+
+
+@router.get(
+    "/recipes/compare",
+    response_model=CompareResultOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Side-by-side compare of 2–4 recipes: components (CAS × recipe) "
+        "and ML property predictions (property × recipe)"
+    ),
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def recipes_compare(
+    container: Annotated[Container, Depends(get_container)],
+    ids: str = Query(
+        min_length=1,
+        max_length=256,
+        description=(
+            "Comma-separated recipe ids to compare, 2 to "
+            f"{_COMPARE_MAX_RECIPES}.  Order in the response follows "
+            "the order passed here."
+        ),
+    ),
+    diff_threshold: float = Query(
+        default=_COMPARE_DIFF_THRESHOLD_PERCENT,
+        ge=0.0,
+        le=100.0,
+        description=(
+            "Mass-percent delta above which a component row is "
+            "flagged as ``is_diff=true``.  UI uses this to highlight "
+            "meaningful deltas and ignore rounding noise."
+        ),
+    ),
+) -> CompareResultOut:
+    """Aggregate compare for the ``/compare`` UI page.
+
+    Bundles composition + ML predictions in one round-trip so the UI
+    doesn't need N×2 API calls (which used to be the workaround
+    before v1.26).  ML predictions come from the same regressor the
+    recipe-detail page uses; a recipe without a trained model for a
+    given property just gets ``None`` in its cell.
+
+    Deliberately cheap: ``get_recipe.execute`` per id (cached-ish
+    inside the repository), then a single ``predict_properties``
+    call per recipe.  For 4 recipes × 4 models this is 4 SQL + 4
+    ML calls, ~200 ms end-to-end on the seed catalogue.
+    """
+    from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+    from ...application.use_cases.ml_predict import PredictPropertyQuery
+
+    id_list = [x.strip() for x in ids.split(",") if x.strip()]
+    if not 2 <= len(id_list) <= _COMPARE_MAX_RECIPES:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Compare requires 2..{_COMPARE_MAX_RECIPES} recipe ids, got {len(id_list)}",
+        )
+    if len(set(id_list)) != len(id_list):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "Compare recipe ids must be unique",
+        )
+
+    # Load every recipe up-front — a single missing id kills the
+    # request rather than silently returning a partial grid.
+    recipes = []
+    for rid in id_list:
+        recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=rid))
+        if recipe is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Recipe not found: {rid}")
+        recipes.append(recipe)
+
+    headers = [
+        CompareRecipeHeaderOut(
+            id=r.id,
+            category=r.category,
+            subcategory=r.subcategory,
+            binder_type=r.binder_type,
+            product_class=r.product_class.value,
+            status=r.status.state.value,
+            version=r.version,
+        )
+        for r in recipes
+    ]
+
+    # --- Build the CAS × recipe matrix ---------------------------------
+    #
+    # For each recipe: sum mass_percent across all stages of the same
+    # CAS (a recipe may mention TiO2 in two stages — we show the
+    # total).  We remember the FIRST occurrence's display name and
+    # stage number as the "canonical" pointer, so the UI can label
+    # the cell.
+    per_recipe_cas: list[dict[str, dict[str, Any]]] = []
+    for recipe in recipes:
+        cas_map: dict[str, dict[str, Any]] = {}
+        for stage in recipe.stages:
+            for comp in stage.components:
+                cas = comp.cas_number or ""
+                if not cas:
+                    continue
+                if cas not in cas_map:
+                    cas_map[cas] = {
+                        "mass_percent": 0.0,
+                        "stage_number": stage.stage_number,
+                        "display_name": comp.name,
+                    }
+                cas_map[cas]["mass_percent"] += float(comp.mass_percent)
+        per_recipe_cas.append(cas_map)
+
+    all_cas: set[str] = set()
+    for m in per_recipe_cas:
+        all_cas.update(m.keys())
+
+    # Pick a canonical display name — the first non-empty from any
+    # recipe.  Different recipes may spell the same CAS differently
+    # (TiO2 vs "Titanium dioxide" vs "Kronos 2310"); we surface the
+    # variants in the cell display_name but pick one for the row
+    # header.
+    canonical_name: dict[str, str] = {}
+    for cas in all_cas:
+        for m in per_recipe_cas:
+            if cas in m and m[cas]["display_name"]:
+                canonical_name[cas] = m[cas]["display_name"]
+                break
+        canonical_name.setdefault(cas, cas)
+
+    # Sort rows by max mass_percent across recipes DESC — the
+    # operator's eye lands on the dominant materials first.
+    def _row_max(cas: str) -> float:
+        return max(
+            (m[cas]["mass_percent"] for m in per_recipe_cas if cas in m),
+            default=0.0,
+        )
+
+    component_rows: list[CompareComponentRowOut] = []
+    for cas in sorted(all_cas, key=lambda c: -_row_max(c)):
+        cells = [
+            CompareComponentCellOut(
+                mass_percent=(m[cas]["mass_percent"] if cas in m else None),
+                stage_number=(m[cas]["stage_number"] if cas in m else None),
+                display_name=(m[cas]["display_name"] if cas in m else ""),
+            )
+            for m in per_recipe_cas
+        ]
+        present = [c.mass_percent for c in cells if c.mass_percent is not None]
+        # ``is_diff`` = at least one recipe missing the CAS, OR the
+        # spread across those that HAVE it exceeds the threshold.
+        row_diff = len(present) != len(recipes) or (
+            len(present) >= 2 and (max(present) - min(present)) > diff_threshold
+        )
+        component_rows.append(
+            CompareComponentRowOut(
+                cas_number=cas,
+                canonical_name=canonical_name[cas],
+                is_diff=row_diff,
+                cells=cells,
+            )
+        )
+
+    # --- Build the property × recipe matrix ----------------------------
+    per_recipe_predictions: list[dict[str, tuple[float, str]]] = []
+    for recipe in recipes:
+        try:
+            preds = await container.predict_properties.execute(
+                PredictPropertyQuery(recipe_id=recipe.id)
+            )
+        except Exception as exc:  # pragma: no cover — model I/O
+            logger.warning(
+                "compare_prediction_failed",
+                extra={"recipe_id": recipe.id, "error": str(exc)},
+            )
+            preds = []
+        prop_map: dict[str, tuple[float, str]] = {}
+        for p in preds or []:
+            prop_map[p.property_code] = (float(p.predicted_value), p.unit or "")
+        per_recipe_predictions.append(prop_map)
+
+    all_props: set[str] = set()
+    for pm in per_recipe_predictions:
+        all_props.update(pm.keys())
+
+    property_rows: list[ComparePropertyRowOut] = []
+    for prop in sorted(all_props):
+        prop_cells: list[ComparePropertyCellOut] = []
+        prop_values: list[float] = []
+        for pm in per_recipe_predictions:
+            if prop in pm:
+                v, u = pm[prop]
+                prop_values.append(v)
+                prop_cells.append(ComparePropertyCellOut(predicted_value=v, unit=u))
+            else:
+                prop_cells.append(ComparePropertyCellOut(predicted_value=None, unit=""))
+        # For properties: ``is_diff`` when the relative spread is >5%
+        # of the mean (rough rule of thumb — a 5% delta in gloss or
+        # viscosity matters, a 5% delta in R² noise does not).
+        prop_diff = False
+        if len(prop_values) >= 2:
+            mean = sum(prop_values) / len(prop_values)
+            spread = max(prop_values) - min(prop_values)
+            prop_diff = mean != 0 and abs(spread / mean) > 0.05
+        elif 0 < len(prop_values) < len(recipes):
+            # One recipe has a prediction, another doesn't — that's
+            # a diff worth flagging.
+            prop_diff = True
+        property_rows.append(
+            ComparePropertyRowOut(
+                property_code=prop,
+                is_diff=prop_diff,
+                cells=prop_cells,
+            )
+        )
+
+    return CompareResultOut(
+        recipes=headers,
+        components=component_rows,
+        properties=property_rows,
+        diff_threshold_percent=diff_threshold,
     )
 
 

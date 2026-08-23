@@ -94,6 +94,14 @@ export const api = {
   catalogFacets: () => request<CatalogFacetsOut>("/catalog/facets"),
   /** One-shot dashboard payload (v1.21) — replaces 5 independent GETs. */
   dashboardSummary: () => request<DashboardSummaryOut>("/dashboard/summary"),
+  /** Side-by-side compare (v1.26). */
+  recipesCompare: (params: { ids: string[]; diff_threshold?: number }) => {
+    const q = new URLSearchParams({ ids: params.ids.join(",") });
+    if (params.diff_threshold !== undefined)
+      q.set("diff_threshold", String(params.diff_threshold));
+    return request<CompareResultOut>(`/recipes/compare?${q.toString()}`);
+  },
+
   /** Reverse composition search — CAS → recipes (v1.25). */
   recipesByComponent: (params: {
     cas: string;
@@ -568,6 +576,53 @@ export interface CatalogFacetsOut {
   by_subcategory: Record<string, Record<string, number>>;
   by_product_class: Record<string, number>;
   by_status: Record<string, number>;
+}
+
+/** Column header of the compare grid (v1.26). */
+export interface CompareRecipeHeaderOut {
+  id: string;
+  category: string;
+  subcategory: string;
+  binder_type: string;
+  product_class: string;
+  status: string;
+  version: number;
+}
+
+/** One cell of the composition compare grid (v1.26). */
+export interface CompareComponentCellOut {
+  mass_percent: number | null;
+  stage_number: number | null;
+  display_name: string;
+}
+
+/** One CAS-row of the composition compare grid (v1.26). */
+export interface CompareComponentRowOut {
+  cas_number: string;
+  canonical_name: string;
+  is_diff: boolean;
+  cells: CompareComponentCellOut[];
+}
+
+/** One cell of the property compare grid (v1.26). */
+export interface ComparePropertyCellOut {
+  predicted_value: number | null;
+  unit: string;
+}
+
+/** One property row of the compare grid (v1.26). */
+export interface ComparePropertyRowOut {
+  property_code: string;
+  is_diff: boolean;
+  cells: ComparePropertyCellOut[];
+}
+
+/** Response of ``GET /recipes/compare`` (v1.26). */
+export interface CompareResultOut {
+  recipes: CompareRecipeHeaderOut[];
+  components: CompareComponentRowOut[];
+  properties: ComparePropertyRowOut[];
+  diff_threshold_percent: number;
 }
 
 /** One row of the reverse composition-search result (v1.25). */

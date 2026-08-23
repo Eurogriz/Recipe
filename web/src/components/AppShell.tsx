@@ -7,6 +7,7 @@ import {
   Beaker,
   ClipboardList,
   Cpu,
+  Diff,
   ExternalLink,
   FlaskConical,
   Key,
@@ -37,6 +38,7 @@ const NAV = [
   { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
   { href: "/recipes", labelKey: "nav.recipes", icon: Beaker },
   { href: "/search", labelKey: "nav.search", icon: FlaskConical },
+  { href: "/compare", labelKey: "nav.compare", icon: Diff },
   { href: "/regulatory", labelKey: "nav.regulatory", icon: ShieldCheck },
   { href: "/ml", labelKey: "nav.ml", icon: Cpu },
   { href: "/ml/drift", labelKey: "nav.drift", icon: Waves },
@@ -63,7 +65,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-semibold leading-tight group-hover:text-primary transition-colors">
                 {t("app.brand")}
               </div>
-              <div className="text-xs text-muted-foreground">v1.25.0</div>
+              <div className="text-xs text-muted-foreground">v1.26.0</div>
             </div>
           </Link>
         </div>

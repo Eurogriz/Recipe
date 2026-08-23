@@ -1242,6 +1242,89 @@ class DataQualityReportOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Compare (v1.26)
+# ---------------------------------------------------------------------------
+class CompareComponentCellOut(BaseModel):
+    """One cell of the compare grid — how much of this CAS a recipe has.
+
+    ``mass_percent=None`` means the recipe simply does not contain
+    this CAS — different from ``0.0`` which would mean an explicit
+    "declared but present at zero" entry (which is unusual but
+    legitimate).
+    """
+
+    mass_percent: float | None = None
+    stage_number: int | None = None
+    display_name: str = ""
+
+
+class CompareComponentRowOut(BaseModel):
+    """One row of the compare grid = one CAS across all compared recipes.
+
+    ``cells`` is ordered the same way as the top-level ``recipes``
+    list.  ``is_diff`` flags rows where at least one recipe has the
+    component and at least one doesn't, OR the mass_percent varies
+    by more than ``diff_threshold_percent`` between recipes — the UI
+    highlights those rows so the eye lands on the actual delta.
+    """
+
+    cas_number: str
+    canonical_name: str
+    is_diff: bool
+    cells: list[CompareComponentCellOut]
+
+
+class ComparePropertyCellOut(BaseModel):
+    """One cell of the property comparison grid — predicted or measured."""
+
+    predicted_value: float | None = None
+    unit: str = ""
+
+
+class ComparePropertyRowOut(BaseModel):
+    """One row of the property compare grid — one property code across recipes."""
+
+    property_code: str
+    is_diff: bool
+    cells: list[ComparePropertyCellOut]
+
+
+class CompareRecipeHeaderOut(BaseModel):
+    """Column header of the compare grid — one per recipe."""
+
+    id: str
+    category: str
+    subcategory: str
+    binder_type: str
+    product_class: str
+    status: str
+    version: int
+
+
+class CompareResultOut(BaseModel):
+    """Response of ``GET /recipes/compare?ids=a,b,c``.
+
+    Two grids share the same column order:
+      * ``components`` — CAS × recipe, mass_percent.  Rows sorted by
+        max mass_percent across compared recipes (dominant materials
+        first).
+      * ``properties`` — property_code × recipe, ML predicted values.
+    ``n_recipes`` == len(recipes) == len(each row.cells).
+    """
+
+    recipes: list[CompareRecipeHeaderOut]
+    components: list[CompareComponentRowOut]
+    properties: list[ComparePropertyRowOut]
+    diff_threshold_percent: float = Field(
+        default=0.1,
+        description=(
+            "Mass-percent delta above which a component row is flagged "
+            "as 'is_diff=true'.  UI uses this for row highlighting."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Component reverse-search (v1.25)
 # ---------------------------------------------------------------------------
 class ComponentMatchOut(BaseModel):
@@ -1334,6 +1417,12 @@ __all__ = [
     "CategoryBreakdownOut",
     "CitationIn",
     "CitationOut",
+    "CompareComponentCellOut",
+    "CompareComponentRowOut",
+    "ComparePropertyCellOut",
+    "ComparePropertyRowOut",
+    "CompareRecipeHeaderOut",
+    "CompareResultOut",
     "ComponentBoundsIn",
     "ComponentIn",
     "ComponentMatchOut",

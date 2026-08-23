@@ -550,6 +550,32 @@ export const en: Dict = {
   // navigation extra (v1.25)
   "nav.search": "Search by component",
 
+  // navigation extra (v1.26)
+  "nav.compare": "Recipe compare",
+
+  // compare (v1.26)
+  "compare.title": "Side-by-side recipe compare",
+  "compare.subtitle":
+    "2 to 4 recipes in one table. Composition rows sorted by max mass-percent — dominant ingredients first. Differences marked with Δ badges and highlighted rows.",
+  "compare.query.title": "What to compare",
+  "compare.query.hint":
+    "Paste recipe UUIDs from the recipe URL (e.g. /recipes/<id>). First two are required, third and fourth optional.",
+  "compare.f.id_required": "Recipe #{n} (required)",
+  "compare.f.id_optional": "Recipe #{n} (optional)",
+  "compare.f.threshold": "Mass delta threshold, %",
+  "compare.f.show_only_diff": "Show only differences",
+  "compare.run": "Compare",
+  "compare.header.title": "Recipes under compare",
+  "compare.components.title": "Composition ({n} rows)",
+  "compare.components.empty": "No composition differences, or no recipes selected.",
+  "compare.components.col.name": "Name",
+  "compare.components.col.recipe_n": "Recipe #{n}",
+  "compare.components.stage": "stage {n}",
+  "compare.properties.title": "Predicted properties ({n} rows)",
+  "compare.properties.empty":
+    "No predictions available. Train models with formulation-train-models.",
+  "compare.properties.col.property": "Property",
+
   // component search (v1.25)
   "search.title": "Reverse composition search",
   "search.subtitle":

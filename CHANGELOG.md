@@ -7,6 +7,114 @@
 
 ---
 
+## [1.26.0] — Side-by-side compare: сравнение 2-4 рецептов на одном экране (2026-08-23)
+
+Классическая нужда технолога: «новая версия vs текущий продакшн»,
+«наши три акриловых лака рядом», «конкурентная формула vs наша».
+Раньше пользователь открывал 2 вкладки и глазами сравнивал —
+теперь один экран с выравненным составом и предсказаниями.
+
+### Added — Endpoint ``GET /recipes/compare``
+
+Один агрегатный round-trip вместо N×2 отдельных вызовов.  Query:
+
+    /recipes/compare?ids=abc,def,ghi&diff_threshold=0.1
+
+- **2..4 recipes** — enforced (422 при 1 или 5+).
+- **Duplicate check** — `ids=abc,abc` возвращает 422 (безсмысленный
+  сравнение).
+- **404** если хоть один id не найден (лучше upfront, чем
+  показать частичную сетку).
+- ``diff_threshold`` (0..100%) — порог для флага
+  ``is_diff=true`` на строке.  Default 0.1% скрывает
+  rounding-noise, но ловит 0.5% delta.
+
+Response — две сетки:
+
+1. **``components``** — CAS × recipe.  Массовые проценты
+   **суммируются по всем этапам** одного рецепта (TiO2 в grind
+   + topcoat → одна строка с суммой).  Отсортировано по max
+   mass_percent DESC — dominant materials first.
+2. **``properties``** — property_code × recipe.  ML-predictions
+   из существующего ``predict_properties``; recipe без trained
+   model даёт ``None`` cell.
+
+Диф-детектор:
+- **Component row**: is_diff если хотя бы один recipe не имеет
+  этого CAS, ИЛИ spread mass_percent > threshold.
+- **Property row**: is_diff если relative spread > 5% mean
+  (rule of thumb — 5% delta в gloss/viscosity значимо, 5% в
+  R² noise — нет).
+
+Реализация ~200 мс на 4 recipes × 4 models: 4 recipe SQL + 4 ML
+inference calls.  Placed BEFORE ``/recipes/{recipe_id}`` в
+router'е — regression guard тест это pin'ует.
+
+### Added — UI ``/compare`` page
+
+Новый пункт «Сравнение рецептов» в navigation (``Diff`` icon).
+
+- **Форма запроса**: 4 input'а для UUID (первые 2 required),
+  `diff_threshold` numeric input, checkbox «Show only differences».
+- Deep-link через URL: `/compare?ids=abc,def` — можно копировать
+  и делиться.  Подхватывается ``useSearchParams`` в Suspense
+  boundary (Next 14 App Router requirement).
+- **Recipe header cards**: category / subcategory / binder / status
+  badge / version / product_class — кликабельны как ссылки на
+  карточку.
+- **Composition grid**: CAS столбец + канонич имя + N recipe
+  cells с mass % (цвет: green <10%, amber 10-30%, red ≥30%) +
+  stage-number под каждой ячейкой.  Δ-badge и amber-фон на строке
+  с диф.
+- **Properties grid**: та же структура, значение + unit + Δ-badge.
+- Empty states: «нет различий» / «нет предсказаний» с подсказкой
+  запустить ``formulation-train-models``.
+
+### Changed
+
+- ``routes.py`` — импорт ``logging`` + module-level ``logger``
+  (для ``compare_prediction_failed`` warning'а).
+- Order of routes: ``/recipes/compare`` зарегистрирован **до**
+  ``/recipes/{recipe_id}`` (тот же fix как у ``by-component`` в
+  v1.25 — regression guard тест).
+
+### Metrics
+
+- **655 тестов** (было 644, +11 for compare endpoint: 2 shape +
+  3 diff-detection + 4 error paths + 1 route-order regression).
+  Прогон ~164 с.
+- **65 REST endpoints** (было 64, +1: ``/recipes/compare``).
+- **17 UI страниц** (было 16, +1: ``/compare``).
+- **127 source file** (без изменений — только route/schema
+  расширение).
+- **593 i18n ключей** (было 574, +19 для compare UI RU+EN),
+  паритет 100%.
+
+### QA
+
+- ``ruff check src tests`` — All checks passed!
+- ``ruff format --check`` — clean
+- ``mypy src/formulation_workbench`` — Success: no issues in 125 files
+- ``bandit -c pyproject.toml -q -r src`` — clean
+- ``pytest --no-cov --deselect ...`` — 655 passed, 16 deselected,
+  1 skipped
+- ``npx tsc --noEmit`` — clean
+- ``npx next build`` — 17 маршрутов
+- Реальный compare через прокси (Краски vs Лаки):
+  - 16 component rows, все различаются (разные категории)
+  - 4 property rows все различаются (gloss 91 vs 140, VOC 93 vs 6)
+  - 1.5 сек end-to-end
+- HTML ``/compare`` компилируется за 700 мс, отдаётся 200
+
+### Ops-заметка
+
+При переключении next-dev ↔ next-build **удаляйте** ``.next/``
+между режимами — они несовместимы по layout ``.next/server``.
+Симптом: ``MODULE_NOT_FOUND: Cannot find module './161.js'`` в
+логах dev-server.  Фиксится ``rm -rf web/.next && npm run dev``.
+
+---
+
 ## [1.25.0] — Обратный поиск по составу: «какие рецепты содержат этот CAS» (2026-08-23)
 
 Пост-v1.24 полный чистый каталог — время закрыть usability-задачу,

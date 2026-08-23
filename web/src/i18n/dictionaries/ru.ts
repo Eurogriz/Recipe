@@ -567,6 +567,32 @@ export const ru: Dict = {
   // navigation extra (v1.25)
   "nav.search": "Поиск по составу",
 
+  // navigation extra (v1.26)
+  "nav.compare": "Сравнение рецептов",
+
+  // compare (v1.26)
+  "compare.title": "Сравнение рецептов бок о бок",
+  "compare.subtitle":
+    "От 2 до 4 рецептов на одной таблице. Строки состава упорядочены по максимальной массовой доле — сверху доминирующие ингредиенты. Различия помечены значком Δ и фоном.",
+  "compare.query.title": "Что сравниваем",
+  "compare.query.hint":
+    "Вставьте UUID рецептов из URL (напр. /recipes/<id>). Первые два — обязательные, третий и четвёртый — по желанию.",
+  "compare.f.id_required": "Рецепт #{n} (обязателен)",
+  "compare.f.id_optional": "Рецепт #{n} (необязателен)",
+  "compare.f.threshold": "Порог различия по массе, %",
+  "compare.f.show_only_diff": "Показывать только различия",
+  "compare.run": "Сравнить",
+  "compare.header.title": "Сравниваемые рецепты",
+  "compare.components.title": "Состав ({n} строк)",
+  "compare.components.empty": "Различий в составе нет или ни один рецепт не выбран.",
+  "compare.components.col.name": "Название",
+  "compare.components.col.recipe_n": "Рецепт #{n}",
+  "compare.components.stage": "этап {n}",
+  "compare.properties.title": "Прогнозируемые свойства ({n} строк)",
+  "compare.properties.empty":
+    "Нет предсказаний. Обучите модели командой formulation-train-models.",
+  "compare.properties.col.property": "Свойство",
+
   // component search (v1.25)
   "search.title": "Поиск рецептов по составу",
   "search.subtitle":
