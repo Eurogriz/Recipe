@@ -315,10 +315,43 @@ class HeatmapResultOut(BaseModel):
 
 
 class CatalogStats(BaseModel):
+    """Compact dashboard payload — status split + category/class counts.
+
+    Since v1.19 the ``by_category`` and ``by_product_class`` maps are
+    populated from real repository queries (previously they were
+    stubbed to ``{}`` which caused the UI's category dropdown to be
+    empty until the user loaded a page containing every category).
+    """
+
     total: int = Field(examples=[500])
     by_status: dict[str, int] = Field(
         examples=[{"Draft": 30, "PendingReview": 12, "Verified": 450, "Rejected": 8}]
     )
+    by_category: dict[str, int] = Field(
+        default_factory=dict,
+        examples=[{"Краски": 320, "Герметики": 138}],
+    )
+    by_product_class: dict[str, int] = Field(
+        default_factory=dict,
+        examples=[{"Standard": 300, "Premium": 120}],
+    )
+
+
+class CatalogFacetsOut(BaseModel):
+    """Full facet snapshot for the UI's filter dropdowns.
+
+    Powers ``GET /catalog/facets``.  Empty categories, subcategories
+    and classes never appear — the UI only needs values that would
+    return >0 results.
+    """
+
+    total: int
+    by_category: dict[str, int] = Field(examples=[{"Краски": 320, "Лаки": 85}])
+    by_subcategory: dict[str, dict[str, int]] = Field(
+        examples=[{"Краски": {"Акриловые интерьерные": 40}}]
+    )
+    by_product_class: dict[str, int] = Field(examples=[{"Standard": 300, "Premium": 120}])
+    by_status: dict[str, int]
 
 
 # ---------------------------------------------------------------------------
@@ -1189,6 +1222,7 @@ __all__ = [
     "CalibrationOut",
     "CalibrationRequest",
     "CalibrationSample",
+    "CatalogFacetsOut",
     "CatalogStats",
     "CitationIn",
     "CitationOut",

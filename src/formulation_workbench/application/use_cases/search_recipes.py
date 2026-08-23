@@ -109,11 +109,30 @@ class SearchRecipesUseCase:
         has_more = len(recipes) > filter_.limit
         recipes = recipes[: filter_.limit]
 
+        # Total count matching the filter, without pagination — asked
+        # of the repository so a UI's "Showing 200 of N" line reports
+        # the real N and not the size of the current page.  FTS-first
+        # queries fall back to len(recipes) because we can't easily
+        # count text-match hits in one query.
+        if filter_.text_query:
+            total_count = len(recipes) + (1 if has_more else 0)
+        else:
+            category = filter_.categories[0] if filter_.categories else None
+            subcategory = filter_.subcategories[0] if filter_.subcategories else None
+            product_class = filter_.product_classes[0] if filter_.product_classes else None
+            total_count = await self._recipe_repo.count_by_criteria(
+                category=category,
+                subcategory=subcategory,
+                product_class=product_class,
+                status=filter_.status,
+                tags=list(filter_.tags) if filter_.tags else None,
+            )
+
         get_recipe_search_results().observe(len(recipes))
 
         return SearchResult(
             recipes=tuple(recipes),
-            total_count=len(recipes),
+            total_count=total_count,
             limit=filter_.limit,
             offset=filter_.offset,
             has_more=has_more,
@@ -146,17 +165,78 @@ class GetCatalogStatisticsUseCase:
         """Compute statistics."""
         by_status = await self._recipe_repo.count_by_status()
         total = sum(by_status.values())
+        # Full category and product-class breakdowns since v1.19 —
+        # used by /catalog/facets to power the UI's filter dropdowns.
+        by_category = await self._recipe_repo.count_by_category()
+        by_product_class = await self._recipe_repo.count_by_product_class()
 
         get_catalog_size().set(total)
         gauge = get_catalog_size_by_status()
         for state, count in by_status.items():
             gauge.labels(state=state.value).set(count)
 
-        # Category and class breakdowns require additional queries
-        # For MVP, return partial stats
         return CatalogStatistics(
             by_status=by_status,
-            by_category={},  # TODO: add count_by_category to repo
-            by_product_class={},  # TODO: add count_by_product_class to repo
+            by_category=by_category,
+            by_product_class=by_product_class,
             total=total,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class GetCatalogFacetsQuery:
+    """Ask for every value the UI needs to build filter dropdowns."""
+
+
+@dataclass(frozen=True, slots=True)
+class CatalogFacets:
+    """Full facet snapshot of the catalogue.
+
+    Every dictionary is keyed by the actual stored value (so a URL
+    filter built from it is exact-match ready) and holds the count
+    of matching recipes.  Empty categories/classes never appear —
+    the UI only needs values that would return >0 results.
+    """
+
+    total: int
+    by_category: dict[str, int]
+    by_subcategory: dict[str, dict[str, int]]
+    by_product_class: dict[str, int]
+    by_status: dict[str, int]
+
+
+class GetCatalogFacetsUseCase:
+    """Use case for ``/catalog/facets``.
+
+    Exists as a separate use case (rather than folded into
+    ``GetCatalogStatisticsUseCase``) because facets are a much larger
+    payload — pulling them on every dashboard render would waste
+    bandwidth.  The UI hits this once when it renders the recipes
+    list, then caches the result until the user navigates away.
+    """
+
+    def __init__(self, recipe_repo: RecipeRepository) -> None:
+        self._recipe_repo = recipe_repo
+
+    @observed("catalog_facets")
+    async def execute(self, query: GetCatalogFacetsQuery) -> CatalogFacets:
+        by_category = await self._recipe_repo.count_by_category()
+        by_subcategory_flat = await self._recipe_repo.count_by_subcategory()
+        by_product_class = await self._recipe_repo.count_by_product_class()
+        by_status_state = await self._recipe_repo.count_by_status()
+
+        # Reshape (cat, sub) → nested {cat: {sub: n}} so the UI can
+        # render subcategory dropdowns scoped to the chosen category
+        # without a second request.
+        by_subcategory: dict[str, dict[str, int]] = {}
+        for (cat, sub), n in by_subcategory_flat.items():
+            by_subcategory.setdefault(cat, {})[sub] = n
+
+        total = sum(by_category.values())
+        return CatalogFacets(
+            total=total,
+            by_category=by_category,
+            by_subcategory=by_subcategory,
+            by_product_class=by_product_class,
+            by_status={s.value: n for s, n in by_status_state.items()},
         )

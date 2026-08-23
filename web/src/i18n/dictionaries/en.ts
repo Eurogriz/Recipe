@@ -84,6 +84,11 @@ export const en: Dict = {
   "recipes.subtitle": "Verified catalog · {n} entries",
   "recipes.search_placeholder": "Search by name, category, binder…",
   "recipes.category.all": "All categories",
+  "recipes.subcategory.all": "All subcategories",
+  "recipes.subcategory.pick_category_first": "Pick a category first",
+  "recipes.class.all": "All quality classes",
+  "recipes.filter.reset": "Reset filters",
+  "recipes.facets.hint": "{n} categories · {total} recipes in catalogue",
   "recipes.empty": "No recipes yet. Run {cmd} to seed the catalog.",
 
   // ----- recipe detail

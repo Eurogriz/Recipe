@@ -54,5 +54,56 @@ class RecipeRepository(abc.ABC):
         """Count recipes grouped by verification status (for statistics dashboard)."""
 
     @abc.abstractmethod
+    async def count_by_category(self) -> dict[str, int]:
+        """Return ``{category → n_recipes}`` for the whole catalogue.
+
+        Powers the ``/catalog/facets`` endpoint that populates the UI's
+        category dropdown.  Without this the UI historically built the
+        list from a single search page, which meant that a user
+        searching for anything other than the first two lexicographic
+        categories saw a truncated list.
+        """
+
+    @abc.abstractmethod
+    async def count_by_subcategory(self) -> dict[tuple[str, str], int]:
+        """Return ``{(category, subcategory) → n_recipes}``.
+
+        Uses a compound key so the UI can render subcategory filters
+        that are scoped to a chosen category without a follow-up
+        request.  Order is up to the concrete implementation but
+        callers should not rely on it.
+        """
+
+    @abc.abstractmethod
+    async def count_by_product_class(self) -> dict[str, int]:
+        """Return ``{product_class → n_recipes}`` for the whole catalogue."""
+
+    @abc.abstractmethod
+    async def count_by_criteria(
+        self,
+        category: str | None = None,
+        subcategory: str | None = None,
+        product_class: str | None = None,
+        status: VerificationState | None = None,
+        tags: list[str] | None = None,
+    ) -> int:
+        """Total row count matching the same filter as ``find_by_criteria``.
+
+        Search endpoints must report the total number of matches, not
+        the size of the returned page — otherwise UI pagination is a
+        lie.  This method exists so a single ``COUNT(*)`` runs in one
+        round-trip alongside the paginated fetch.
+        """
+
+    @abc.abstractmethod
+    async def list_all_ids(self, *, limit: int | None = None) -> list[str]:
+        """Enumerate every recipe id in the catalogue.
+
+        Introduced so that cross-recipe ML training does not require
+        the caller to hand-craft a full id list.  ``limit=None`` means
+        "no cap"; use a positive int to sample.
+        """
+
+    @abc.abstractmethod
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         """Get all versions of a recipe (latest first), including the given ID."""

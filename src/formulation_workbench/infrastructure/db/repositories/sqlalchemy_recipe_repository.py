@@ -170,6 +170,75 @@ class SqlAlchemyRecipeRepository:
                 logger.warning("Unknown status value in DB: %s", status_value)
         return counts
 
+    async def count_by_category(self) -> dict[str, int]:
+        from sqlalchemy import func
+
+        stmt = (
+            select(RecipeModel.category, func.count(RecipeModel.id))
+            .group_by(RecipeModel.category)
+            .order_by(RecipeModel.category)
+        )
+        rows = (await self._session.execute(stmt)).all()
+        return {str(cat): int(n) for cat, n in rows if cat}
+
+    async def count_by_subcategory(self) -> dict[tuple[str, str], int]:
+        from sqlalchemy import func
+
+        stmt = (
+            select(
+                RecipeModel.category,
+                RecipeModel.subcategory,
+                func.count(RecipeModel.id),
+            )
+            .group_by(RecipeModel.category, RecipeModel.subcategory)
+            .order_by(RecipeModel.category, RecipeModel.subcategory)
+        )
+        rows = (await self._session.execute(stmt)).all()
+        return {(str(cat), str(sub)): int(n) for cat, sub, n in rows if cat and sub}
+
+    async def count_by_product_class(self) -> dict[str, int]:
+        from sqlalchemy import func
+
+        stmt = (
+            select(RecipeModel.product_class, func.count(RecipeModel.id))
+            .group_by(RecipeModel.product_class)
+            .order_by(RecipeModel.product_class)
+        )
+        rows = (await self._session.execute(stmt)).all()
+        return {str(pc): int(n) for pc, n in rows if pc}
+
+    async def count_by_criteria(
+        self,
+        category: str | None = None,
+        subcategory: str | None = None,
+        product_class: str | None = None,
+        status: VerificationState | None = None,
+        tags: list[str] | None = None,
+    ) -> int:
+        from sqlalchemy import func
+
+        stmt = select(func.count(RecipeModel.id))
+        if category:
+            stmt = stmt.where(RecipeModel.category == category)
+        if subcategory:
+            stmt = stmt.where(RecipeModel.subcategory == subcategory)
+        if product_class:
+            stmt = stmt.where(RecipeModel.product_class == product_class)
+        if status:
+            stmt = stmt.where(RecipeModel.status == status.value)
+        if tags:
+            for tag in tags:
+                stmt = stmt.where(RecipeModel.metadata_json.contains(f'"{tag}"'))
+        total = (await self._session.execute(stmt)).scalar_one()
+        return int(total)
+
+    async def list_all_ids(self, *, limit: int | None = None) -> list[str]:
+        stmt = select(RecipeModel.id).order_by(RecipeModel.category, RecipeModel.id)
+        if limit is not None and limit > 0:
+            stmt = stmt.limit(limit)
+        rows = (await self._session.execute(stmt)).scalars().all()
+        return [str(r) for r in rows]
+
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         # Walk back via previous_version_id chain
         result: list[Recipe] = []

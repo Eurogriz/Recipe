@@ -92,6 +92,11 @@ export const ru: Dict = {
   "recipes.search_placeholder":
     "Поиск по названию, категории, связующему…",
   "recipes.category.all": "Все категории",
+  "recipes.subcategory.all": "Все подкатегории",
+  "recipes.subcategory.pick_category_first": "Сначала выберите категорию",
+  "recipes.class.all": "Все классы качества",
+  "recipes.filter.reset": "Сбросить фильтры",
+  "recipes.facets.hint": "{n} категорий · {total} рецептов в каталоге",
   "recipes.empty":
     "Пока нет рецептов. Выполните {cmd}, чтобы заполнить каталог демонстрационными данными.",
 

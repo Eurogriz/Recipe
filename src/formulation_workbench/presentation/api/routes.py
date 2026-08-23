@@ -21,6 +21,7 @@ from ...application.use_cases.create_recipe import CreateRecipeCommand
 from ...application.use_cases.delete_recipe import DeleteRecipeCommand
 from ...application.use_cases.get_recipe import GetAllVersionsQuery, GetRecipeByIdQuery
 from ...application.use_cases.search_recipes import (
+    GetCatalogFacetsQuery,
     GetCatalogStatisticsQuery,
     SearchFilter,
 )
@@ -58,6 +59,7 @@ from .schemas import (
     CalibrationMatrixRowOut,
     CalibrationOut,
     CalibrationRequest,
+    CatalogFacetsOut,
     CatalogStats,
     CitationOut,
     ComponentOut,
@@ -730,6 +732,15 @@ async def list_recipes(
     container: Annotated[Container, Depends(get_container)],
     q: str = Query("", description="Free-text query."),
     category: list[str] = Query(default_factory=list),
+    subcategory: list[str] = Query(
+        default_factory=list,
+        description=(
+            "Filter by subcategory (exact match).  Usually combined "
+            "with a single ``category`` so the UI's dropdown chain "
+            "surfaces only the subcategories that belong to the "
+            "chosen category."
+        ),
+    ),
     product_class: list[str] = Query(default_factory=list),
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
@@ -738,6 +749,7 @@ async def list_recipes(
         SearchFilter(
             text_query=q,
             categories=tuple(category),
+            subcategories=tuple(subcategory),
             product_classes=tuple(product_class),
             limit=limit,
             offset=offset,
@@ -1446,6 +1458,41 @@ async def catalog_stats(
     return CatalogStats(
         total=result.total,
         by_status={s.value: n for s, n in result.by_status.items()},
+        by_category=result.by_category,
+        by_product_class=result.by_product_class,
+    )
+
+
+@router.get(
+    "/catalog/facets",
+    response_model=CatalogFacetsOut,
+    tags=["catalog"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Full facet snapshot for filter dropdowns — total counts by "
+        "category, subcategory, product_class, status"
+    ),
+    responses={**_UNAUTHORIZED},
+)
+async def catalog_facets(
+    container: Annotated[Container, Depends(get_container)],
+) -> CatalogFacetsOut:
+    """Return every value the UI needs to build its filter widgets.
+
+    Fixes the historical bug where the recipes page inferred its
+    category dropdown from a single search page — which meant that
+    the user saw only whichever 1-2 categories happened to sort
+    first in that page.  Now the UI reads /catalog/facets once,
+    populates its dropdowns from the real totals, and pages the
+    result list independently.
+    """
+    result = await container.catalog_facets.execute(GetCatalogFacetsQuery())
+    return CatalogFacetsOut(
+        total=result.total,
+        by_category=result.by_category,
+        by_subcategory=result.by_subcategory,
+        by_product_class=result.by_product_class,
+        by_status=result.by_status,
     )
 
 

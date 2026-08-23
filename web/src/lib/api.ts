@@ -61,6 +61,7 @@ export const api = {
   listRecipes: (params?: {
     q?: string;
     category?: string[];
+    subcategory?: string[];
     product_class?: string[];
     limit?: number;
     offset?: number;
@@ -68,6 +69,8 @@ export const api = {
     const q = new URLSearchParams();
     if (params?.q) q.set("q", params.q);
     if (params?.category) params.category.forEach((c) => q.append("category", c));
+    if (params?.subcategory)
+      params.subcategory.forEach((c) => q.append("subcategory", c));
     if (params?.product_class)
       params.product_class.forEach((c) => q.append("product_class", c));
     if (params?.limit) q.set("limit", String(params.limit));
@@ -87,6 +90,8 @@ export const api = {
     request<PredictionsOut>(`/recipes/${id}/predict?explain_top_k=${explainTopK}`),
 
   catalogStats: () => request<CatalogStats>("/catalog/stats"),
+  /** Full facet snapshot for filter dropdowns — every category + count. */
+  catalogFacets: () => request<CatalogFacetsOut>("/catalog/facets"),
 
   // ml
   listModels: () => request<ModelMetadata[]>("/ml/models"),
@@ -513,6 +518,20 @@ export interface PredictionsOut {
 
 export interface CatalogStats {
   total: number;
+  by_status: Record<string, number>;
+  /** ``{category → n_recipes}`` — populated since v1.19. */
+  by_category?: Record<string, number>;
+  /** ``{product_class → n_recipes}`` — populated since v1.19. */
+  by_product_class?: Record<string, number>;
+}
+
+/** Full facet snapshot for filter dropdowns (``GET /catalog/facets``). */
+export interface CatalogFacetsOut {
+  total: number;
+  by_category: Record<string, number>;
+  /** Nested map so the UI can render subcategory scoped to a category. */
+  by_subcategory: Record<string, Record<string, number>>;
+  by_product_class: Record<string, number>;
   by_status: Record<string, number>;
 }
 

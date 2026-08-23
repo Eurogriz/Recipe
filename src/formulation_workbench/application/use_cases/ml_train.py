@@ -42,31 +42,30 @@ class TrainPropertyModelsUseCase:
             build_training_samples,
         )
 
-        # Collect experiments — either for the given recipes only, or every
-        # completed run in the store (via the recipe catalogue).
-        # The recipe repository does not (yet) expose "list all", so
-        # cross-recipe training requires the caller to enumerate ids.
+        # Collect experiments.  When the caller supplies ``recipe_ids``
+        # we walk only those; otherwise the recipe repository is asked
+        # to enumerate every id in the catalogue (added in v1.19).
+        # This matters because pre-v1.19 a bare ``formulation-workbench
+        # train`` call collected zero samples and silently did nothing.
         recipe_ids: list[str] = list(command.recipe_ids) if command.recipe_ids else []
+        if not recipe_ids:
+            recipe_ids = await self._recipes.list_all_ids()
+            logger.info(
+                "ml_train_full_catalogue",
+                extra={"n_recipes": len(recipe_ids)},
+            )
 
         experiments = []
         recipes: dict[str, object] = {}
 
-        if recipe_ids:
-            for rid in recipe_ids:
-                runs = await self._exp.list_for_recipe(rid)
-                experiments.extend(runs)
-                if runs:
-                    recipe = await self._recipes.get_by_id(rid)
-                    if recipe is not None:
-                        recipes[rid] = recipe
-        else:
-            # Fallback: cross-recipe training is only possible if the
-            # caller supplies recipe_ids.  We still try — some deployments
-            # may extend the port later.
-            logger.info(
-                "ml_train_without_recipe_ids",
-                extra={"note": "supply recipe_ids for cross-recipe training"},
-            )
+        for rid in recipe_ids:
+            runs = await self._exp.list_for_recipe(rid)
+            if not runs:
+                continue
+            experiments.extend(runs)
+            recipe = await self._recipes.get_by_id(rid)
+            if recipe is not None:
+                recipes[rid] = recipe
 
         samples = build_training_samples(experiments, recipes)  # type: ignore[arg-type]
 

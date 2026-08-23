@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Filter, Download, Plus } from "lucide-react";
-import { api, type RecipeSummary, type SearchResponse } from "@/lib/api";
+import {
+  api,
+  type CatalogFacetsOut,
+  type RecipeSummary,
+  type SearchResponse,
+} from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,20 +21,46 @@ export default function RecipesPage() {
   const [total, setTotal] = useState(0);
   const [q, setQ] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const [subcategory, setSubcategory] = useState<string | null>(null);
+  const [productClass, setProductClass] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Facets are fetched once and reused for every dropdown so the
+  // filter widgets show every value in the catalogue, not just what
+  // happened to land on the current page.
+  const [facets, setFacets] = useState<CatalogFacetsOut | null>(null);
 
-  const categories = useMemo(() => {
-    const s = new Set<string>();
-    items?.forEach((r) => r.category && s.add(r.category));
-    return Array.from(s).sort();
-  }, [items]);
+  // Sorted category list — server already returns them alphabetically
+  // but a tuple<label, count> is friendlier for the dropdown.
+  const categoryEntries = facets
+    ? Object.entries(facets.by_category).sort(([a], [b]) => a.localeCompare(b))
+    : [];
+  // Subcategory dropdown is scoped to the chosen category — a shortcut
+  // that avoids the "40+ subcategories, half of them irrelevant" trap.
+  const subcategoryEntries =
+    facets && category
+      ? Object.entries(facets.by_subcategory[category] ?? {}).sort(([a], [b]) =>
+          a.localeCompare(b)
+        )
+      : [];
+  const productClassEntries = facets
+    ? Object.entries(facets.by_product_class).sort(([a], [b]) => a.localeCompare(b))
+    : [];
 
   const load = () => {
     setLoading(true);
     setError(null);
     api
-      .listRecipes({ q, category: category ? [category] : undefined, limit: 200 })
+      .listRecipes({
+        q,
+        category: category ? [category] : undefined,
+        // The API supports multi-value ``category`` but a single-value
+        // subcategory is expressed by narrowing the category first,
+        // which is exactly what the dropdown chain enforces.
+        subcategory: subcategory ? [subcategory] : undefined,
+        product_class: productClass ? [productClass] : undefined,
+        limit: 200,
+      })
       .then((r: SearchResponse) => {
         setItems(r.items);
         setTotal(r.total_count);
@@ -39,9 +70,19 @@ export default function RecipesPage() {
   };
 
   useEffect(() => {
+    // Facets → in parallel with the first page load.  Server returns
+    // both under 100 ms on a fresh SQLite, so we don't stagger them.
+    api.catalogFacets().then(setFacets).catch(() => setFacets(null));
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Reset subcategory when category changes — otherwise a stale
+  // subcategory from a different category silently filters the list
+  // to zero results.
+  useEffect(() => {
+    setSubcategory(null);
+  }, [category]);
 
   return (
     <div className="p-8 space-y-6">
@@ -80,34 +121,91 @@ export default function RecipesPage() {
       </header>
 
       <Card>
-        <CardContent className="p-4 flex flex-col md:flex-row gap-3 md:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && load()}
-              placeholder={t("recipes.search_placeholder")}
-              className="pl-9"
-            />
+        <CardContent className="p-4 space-y-3">
+          <div className="flex flex-col md:flex-row gap-3 md:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && load()}
+                placeholder={t("recipes.search_placeholder")}
+                className="pl-9"
+              />
+            </div>
+            <Button onClick={load} disabled={loading}>
+              {loading ? t("common.loading") : t("common.search")}
+            </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select
-              className="h-9 rounded-md border border-input px-3 text-sm bg-white"
+              className="h-9 rounded-md border border-input px-3 text-sm bg-white min-w-[10rem]"
               value={category ?? ""}
               onChange={(e) => setCategory(e.target.value || null)}
             >
               <option value="">{t("recipes.category.all")}</option>
-              {categories.map((c) => (
+              {categoryEntries.map(([c, n]) => (
                 <option key={c} value={c}>
-                  {c}
+                  {c} ({n})
                 </option>
               ))}
             </select>
-            <Button onClick={load} disabled={loading}>
-              {loading ? t("common.loading") : t("common.search")}
-            </Button>
+            <select
+              className="h-9 rounded-md border border-input px-3 text-sm bg-white min-w-[10rem] disabled:opacity-50"
+              value={subcategory ?? ""}
+              onChange={(e) => setSubcategory(e.target.value || null)}
+              disabled={!category || subcategoryEntries.length === 0}
+              title={
+                category
+                  ? t("recipes.subcategory.all")
+                  : t("recipes.subcategory.pick_category_first")
+              }
+            >
+              <option value="">
+                {category
+                  ? t("recipes.subcategory.all")
+                  : t("recipes.subcategory.pick_category_first")}
+              </option>
+              {subcategoryEntries.map(([s, n]) => (
+                <option key={s} value={s}>
+                  {s} ({n})
+                </option>
+              ))}
+            </select>
+            <select
+              className="h-9 rounded-md border border-input px-3 text-sm bg-white min-w-[8rem]"
+              value={productClass ?? ""}
+              onChange={(e) => setProductClass(e.target.value || null)}
+            >
+              <option value="">{t("recipes.class.all")}</option>
+              {productClassEntries.map(([c, n]) => (
+                <option key={c} value={c}>
+                  {c} ({n})
+                </option>
+              ))}
+            </select>
+            {(category || subcategory || productClass) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCategory(null);
+                  setSubcategory(null);
+                  setProductClass(null);
+                }}
+              >
+                {t("recipes.filter.reset")}
+              </Button>
+            )}
+            {facets && (
+              <span className="ml-auto text-xs text-muted-foreground">
+                {t("recipes.facets.hint", {
+                  n: Object.keys(facets.by_category).length,
+                  total: facets.total,
+                })}
+              </span>
+            )}
           </div>
         </CardContent>
       </Card>

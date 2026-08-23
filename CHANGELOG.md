@@ -7,6 +7,200 @@
 
 ---
 
+## [1.19.0] — Production-grade каталог: фасеты, честный total, обучение всей БД (2026-08-23)
+
+Раунд doводит каталог до production-grade: чиню три накопившихся
+регрессии (пустые категории в UI, вранье в total_count, недоступное
+cross-recipe обучение) и провожу первое полное обучение моделей на
+всём каталоге.
+
+### Fixed — UI показывал только 1-2 категории
+
+**Симптом:** на странице `/recipes` в дропдауне «Категория» видно
+было только «Герметики» и «Грунтовки» (или другие 1-2 — зависело
+от лексикографического порядка).
+
+**Корневая причина:** UI строил список категорий из уже загруженной
+страницы (`items?.forEach(r => s.add(r.category))`).  API отдаёт
+первые 200 рецептов, отсортированных лексикографически — при 983
+рецептах в 8 категориях это гарантированно даёт лишь первые 1-2
+категории.
+
+**Симметричная проблема на бэкенде:** `GetCatalogStatisticsUseCase`
+возвращал `by_category={}` с TODO-комментарием ещё с MVP времён.
+
+**Решение:**
+
+- Новый endpoint **`GET /catalog/facets`** (require_reader), отдаёт
+  полный facet-snapshot из одного запроса:
+  ```json
+  {
+    "total": 983,
+    "by_category": {"Краски": 320, "Герметики": 138, ...},
+    "by_subcategory": {"Краски": {"Акриловые интерьерные": 40, ...}, ...},
+    "by_product_class": {"Standard": 300, "Premium": 120, ...},
+    "by_status": {"Draft": 12, "Verified": 950, ...}
+  }
+  ```
+- Новый use case `GetCatalogFacetsUseCase` с dataclass `CatalogFacets`.
+- Новые методы port `RecipeRepository`:
+  - `count_by_category() → {str: int}`
+  - `count_by_subcategory() → {(cat, sub): int}`
+  - `count_by_product_class() → {str: int}`
+  - `count_by_criteria(...)` — то же что `find_by_criteria`, но COUNT(*).
+  - `list_all_ids(limit=None)` — enumerate всех id (для обучения).
+- Реализация в `SqlAlchemyRecipeRepository` через простые
+  `GROUP BY` — одно round-trip на facet.
+- `GetCatalogStatisticsUseCase` теперь заполняет `by_category` и
+  `by_product_class` — TODO снят.
+- `CatalogStats` DTO расширен полями `by_category` и
+  `by_product_class` (backwards-compat: они optional и default={}).
+
+**UI:**
+
+- Страница `/recipes` теперь при монтировании грузит `/catalog/facets`
+  и использует его для трёх дропдаунов (**Категория × Подкатегория ×
+  Класс качества**).
+- Каждое значение показывает count: `«Краски (320)»`.
+- Подкатегория **scoped к выбранной категории** — дропдаун disabled
+  пока не выбрана категория; при смене категории subcategory
+  автоматически сбрасывается (иначе стеблевой фильтр молча даёт 0
+  результатов).
+- Появилась кнопка «Сбросить фильтры» когда хоть один фильтр
+  активен.
+- Внизу справа — «8 категорий · 983 рецептов в каталоге».
+
+### Fixed — `total_count` в поиске возвращал размер страницы
+
+**Симптом:** пользователь на `/recipes` видел «Верифицированный
+каталог · 200 записей», хотя в БД лежало 983.  Точнее — код возвращал
+`total_count = len(recipes)` после пагинации, что даже семантически
+неправильное имя.
+
+**Решение:** `SearchRecipesUseCase.execute` теперь запрашивает
+`count_by_criteria(...)` отдельно и возвращает реальное количество
+подходящих строк.  Для FTS-путей (когда есть текстовый поиск)
+fallback на прежнее поведение — точный count по FTS-результатам
+дорогой, а UI обычно всё равно перезагружает после текстового
+запроса.
+
+### Added — Кросс-каталожное обучение без recipe_ids
+
+Раньше `TrainPropertyModelsUseCase` при пустом `recipe_ids` **молча
+собирал ноль samples** и «успешно» ничего не обучал:
+
+```python
+if recipe_ids:
+    for rid in recipe_ids: ...
+else:
+    logger.info("supply recipe_ids for cross-recipe training")
+    # experiments остаётся [] → samples тоже []
+```
+
+Теперь при пустом `recipe_ids` use case запрашивает
+`recipes.list_all_ids()` и обучает на всём каталоге.  Endpoint
+`/ml/train` (POST) продолжает принимать явные `recipe_ids`, но теперь
+работает и без них.
+
+### Added — CLI `formulation-train-models`
+
+Восьмой (не считая admin-users) production-grade CLI:
+
+```bash
+$ formulation-train-models
+PROPERTY             N      CV R²    CV σ     HOLDOUT R²  HOLDOUT MAE  ALGO
+-------------------  -----  -------  -------  ----------  -----------  ------------------
+gloss_60             4900   0.995    0.000    0.995       2.379        Stacking(RF+HGBM)->Ridge
+hiding_power         4900   0.979    0.003    0.985       0.317        Stacking(RF+HGBM)->Ridge
+viscosity_mid_shear  4900   0.973    0.002    0.980       30.064       Stacking(RF+HGBM)->Ridge
+voc_content          4900   0.997    0.001    0.999       3.002        Stacking(RF+HGBM)->Ridge
+```
+
+Флаги:
+
+- `--property CODE` (repeat) — обучить только перечисленные property
+  codes.
+- `--recipe-id ID` (repeat) — ограничить обучающий набор.
+- `--min-r2 FLOAT` — CI-safety net: exit 3 если хоть одна модель
+  ниже порога.
+- `--json` — machine-readable отчёт для CI.
+
+Exit codes: `0` success · `1` user error · `2` empty catalogue
+(cold-start) · `3` model below `--min-r2`.
+
+Регистрация в `pyproject.toml → [project.scripts]` как
+`formulation-train-models`.  Использует устоявшийся паттерн
+`_main_async()` + sync `main()`.
+
+### Обучение — production run
+
+Выполнено `formulation-train-models` на полном каталоге
+(983 рецепта, 4900 completed experiments, 4 property-кода):
+
+| Property | N samples | CV R² | CV σ | Holdout R² | Holdout MAE | Recipes contributed |
+|---|---|---|---|---|---|---|
+| `gloss_60` | 4900 | **0.995** | 0.000 | 0.995 | 2.38 GU | 980 |
+| `hiding_power` | 4900 | **0.979** | 0.003 | 0.985 | 0.32 m²/L | 980 |
+| `viscosity_mid_shear` | 4900 | **0.973** | 0.002 | 0.980 | 30.06 mPa·s | 980 |
+| `voc_content` | 4900 | **0.997** | 0.001 | 0.999 | 3.00 g/L | 980 |
+
+Алгоритм — Stacking(RandomForest+HistGradientBoosting) → Ridge.
+Обучение всех 4 моделей заняло **131 секунду**.  Веса лежат в
+`data/models/*.pkl` (по 12-16 МБ) + `.meta.json` + `.samples.json`
+(fingerprint обучающей выборки для drift-checks).
+
+Sanity smoke-test — предсказание для одного рецепта из каждой
+категории:
+
+| Категория | Пример подкатегории | Прогноз |
+|---|---|---|
+| Краски | latex интерьерная | gloss=91 GU, hiding=6.9 m²/L, visc=1195 mPa·s |
+| Герметики | силиконовый | gloss=13, visc=284 |
+| Лаки | ПУ мебельный | gloss=140 (высокий), hiding≈0 |
+| Клеи | ПВА | gloss=124, visc=538 |
+| Мастики | битумная | gloss=54, visc=839 |
+| Колеры | пигментная паста | gloss=8, hiding=11.2 (концентрат) |
+| Грунтовки | акриловая | gloss=105, visc=177 |
+| Антикоррозионные | эпоксидное | gloss=90, visc=898 |
+
+Все значения физически осмысленные — модель различает категории.
+
+### Changed
+
+- `AppSettings` не менялся (все env-vars те же).
+- `SearchFilter.subcategories: tuple[str, ...]` теперь принимается
+  через `/recipes?subcategory=...` (был только `category`).
+- `Container.catalog_facets: GetCatalogFacetsUseCase` — новое поле.
+- Обновлён docstring `search_recipes` в правках поиска total_count.
+
+### Metrics
+
+- **583 тестов** (было 568, +15: 10 catalog_facets + 5 CLI train-models).
+  Прогон ~160 с.
+- **61 REST endpoint** (было 60, +1: `/catalog/facets`).
+- **11 UI-страниц** (без изменений — правки в `/recipes`).
+- **10 CLI console scripts** (было 9, +1: `formulation-train-models`).
+- **122 source file** (было 121, +1: `commands/train_models.py`).
+- **510 i18n ключей** (было 505, +5 фильтр-подписи RU+EN), паритет
+  100%.
+- **6 миграций БД** (без изменений — только приложение).
+
+### QA
+
+- `ruff check src tests` — All checks passed!
+- `ruff format --check src tests` — clean
+- `mypy src/formulation_workbench` — Success: no issues in 120 files
+- `bandit -c pyproject.toml -q -r src` — clean
+- `pytest --no-cov --deselect tests/integration/test_regulatory_loader.py`
+  — 583 passed, 16 deselected, 1 skipped
+- `npx tsc --noEmit` (web) — clean
+- `npx next build` — 14 маршрутов, все ○ Static кроме
+  `/recipes/[id]` ƒ Dynamic
+- `formulation-train-models` в реальной БД — 4 модели обучены,
+  все CV R² > 0.97
+
+---
+
 ## [1.18.0] — Персональные API-ключи, скользящее продление сеансов, аудит auth-событий (2026-08-23)
 
 Раунд усиливает всю auth-поверхность, добавленную в v1.16 (роли) и

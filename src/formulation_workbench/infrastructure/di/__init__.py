@@ -25,6 +25,7 @@ from ...application.use_cases.ml_train import TrainPropertyModelsUseCase
 from ...application.use_cases.optimise_recipe import OptimiseRecipeUseCase
 from ...application.use_cases.regulatory_scan import RegulatoryScanUseCase
 from ...application.use_cases.search_recipes import (
+    GetCatalogFacetsUseCase,
     GetCatalogStatisticsUseCase,
     SearchRecipesUseCase,
 )
@@ -84,6 +85,7 @@ class Container:
     sensitivity_analysis: SensitivityAnalysisUseCase
     sensitivity_heatmap: SensitivityHeatmapUseCase
     catalog_stats: GetCatalogStatisticsUseCase
+    catalog_facets: GetCatalogFacetsUseCase
     submit_for_review: SubmitRecipeForReviewUseCase
     verify_recipe: VerifyRecipeUseCase
     reject_recipe: RejectRecipeUseCase
@@ -184,6 +186,7 @@ class Container:
             sensitivity_analysis=SensitivityAnalysisUseCase(recipe_repository, property_regressor),
             sensitivity_heatmap=SensitivityHeatmapUseCase(recipe_repository, property_regressor),
             catalog_stats=GetCatalogStatisticsUseCase(recipe_repository),
+            catalog_facets=GetCatalogFacetsUseCase(recipe_repository),
             submit_for_review=SubmitRecipeForReviewUseCase(recipe_repository, audit_logger),
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),
             reject_recipe=RejectRecipeUseCase(recipe_repository, audit_logger),

@@ -1,6 +1,6 @@
 [project]
 name = "formulation-workbench"
-version = "1.18.0"
+version = "1.19.0"
 description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -129,6 +129,7 @@ formulation-backup = "formulation_workbench.presentation.commands.backup:main"
 formulation-production-vectors = "formulation_workbench.presentation.commands.production_vectors:main"
 formulation-drift-check = "formulation_workbench.presentation.commands.drift_check:main"
 formulation-admin-users = "formulation_workbench.presentation.commands.admin_users:main"
+formulation-train-models = "formulation_workbench.presentation.commands.train_models:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

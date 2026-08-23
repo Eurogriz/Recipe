@@ -71,6 +71,39 @@ class ScopedRecipeRepository(RecipeRepository):
         async with self._db.session() as session:
             return await SqlAlchemyRecipeRepository(session).count_by_status()
 
+    async def count_by_category(self) -> dict[str, int]:
+        async with self._db.session() as session:
+            return await SqlAlchemyRecipeRepository(session).count_by_category()
+
+    async def count_by_subcategory(self) -> dict[tuple[str, str], int]:
+        async with self._db.session() as session:
+            return await SqlAlchemyRecipeRepository(session).count_by_subcategory()
+
+    async def count_by_product_class(self) -> dict[str, int]:
+        async with self._db.session() as session:
+            return await SqlAlchemyRecipeRepository(session).count_by_product_class()
+
+    async def count_by_criteria(
+        self,
+        category: str | None = None,
+        subcategory: str | None = None,
+        product_class: str | None = None,
+        status: VerificationState | None = None,
+        tags: list[str] | None = None,
+    ) -> int:
+        async with self._db.session() as session:
+            return await SqlAlchemyRecipeRepository(session).count_by_criteria(
+                category=category,
+                subcategory=subcategory,
+                product_class=product_class,
+                status=status,
+                tags=tags,
+            )
+
+    async def list_all_ids(self, *, limit: int | None = None) -> list[str]:
+        async with self._db.session() as session:
+            return await SqlAlchemyRecipeRepository(session).list_all_ids(limit=limit)
+
     async def get_all_versions(self, recipe_id: str) -> list[Recipe]:
         async with self._db.session() as session:
             return await SqlAlchemyRecipeRepository(session).get_all_versions(recipe_id)
