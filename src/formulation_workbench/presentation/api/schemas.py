@@ -225,6 +225,31 @@ class ErrorResponse(BaseModel):
     code: str | None = None
 
 
+class RuleFindingOut(BaseModel):
+    """One finding in a recipe assessment (technological rule)."""
+
+    rule_id: str = Field(examples=["T3"])
+    severity: str = Field(examples=["warning"])
+    message: str
+    reference: str = ""
+
+
+class VerificationViolationOut(BaseModel):
+    rule: str = Field(examples=["R1"])
+    message: str
+
+
+class RecipeAssessmentOut(BaseModel):
+    """Full quality report of one recipe."""
+
+    recipe_id: str
+    score: float = Field(examples=[87.5], ge=0, le=100)
+    maturity: str = Field(examples=["production_ready"])
+    findings: list[RuleFindingOut]
+    verification_violations: list[VerificationViolationOut] = Field(default_factory=list)
+    summary: dict[str, int | float | str]
+
+
 class ValidationErrorResponse(BaseModel):
     detail: list[dict[str, Any]] = Field(
         examples=[
@@ -249,11 +274,14 @@ __all__ = [
     "ErrorResponse",
     "HealthResponse",
     "ProcessParamsIn",
+    "RecipeAssessmentOut",
     "RecipeSummary",
     "RejectRequest",
+    "RuleFindingOut",
     "SearchResponse",
     "SubmitReviewRequest",
     "UpdateRecipeRequest",
     "ValidationErrorResponse",
+    "VerificationViolationOut",
     "VerifyRequest",
 ]

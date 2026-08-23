@@ -7,6 +7,79 @@
 
 ---
 
+## [1.2.0] — Formulation domain production-grade (2026-08-23)
+
+Пятый раунд — качество разработки самих рецептур, а не инфраструктуры.
+
+### Added — Domain
+
+- **`ComponentFunction`** enum (30 значений) + `FunctionEnvelope` с
+  типичными концентрационными окнами по каждой функции (Flick, Wicks,
+  Vincentz, BASF/Byk/Evonik technical bulletins). Заменил free-text
+  `Component.function`.
+- **`PhysicalProperties`** value-object: 22 поля — density, Tg,
+  MFFT, oil absorption, HSP δd/δp/δh, VOC-фракция, solids-фракция,
+  H317/H400 GHS-метки, REACH-регистрация.
+- **`RawMaterial`** aggregate root — first-class каталог сырья с
+  supplier references, deprecated + replacement_id, immutable-in-practice.
+- **`TargetSpecification` + property catalogue** (`target_properties.py`):
+  44 канонических свойства (optical, mechanical, chemical, rheological,
+  application, stability, safety, regulatory) с default test methods
+  (ISO 2813, ISO 1522, ГОСТ 8420, ASTM D2244, EN ISO 6270-2, …),
+  5 tolerance modes (absolute / percent / min / max / range).
+- **`TestMethod`** value object — стандарт + название + unit.
+
+### Added — Technological rules
+
+- Новый сервис `domain/services/technological_rules.py` — 13 правил
+  (T1-T13): обязательное наличие BINDER, envelope check для 20+ типов
+  additives, VOC ceiling по EU 2004/42/EC (Annex II lookup),
+  biocide/defoamer/coalescent для водных систем, hardener/binder ratio
+  для 2K, hybrid solvent-water detection, pH окно для акриловых
+  дисперсий, минимум компонентов, требование target_properties.
+- Каждое правило возвращает `RuleFinding(rule_id, severity, message,
+  reference)` с ссылкой на литературу.
+
+### Added — Recipe assessment
+
+- `RecipeAssessmentService.assess(recipe)` — сводный отчёт:
+  score 0..100, `Maturity` (defective / draft / lab_ready /
+  production_ready / reference), findings + verification_violations +
+  summary dict. Явная таблица штрафов (audit-friendly).
+- Use case `AssessRecipeUseCase` + endpoint
+  **`GET /recipes/{id}/assessment`** — возвращает полный отчёт.
+- Live-пример: простой водный акриловый рецепт получил score 91,
+  production_ready, 1 warning (нет биоцида) + 3 info.
+
+### Added — Lab workflow
+
+- `ExperimentRun` aggregate с state machine (PLANNED → IN_PROGRESS →
+  COMPLETED / CANCELLED / FAILED) и авто-verdict-ом
+  (PASSED / PASSED_WITH_DEVIATION / FAILED / INCONCLUSIVE) на основе
+  сравнения `MeasuredValue` с `TargetSpecification`.
+- `BatchInfo` фиксирует batch_number, target/actual_mass, lot_numbers,
+  equipment.
+
+### Changed
+
+- `Component` расширен: `functional_role` (enum), `properties`
+  (`PhysicalProperties`), `raw_material_id` — всё опциональное,
+  legacy рецепты продолжают загружаться. При `functional_role=UNSPECIFIED`
+  и непустом `function` роль вычисляется автоматически через
+  `ComponentFunction.parse()` (включая синонимы).
+- `Recipe` расширен: `target_properties` (tuple),
+  `regulatory_context` (tuple).
+
+### Metrics
+
+- **273 теста зелёные** (было 203, +70: 37 domain value objects,
+  14 technological rules, 5 recipe assessment, 16 experiment,
+  3 assessment API).
+- **ruff clean · ruff format clean · bandit clean · mypy clean** (77 файлов).
+- Live-endpoint `/recipes/{id}/assessment` работает.
+
+---
+
 ## [1.1.3] — Full write API, JWT auth, K8s, CVE-scanning (2026-08-23)
 
 Четвёртый раунд production-grade доработок.

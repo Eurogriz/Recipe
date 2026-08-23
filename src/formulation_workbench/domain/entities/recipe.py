@@ -21,6 +21,9 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from ..value_objects.functions import ComponentFunction
+from ..value_objects.physical_properties import PhysicalProperties
+from ..value_objects.target_properties import TargetSpecification
 from ..value_objects.verification_status import VerificationState, VerificationStatus
 
 if TYPE_CHECKING:
@@ -48,6 +51,14 @@ class Component:
     """A single component in a recipe composition stage.
 
     Immutable. Includes CAS number, mass percent, and function.
+
+    The legacy ``function`` string is kept for backwards compatibility;
+    ``functional_role`` provides the same information as a first-class
+    :class:`ComponentFunction` enum used by the technological rules.
+
+    ``properties`` and ``raw_material_id`` are optional — legacy recipes
+    without a linked raw material continue to load, but the calculators
+    prefer the explicit physical data when it's available.
     """
 
     name: str
@@ -58,6 +69,9 @@ class Component:
     inci_name: str = ""
     manufacturer_reference: str = ""
     notes: str = ""
+    functional_role: ComponentFunction = ComponentFunction.UNSPECIFIED
+    properties: PhysicalProperties | None = None
+    raw_material_id: str | None = None
 
     def __post_init__(self) -> None:
         if not self.name or not self.name.strip():
@@ -74,6 +88,11 @@ class Component:
             raise InvalidRecipeError(
                 f"Component '{self.name}' tolerance must be in [0, 100], got {self.tolerance_percent}"
             )
+        # If functional_role was left at UNSPECIFIED but ``function`` is
+        # populated, try to derive the enum so downstream code doesn't
+        # have to know which field to consult.
+        if self.functional_role is ComponentFunction.UNSPECIFIED and self.function:
+            object.__setattr__(self, "functional_role", ComponentFunction.parse(self.function))
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,6 +162,8 @@ class Recipe:
         tags: tuple[str, ...] = (),
         finish: str = "",
         color: str = "",
+        target_properties: tuple[TargetSpecification, ...] = (),
+        regulatory_context: tuple[str, ...] = (),  # e.g. "EU 2004/42", "REACH", "ГОСТ Р"
     ) -> None:
         # Required fields
         if not category or not category.strip():
@@ -194,6 +215,8 @@ class Recipe:
         self._tags = tags
         self._finish = finish
         self._color = color
+        self._target_properties = tuple(target_properties)
+        self._regulatory_context = tuple(regulatory_context)
 
     # ============================================================================
     # Properties (read-only access)
@@ -272,6 +295,14 @@ class Recipe:
         return self._color
 
     @property
+    def target_properties(self) -> tuple[TargetSpecification, ...]:
+        return self._target_properties
+
+    @property
+    def regulatory_context(self) -> tuple[str, ...]:
+        return self._regulatory_context
+
+    @property
     def all_components(self) -> tuple[Component, ...]:
         """Flat list of all components across all stages."""
         result: list[Component] = []
@@ -326,6 +357,8 @@ class Recipe:
             tags=self._tags,
             finish=self._finish,
             color=self._color,
+            target_properties=self._target_properties,
+            regulatory_context=self._regulatory_context,
         )
         return new_recipe
 
@@ -349,6 +382,8 @@ class Recipe:
             tags=self._tags,
             finish=self._finish,
             color=self._color,
+            target_properties=self._target_properties,
+            regulatory_context=self._regulatory_context,
         )
         return new_recipe
 

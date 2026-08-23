@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from ...application.use_cases.assess_recipe import AssessRecipeUseCase
 from ...application.use_cases.create_recipe import CreateRecipeUseCase
 from ...application.use_cases.delete_recipe import DeleteRecipeUseCase
 from ...application.use_cases.get_recipe import GetAllRecipeVersionsUseCase, GetRecipeByIdUseCase
@@ -63,6 +64,7 @@ class Container:
     verify_recipe: VerifyRecipeUseCase
     reject_recipe: RejectRecipeUseCase
     create_new_version: CreateNewVersionUseCase
+    assess_recipe: AssessRecipeUseCase
 
     @classmethod
     async def build(cls, settings: AppSettings | None = None) -> Container:
@@ -101,6 +103,7 @@ class Container:
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),
             reject_recipe=RejectRecipeUseCase(recipe_repository, audit_logger),
             create_new_version=CreateNewVersionUseCase(recipe_repository, audit_logger),
+            assess_recipe=AssessRecipeUseCase(recipe_repository),
         )
 
     async def close(self) -> None:

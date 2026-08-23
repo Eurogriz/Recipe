@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ... import __version__
 from ...application.dto.recipe_dto import RecipeSummaryDto
+from ...application.use_cases.assess_recipe import AssessRecipeQuery
 from ...application.use_cases.create_recipe import CreateRecipeCommand
 from ...application.use_cases.delete_recipe import DeleteRecipeCommand
 from ...application.use_cases.get_recipe import GetRecipeByIdQuery
@@ -41,12 +42,15 @@ from .schemas import (
     CreateRecipeRequest,
     ErrorResponse,
     HealthResponse,
+    RecipeAssessmentOut,
     RecipeSummary,
     RejectRequest,
+    RuleFindingOut,
     SearchResponse,
     SubmitReviewRequest,
     UpdateRecipeRequest,
     ValidationErrorResponse,
+    VerificationViolationOut,
     VerifyRequest,
 )
 
@@ -354,6 +358,42 @@ async def reject_recipe(
     except ValueError as exc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
     return _recipe_summary(result)
+
+
+@router.get(
+    "/recipes/{recipe_id}/assessment",
+    response_model=RecipeAssessmentOut,
+    tags=["recipes", "assessment"],
+    dependencies=[Depends(require_reader)],
+    summary="Full technological + bibliographic quality assessment",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def assess_recipe(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeAssessmentOut:
+    assessment = await container.assess_recipe.execute(AssessRecipeQuery(recipe_id=recipe_id))
+    if assessment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return RecipeAssessmentOut(
+        recipe_id=recipe_id,
+        score=assessment.score,
+        maturity=assessment.maturity.value,
+        findings=[
+            RuleFindingOut(
+                rule_id=f.rule_id,
+                severity=f.severity.value,
+                message=f.message,
+                reference=f.reference,
+            )
+            for f in assessment.findings
+        ],
+        verification_violations=[
+            VerificationViolationOut(rule=v.rule, message=v.message)
+            for v in assessment.verification_violations
+        ],
+        summary=assessment.summary(),
+    )
 
 
 __all__ = ["router"]
