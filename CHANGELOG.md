@@ -7,6 +7,113 @@
 
 ---
 
+## [1.23.0] — Fix R1+R3 корней: CLI repair-citations, 4 ISBN'а в seed, +150 Verified (2026-08-23)
+
+Data-quality дашборд из v1.22 показал **где болит** — теперь чиню
+**сами корни** без пересидинга каталога.  Два независимых бага в
+seed-данных, оба заканчиваются in-place migration'ом.
+
+### Bug 1 — 4 битых ISBN checksum'а в seed-data
+
+Data-quality дашборд из v1.22 показал: 733 из 983 рецептов сидят в
+Draft из-за R1 (``primary_source`` без ISBN/DOI/URL).  При этом сами
+seed-файлы содержат ISBN в тексте citation'а — но `_parse_citation`
+не может их сохранить, потому что валидатор ``Isbn`` отвергает **4
+уникальных ISBN с неверной проверочной цифрой** (пересчёт показывает,
+что seed-автор ввёл цифры с ошибкой на 5 книгах Wiley/Hanser/Vincentz).
+
+- ``978-1-84569-471-2`` (Karsa 2007) — правильно ``…-471-5``
+- ``978-0-8155-0905-0`` (Noyes) — правильно ``…-0905-9``
+- ``978-1-118-83620-6`` (Wiley 2014) — правильно ``…-83620-0``
+- ``978-1-56990-322-0`` (Hanser) — правильно ``…-322-3``
+- ``978-3-86630-650-2`` (Vincentz) — правильно ``…-650-9``
+
+Все 43 вхождения (`seed-data/*.json` + `scripts/base_formulations*.py`
++ `scripts/laki_base_formulations.py`) исправлены разом sed'ом.
+
+### Bug 2 — placeholder ``see-variant`` для пигментов колеров
+
+`scripts/base_formulations.py` определяет базовую рецептуру
+пигментной пасты с компонентом ``{name: "PIGMENT", cas: "see-variant"}``
+— placeholder ожидал, что при генерации color-variant CAS будет
+подменён на реальный.  Подмены никогда не было — 5 Колеров в
+Draft'e с R3 violation.
+
+### Added — CLI ``formulation-repair-citations``
+
+In-place migration существующих БД без пересидинга.  Два прохода:
+
+**Pass 1 (ISBN recovery):**
+- Regex ищет `ISBN: 978-…` в `title` каждой Citation.
+- Если найденный ISBN проходит валидацию `Isbn()` — сохраняется как
+  extracted.
+- Если не проходит (checksum mismatch) — **пересчитываю check-digit**
+  и сохраняю autofixed.  Реальная книга существует, только цифра
+  битая — блокировать 700+ рецептов из-за опечатки нельзя.
+- Regex: `ISBN(?:[\s-]*13)?[:\s-]+([0-9][0-9\-\u2013]{9,20}[0-9X])`
+  — вылавливает `ISBN:`, `ISBN 13:`, `ISBN-13:`, `ISBN 9780815511502`,
+  с обычными и figure-dash разделителями.
+
+**Pass 2 (R3 CAS backfill):**
+- Компоненты с `cas_number == "see-variant"` заменяются реальным CAS
+  из встроенной таблицы `(subcategory-substring, color-substring) →
+  (CAS, human name)`.  Например, «Универсальные (на воде)» + «Красный»
+  → CAS 6448-95-9 (Pigment Red 22 naphthol).
+- 13 mapping правил + fallback на `"mixture"` (R3 его принимает).
+
+Флаги: `--dry-run`, `--skip-isbn`, `--skip-cas`, `--category NAME`
+(repeat), `--json`.  Оба прохода **идемпотентны** — вторая пробежка
+= no-op.
+
+Exit codes: 0 success · 1 user error · 2 empty catalogue · 3 partial
+write failure.
+
+Реальный запуск на боевой БД (983 рецепта):
+
+    processed=983  isbn_repaired=155 (extracted=0, checksum_autofix=155)
+    cas_placeholders_fixed=5  failed=0
+    real  0m8.2s
+
+### Impact — до/после
+
+|  | до v1.23 | после `repair-citations` | после `verify-catalog` |
+|---|---|---|---|
+| clean recipes | 250 | **405** (+155) | 405 |
+| Verified | 220 | 220 | **370** (+150) |
+| Draft | 733 | 578 | **578** (-155) |
+| R1 offenders | 733 | **578** (-155) | 578 |
+| R3 offenders | 5 | **0** | 0 |
+| Verified share | 22.4% | 22.4% | **37.6%** |
+
+Осталось 578 recipes без identifier вообще (BASF technical bulletins,
+GOST'ы) — это не bug в парсере, это отсутствие данных в seed.
+Отдельный сеанс seed-обогащения закроет остаток.
+
+### Metrics
+
+- **631 тестов** (было 617, +14 for repair CLI: 7 unit + 7 e2e).
+  Прогон ~155 с.
+- **13 CLI console scripts** (было 12, +1: `formulation-repair-citations`).
+- **126 source file** (было 125, +1: `commands/repair_citations.py`).
+- **63 REST endpoints** (без изменений).
+- **i18n** без изменений (CLI работает через shell).
+
+### QA
+
+- `ruff check src tests` — All checks passed!
+- `ruff format --check` — clean
+- `mypy src/formulation_workbench` — Success: no issues in 124 files
+- `bandit -c pyproject.toml -q -r src` — clean
+- `pytest --no-cov --deselect ...` — 631 passed, 16 deselected,
+  1 skipped
+- `npx tsc --noEmit` + `npx next build` — clean, 15 маршрутов
+- Реальные CLI-запуски на боевой БД:
+  - `formulation-repair-citations` — 155 ISBN + 5 CAS исправлены за 8 с
+  - `formulation-verify-catalog --actor repair-round-1` — +150 Verified
+  - `/dashboard/data-quality` через API: R3 упал до 0, R1 упал с 733 до 578
+
+---
+
 ## [1.22.0] — Дашборд «Здоровье данных»: агрегат R-правил по всему каталогу (2026-08-23)
 
 Пост-v1.20 показал: 733 из 983 рецептов сидят в Draft из-за
