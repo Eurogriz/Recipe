@@ -13,6 +13,7 @@ import {
   LogIn,
   LogOut,
   Shield,
+  ShieldAlert,
   ShieldCheck,
   Waves,
 } from "lucide-react";
@@ -38,6 +39,7 @@ const NAV = [
   { href: "/ml", labelKey: "nav.ml", icon: Cpu },
   { href: "/ml/drift", labelKey: "nav.drift", icon: Waves },
   { href: "/ml/jobs", labelKey: "nav.jobs", icon: Activity },
+  { href: "/admin/data-quality", labelKey: "nav.dq", icon: ShieldAlert },
   { href: "/admin/users", labelKey: "nav.admin", icon: Shield },
   { href: "/admin/audit", labelKey: "nav.audit", icon: ClipboardList },
   { href: "/admin/api-keys", labelKey: "nav.apikeys", icon: Key },
@@ -59,7 +61,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-semibold leading-tight group-hover:text-primary transition-colors">
                 {t("app.brand")}
               </div>
-              <div className="text-xs text-muted-foreground">v1.21.0</div>
+              <div className="text-xs text-muted-foreground">v1.22.0</div>
             </div>
           </Link>
         </div>

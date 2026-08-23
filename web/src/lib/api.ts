@@ -94,6 +94,19 @@ export const api = {
   catalogFacets: () => request<CatalogFacetsOut>("/catalog/facets"),
   /** One-shot dashboard payload (v1.21) — replaces 5 independent GETs. */
   dashboardSummary: () => request<DashboardSummaryOut>("/dashboard/summary"),
+  /** Whole-catalogue R-rule aggregate (v1.22). */
+  dashboardDataQuality: (params?: {
+    sample_size?: number;
+    max_recipes?: number;
+  }) => {
+    const q = new URLSearchParams();
+    if (params?.sample_size) q.set("sample_size", String(params.sample_size));
+    if (params?.max_recipes) q.set("max_recipes", String(params.max_recipes));
+    const qs = q.toString();
+    return request<DataQualityReportOut>(
+      `/dashboard/data-quality${qs ? "?" + qs : ""}`
+    );
+  },
 
   // ml
   listModels: () => request<ModelMetadata[]>("/ml/models"),
@@ -545,6 +558,38 @@ export interface RecentRecipeOut {
   status: string;
   product_class: string;
   created_at: string;
+}
+
+/** One row of the data-quality R-rule table (``/dashboard/data-quality``). */
+export interface RuleBreakdownOut {
+  rule: string;
+  title: string;
+  n_recipes: number;
+  by_category: Record<string, number>;
+  sample_recipe_ids: string[];
+}
+
+/** Per-category health for the data-quality dashboard. */
+export interface CategoryBreakdownOut {
+  category: string;
+  n_total: number;
+  n_clean: number;
+  n_with_violations: number;
+  n_verified: number;
+  n_draft: number;
+  top_rules: string[];
+}
+
+/** Full data-quality snapshot (``/dashboard/data-quality``, v1.22). */
+export interface DataQualityReportOut {
+  total_recipes: number;
+  n_clean: number;
+  n_with_violations: number;
+  /** In [0, 1] — multiply by 100 to render as a percentage. */
+  verified_share: number;
+  by_rule: RuleBreakdownOut[];
+  by_category: CategoryBreakdownOut[];
+  by_status: Record<string, number>;
 }
 
 /** Everything the dashboard renders in one round-trip

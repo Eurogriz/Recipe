@@ -544,6 +544,41 @@ export const en: Dict = {
   // navigation extra (v1.18)
   "nav.apikeys": "API keys",
 
+  // navigation extra (v1.22)
+  "nav.dq": "Data quality",
+
+  // data quality dashboard (v1.22)
+  "dq.title": "Catalogue data quality",
+  "dq.subtitle":
+    "Aggregate report of verification-rule violations (R1–R5) across the whole catalogue. Rules are sorted by pain — top row is where to start.",
+  "dq.loading": "Scanning the whole catalogue for violations…",
+  "dq.stat.total": "Total recipes",
+  "dq.stat.clean": "Clean",
+  "dq.stat.clean.hint": "{pct} of catalogue is fully clean",
+  "dq.stat.violations": "With violations",
+  "dq.stat.violations.hint": "{pct} of catalogue needs fixing",
+  "dq.stat.verified": "Verified",
+  "dq.rules.title": "Violations by rule",
+  "dq.rules.subtitle":
+    "One row per rule. «Top categories» shows where the rule fires most.",
+  "dq.rules.empty": "Catalogue is fully clean — all rules satisfied.",
+  "dq.rules.col.rule": "Rule",
+  "dq.rules.col.title": "What it checks",
+  "dq.rules.col.count": "Affected",
+  "dq.rules.col.top_categories": "Top categories",
+  "dq.rules.col.samples": "Samples",
+  "dq.categories.title": "Category health",
+  "dq.categories.subtitle":
+    "«Health» column — share of recipes with no violations. Green ≥ 75%, amber 40–75%, red < 40%.",
+  "dq.categories.col.category": "Category",
+  "dq.categories.col.total": "Total",
+  "dq.categories.col.clean": "Clean",
+  "dq.categories.col.violations": "With violations",
+  "dq.categories.col.verified": "Verified",
+  "dq.categories.col.draft": "Draft",
+  "dq.categories.col.top_rules": "Top rules",
+  "dq.categories.col.health": "Health",
+
   // personal API keys (v1.18)
   "apikeys.title": "My API keys",
   "apikeys.subtitle":

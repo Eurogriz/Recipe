@@ -1199,6 +1199,49 @@ class AuditLogPageOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Data quality
+# ---------------------------------------------------------------------------
+class RuleBreakdownOut(BaseModel):
+    """One row of the ``/dashboard/data-quality`` R-rule table."""
+
+    rule: str = Field(examples=["R1"])
+    title: str
+    n_recipes: int
+    by_category: dict[str, int] = Field(default_factory=dict)
+    sample_recipe_ids: list[str] = Field(default_factory=list)
+
+
+class CategoryBreakdownOut(BaseModel):
+    """Per-category health for the data-quality dashboard."""
+
+    category: str
+    n_total: int
+    n_clean: int
+    n_with_violations: int
+    n_verified: int
+    n_draft: int
+    top_rules: list[str] = Field(default_factory=list)
+
+
+class DataQualityReportOut(BaseModel):
+    """Full data-quality snapshot (``GET /dashboard/data-quality``).
+
+    ``verified_share`` is in [0, 1]; UI multiplies by 100 to render
+    as a percentage.  ``n_clean`` counts recipes with **zero** rule
+    violations regardless of status — a Draft with no violations
+    still counts as clean because it's ready to be submitted.
+    """
+
+    total_recipes: int
+    n_clean: int
+    n_with_violations: int
+    verified_share: float
+    by_rule: list[RuleBreakdownOut]
+    by_category: list[CategoryBreakdownOut]
+    by_status: dict[str, int]
+
+
+# ---------------------------------------------------------------------------
 # Dashboard summary
 # ---------------------------------------------------------------------------
 class RecentRecipeOut(BaseModel):
@@ -1260,6 +1303,7 @@ __all__ = [
     "CalibrationSample",
     "CatalogFacetsOut",
     "CatalogStats",
+    "CategoryBreakdownOut",
     "CitationIn",
     "CitationOut",
     "ComponentBoundsIn",
@@ -1272,6 +1316,7 @@ __all__ = [
     "CreateNewVersionRequest",
     "CreateRecipeRequest",
     "DashboardSummaryOut",
+    "DataQualityReportOut",
     "DeviationOut",
     "DriftAlertOut",
     "DriftAlertRequest",
@@ -1327,6 +1372,7 @@ __all__ = [
     "RegulatoryScanFindingOut",
     "RegulatoryScanOut",
     "RejectRequest",
+    "RuleBreakdownOut",
     "RuleFindingOut",
     "SearchResponse",
     "SensitivityPointOut",

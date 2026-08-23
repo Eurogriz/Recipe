@@ -18,6 +18,7 @@ from ...application.use_cases.assess_recipe import AssessRecipeUseCase
 from ...application.use_cases.calculate_cost import CalculateRecipeCostUseCase
 from ...application.use_cases.clone_recipe import CloneRecipeUseCase
 from ...application.use_cases.create_recipe import CreateRecipeUseCase
+from ...application.use_cases.data_quality import DataQualityUseCase
 from ...application.use_cases.delete_recipe import DeleteRecipeUseCase
 from ...application.use_cases.get_recipe import GetAllRecipeVersionsUseCase, GetRecipeByIdUseCase
 from ...application.use_cases.ml_predict import PredictPropertiesUseCase
@@ -86,6 +87,7 @@ class Container:
     sensitivity_heatmap: SensitivityHeatmapUseCase
     catalog_stats: GetCatalogStatisticsUseCase
     catalog_facets: GetCatalogFacetsUseCase
+    data_quality: DataQualityUseCase
     submit_for_review: SubmitRecipeForReviewUseCase
     verify_recipe: VerifyRecipeUseCase
     reject_recipe: RejectRecipeUseCase
@@ -187,6 +189,7 @@ class Container:
             sensitivity_heatmap=SensitivityHeatmapUseCase(recipe_repository, property_regressor),
             catalog_stats=GetCatalogStatisticsUseCase(recipe_repository),
             catalog_facets=GetCatalogFacetsUseCase(recipe_repository),
+            data_quality=DataQualityUseCase(recipe_repository),
             submit_for_review=SubmitRecipeForReviewUseCase(recipe_repository, audit_logger),
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),
             reject_recipe=RejectRecipeUseCase(recipe_repository, audit_logger),

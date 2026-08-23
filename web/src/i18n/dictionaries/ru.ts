@@ -561,6 +561,41 @@ export const ru: Dict = {
   // navigation extra (v1.18)
   "nav.apikeys": "API-ключи",
 
+  // navigation extra (v1.22)
+  "nav.dq": "Здоровье данных",
+
+  // data quality dashboard (v1.22)
+  "dq.title": "Здоровье данных каталога",
+  "dq.subtitle":
+    "Агрегированный отчёт по правилам верификации (R1–R5) для всего каталога. Правила отсортированы по количеству нарушений — сверху то, что чинить в первую очередь.",
+  "dq.loading": "Считаем нарушения по всему каталогу…",
+  "dq.stat.total": "Всего рецептов",
+  "dq.stat.clean": "Без нарушений",
+  "dq.stat.clean.hint": "{pct} каталога полностью чистые",
+  "dq.stat.violations": "С нарушениями",
+  "dq.stat.violations.hint": "{pct} каталога требует правок",
+  "dq.stat.verified": "Верифицировано",
+  "dq.rules.title": "Нарушения по правилам",
+  "dq.rules.subtitle":
+    "Каждая строка — одно правило. Столбец «Топ-категории» показывает, где именно правило срабатывает чаще всего.",
+  "dq.rules.empty": "Каталог полностью чистый — все правила выполнены.",
+  "dq.rules.col.rule": "Правило",
+  "dq.rules.col.title": "Что проверяет",
+  "dq.rules.col.count": "Затронуто",
+  "dq.rules.col.top_categories": "Топ-категории",
+  "dq.rules.col.samples": "Примеры",
+  "dq.categories.title": "Здоровье по категориям",
+  "dq.categories.subtitle":
+    "Столбец «Здоровье» — доля рецептов без нарушений в категории. Зелёный ≥ 75%, жёлтый 40–75%, красный < 40%.",
+  "dq.categories.col.category": "Категория",
+  "dq.categories.col.total": "Всего",
+  "dq.categories.col.clean": "Чистых",
+  "dq.categories.col.violations": "С нарушениями",
+  "dq.categories.col.verified": "Verified",
+  "dq.categories.col.draft": "Draft",
+  "dq.categories.col.top_rules": "Топ-правила",
+  "dq.categories.col.health": "Здоровье",
+
   // personal API keys (v1.18)
   "apikeys.title": "Мои API-ключи",
   "apikeys.subtitle":

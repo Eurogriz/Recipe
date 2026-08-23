@@ -61,6 +61,7 @@ from .schemas import (
     CalibrationRequest,
     CatalogFacetsOut,
     CatalogStats,
+    CategoryBreakdownOut,
     CitationOut,
     ComponentOut,
     CompositionStageOut,
@@ -69,6 +70,7 @@ from .schemas import (
     CreateNewVersionRequest,
     CreateRecipeRequest,
     DashboardSummaryOut,
+    DataQualityReportOut,
     DeviationOut,
     DriftAlertOut,
     DriftAlertRequest,
@@ -119,6 +121,7 @@ from .schemas import (
     RegulatoryScanFindingOut,
     RegulatoryScanOut,
     RejectRequest,
+    RuleBreakdownOut,
     RuleFindingOut,
     SearchResponse,
     SensitivityPointOut,
@@ -1562,6 +1565,80 @@ async def dashboard_summary(
             )
             for e in audit_page.entries
         ],
+    )
+
+
+@router.get(
+    "/dashboard/data-quality",
+    response_model=DataQualityReportOut,
+    tags=["ops", "assessment"],
+    dependencies=[Depends(require_reader)],
+    summary=("Catalogue-wide R-rule violation aggregate — powers the «Здоровье данных» page"),
+    responses={**_UNAUTHORIZED},
+)
+async def dashboard_data_quality(
+    container: Annotated[Container, Depends(get_container)],
+    sample_size: int = Query(
+        default=10,
+        ge=1,
+        le=50,
+        description="How many offender ids to return per rule bucket.",
+    ),
+    max_recipes: int | None = Query(
+        default=None,
+        ge=1,
+        le=100_000,
+        description=(
+            "Cap the enumeration.  Omit for whole-catalogue scans "
+            "(the default is safe up to a few thousand recipes)."
+        ),
+    ),
+) -> DataQualityReportOut:
+    """Walk the whole catalogue and report every R-rule violation.
+
+    Answers the operator's question "which rules are hurting me
+    most, and where should I start fixing" without a manual SQL
+    walk.  The rule table is sorted worst-first, so the top row is
+    always where the pain is.
+
+    Scans ``get_by_id`` per recipe rather than one bulk read —
+    keeps memory bounded on a 100k-row catalogue and lets us reuse
+    the exact same rule evaluator that the workflow-guard uses at
+    write time (no room for the report to drift from reality).
+    """
+    from ...application.use_cases.data_quality import DataQualityQuery
+
+    result = await container.data_quality.execute(
+        DataQualityQuery(sample_size=sample_size, max_recipes=max_recipes)
+    )
+    return DataQualityReportOut(
+        total_recipes=result.total_recipes,
+        n_clean=result.n_clean,
+        n_with_violations=result.n_with_violations,
+        verified_share=result.verified_share,
+        by_rule=[
+            RuleBreakdownOut(
+                rule=r.rule,
+                title=r.title,
+                n_recipes=r.n_recipes,
+                by_category=r.by_category,
+                sample_recipe_ids=r.sample_recipe_ids,
+            )
+            for r in result.by_rule
+        ],
+        by_category=[
+            CategoryBreakdownOut(
+                category=c.category,
+                n_total=c.n_total,
+                n_clean=c.n_clean,
+                n_with_violations=c.n_with_violations,
+                n_verified=c.n_verified,
+                n_draft=c.n_draft,
+                top_rules=c.top_rules,
+            )
+            for c in result.by_category
+        ],
+        by_status=result.by_status,
     )
 
 

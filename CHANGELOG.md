@@ -7,6 +7,112 @@
 
 ---
 
+## [1.22.0] — Дашборд «Здоровье данных»: агрегат R-правил по всему каталогу (2026-08-23)
+
+Пост-v1.20 показал: 733 из 983 рецептов сидят в Draft из-за
+R1 (`primary_source` без ISBN/DOI/URL) — но чтобы это увидеть,
+оператор должен был копаться в логах `formulation-verify-catalog`.
+Нужен нормальный отчёт: **какое правило хуже всего болит, где
+именно, и с каких рецептов начинать чинить**.
+
+### Added — Endpoint ``GET /dashboard/data-quality``
+
+Проходит `VerificationRules.can_be_verified()` по всему каталогу и
+агрегирует нарушения тремя срезами:
+
+1. **По правилу** — сколько рецептов затронуто, топ-3 категории
+   для каждого правила, 5-10 sample-id для клика.
+2. **По категории** — total / clean / with_violations /
+   верифицированные / draft + список топ-правил, срабатывающих в
+   этой категории.
+3. **По статусу** — распределение Draft / PendingReview /
+   Verified / Rejected (то же, что `catalog_stats.by_status`).
+
+Ответ на боевой БД:
+
+    total_recipes:   983
+    clean:           250
+    with violations: 733
+    verified_share:  22.4%
+    by_rule:
+      R1 — 733 recipes; top cats: Мастики (80), Клеи (50), Колеры (65)…
+      R3 — 5 recipes; Колеры (5)
+    by_status: Draft=733 PendingReview=30 Verified=220
+
+За 5 секунд для 983 рецептов (тяжёлая часть — `get_by_id` × N с
+eager-load composition tree).  При росте до ~10k пойду через
+`find_by_criteria` batch, пока не нужно.
+
+Флаги: `?sample_size=1..50` (offenders на правило),
+`?max_recipes=1..100000` (cap enumeration).  Оба clamp в 422 при
+выходе за диапазон.
+
+### Added — Use case ``DataQualityUseCase``
+
+Чистый application-layer:
+
+- `DataQualityQuery(sample_size, max_recipes)` — параметры вызова.
+- `DataQualityReport(total, n_clean, n_with_violations,
+  verified_share, by_rule, by_category, by_status)` — dataclass.
+- Три вспомогательных dataclass: `RuleBreakdown`, `CategoryBreakdown`.
+- Использует **тот же** `VerificationRules.can_be_verified()`, что и
+  workflow-guard на write-path — гарантия что отчёт не расходится с
+  реальностью (не может показать "clean" для рецепта, который
+  `submit_for_review` отклоняет).
+
+Каждое правило имеет human-readable `title` в словаре
+`_RULE_TITLES` (близко к коду, чтобы API-контракт не потёк если
+правило переименуется внутри).
+
+### Added — UI страница ``/admin/data-quality``
+
+Три секции:
+
+1. **4 stat-карточки:** total / clean / with violations / verified
+   share с процентными подсказками.
+2. **Таблица «Нарушения по правилам»** — сортирована worst-first:
+   - Rule (R1/R3/…) как destructive-badge
+   - Что проверяет (title)
+   - Затронуто (count)
+   - Топ-3 категории с count'ами
+   - До 5 sample recipe-ids как кликабельные ссылки
+3. **Таблица «Здоровье по категориям»** — по строке на категорию:
+   - Total / Clean / With violations / Verified / Draft
+   - Топ-правила как warning-badge
+   - **Health bar** — зелёная полоска ≥ 75%, амбер 40-75%, красная < 40%
+
+Пункт «Здоровье данных» в navigation (`ShieldAlert` icon).
+
+### Changed
+
+- ``Container.data_quality: DataQualityUseCase`` — новое поле.
+- Прочие модули не менялись.
+
+### Metrics
+
+- **617 тестов** (было 611, +6 for data quality: 2 unit + 4 endpoint).
+  Прогон ~160 с.
+- **63 REST endpoints** (было 62, +1: `/dashboard/data-quality`).
+- **15 UI-страниц** (было 14, +1: `/admin/data-quality`).
+- **125 source file** (было 124, +1: `use_cases/data_quality.py`).
+- **554 i18n ключей** (было 526, +28 для DQ RU+EN), паритет 100%.
+
+### QA
+
+- ``ruff check src tests`` — All checks passed!
+- ``ruff format --check`` — 211 files already formatted
+- ``mypy src/formulation_workbench`` — Success: no issues in 123 files
+- ``bandit -c pyproject.toml -q -r src`` — clean
+- ``pytest --no-cov --deselect ...`` — 617 passed, 16 deselected,
+  1 skipped
+- ``npx tsc --noEmit`` — clean
+- ``npx next build`` — 15 маршрутов, все ○ Static кроме
+  `/recipes/[id]` ƒ Dynamic
+- Реальный ``GET /dashboard/data-quality`` на боевой БД (983
+  рецепта): 5 с, R1 = 733 offenders, 250 clean, 22.4% verified
+
+---
+
 ## [1.21.0] — Backup verify/list/prune, live dashboard-summary, recent-activity виджеты (2026-08-23)
 
 Два блока production-grade улучшений: (1) существующий backup CLI
