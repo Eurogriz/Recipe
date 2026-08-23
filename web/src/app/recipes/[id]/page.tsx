@@ -19,6 +19,7 @@ import {
 import {
   api,
   type Assessment,
+  type HeatmapResult,
   type ModelMetadata,
   type OptimisationResult,
   type ParetoResult,
@@ -77,13 +78,22 @@ export default function RecipeDetailPage() {
         >
           <ArrowLeft className="h-4 w-4" /> {t("recipe.back")}
         </Link>
-        <a
-          href={api.recipeCsvUrl(id)}
-          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-          download
-        >
-          <Download className="h-4 w-4" /> {t("recipe.export.csv")}
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href={api.recipeCsvUrl(id)}
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            download
+          >
+            <Download className="h-4 w-4" /> {t("recipe.export.csv")}
+          </a>
+          <a
+            href={api.recipePdfUrl(id)}
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            download
+          >
+            <Download className="h-4 w-4" /> {t("recipe.export.pdf")}
+          </a>
+        </div>
       </div>
 
       <header className="space-y-2">
@@ -1246,7 +1256,42 @@ function SimilarityBar({ value }: { value: number }) {
 }
 
 /* ------------------------------------------------------------- Sensitivity */
+type SensitivityMode = "1d" | "2d";
+
 function SensitivityTab({ recipe }: { recipe: RecipeFull }) {
+  const t = useT();
+  const [mode, setMode] = useState<SensitivityMode>("1d");
+  return (
+    <div className="space-y-4">
+      <div className="inline-flex rounded-md border border-border overflow-hidden text-sm">
+        <button
+          onClick={() => setMode("1d")}
+          className={`px-3 py-1.5 transition-colors ${
+            mode === "1d"
+              ? "bg-primary text-primary-foreground"
+              : "bg-white hover:bg-accent"
+          }`}
+        >
+          {t("heatmap.mode.1d")}
+        </button>
+        <button
+          onClick={() => setMode("2d")}
+          className={`px-3 py-1.5 transition-colors ${
+            mode === "2d"
+              ? "bg-primary text-primary-foreground"
+              : "bg-white hover:bg-accent"
+          }`}
+        >
+          {t("heatmap.mode.2d")}
+        </button>
+      </div>
+      {mode === "1d" && <SensitivityPanel1D recipe={recipe} />}
+      {mode === "2d" && <SensitivityPanel2D recipe={recipe} />}
+    </div>
+  );
+}
+
+function SensitivityPanel1D({ recipe }: { recipe: RecipeFull }) {
   const t = useT();
   const components = useMemo(
     () => recipe.stages.flatMap((s) => s.components),
@@ -1569,6 +1614,403 @@ function Curve({
         </circle>
       ))}
     </svg>
+  );
+}
+
+/* ------------------------------------------------------------- Heatmap 2D */
+function SensitivityPanel2D({ recipe }: { recipe: RecipeFull }) {
+  const t = useT();
+  const components = useMemo(
+    () => recipe.stages.flatMap((s) => s.components),
+    [recipe]
+  );
+  const [models, setModels] = useState<ModelMetadata[] | null>(null);
+  const [componentA, setComponentA] = useState<string>("");
+  const [componentB, setComponentB] = useState<string>("");
+  const [property, setProperty] = useState<string>("");
+  const [aMin, setAMin] = useState<number>(0);
+  const [aMax, setAMax] = useState<number>(0);
+  const [bMin, setBMin] = useState<number>(0);
+  const [bMax, setBMax] = useState<number>(0);
+  const [steps, setSteps] = useState<number>(9);
+  const [busy, setBusy] = useState<boolean>(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<HeatmapResult | null>(null);
+
+  useEffect(() => {
+    api
+      .listModels()
+      .then((ms) => {
+        setModels(ms);
+        if (ms.length > 0 && !property) setProperty(ms[0].property_code);
+      })
+      .catch(() => setModels([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (components.length < 2) return;
+    // Pick the two largest components as defaults; ±50 % around each.
+    const sorted = [...components].sort((a, b) => b.mass_percent - a.mass_percent);
+    const a = sorted[0];
+    const b = sorted[1];
+    setComponentA(a.name);
+    setComponentB(b.name);
+    const clampRange = (base: number): [number, number] => [
+      Math.max(0, Math.round(base * 0.5 * 100) / 100),
+      Math.min(90, Math.round(base * 1.5 * 100) / 100),
+    ];
+    const [aLo, aHi] = clampRange(a.mass_percent);
+    const [bLo, bHi] = clampRange(b.mass_percent);
+    setAMin(aLo);
+    setAMax(aHi);
+    setBMin(bLo);
+    setBMax(bHi);
+  }, [components]);
+
+  const run = async () => {
+    if (!componentA || !componentB || !property) return;
+    if (componentA === componentB) {
+      setErr("A ≠ B");
+      return;
+    }
+    setBusy(true);
+    setErr(null);
+    setResult(null);
+    try {
+      const r = await api.sensitivityHeatmap(recipe.id, {
+        component_a: componentA,
+        component_b: componentB,
+        property_code: property,
+        a_min: aMin,
+        a_max: aMax,
+        b_min: bMin,
+        b_max: bMax,
+        steps_a: steps,
+        steps_b: steps,
+      });
+      setResult(r);
+    } catch (e: any) {
+      setErr(t("heatmap.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const noModels = models !== null && models.length === 0;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("heatmap.title")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("heatmap.subtitle")}</p>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <div>
+            <label className="text-xs text-muted-foreground">
+              {t("heatmap.component_a")}
+            </label>
+            <select
+              className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+              value={componentA}
+              onChange={(e) => setComponentA(e.target.value)}
+            >
+              {components.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name} ({fmt(c.mass_percent, 2)}%)
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">
+              {t("heatmap.component_b")}
+            </label>
+            <select
+              className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+              value={componentB}
+              onChange={(e) => setComponentB(e.target.value)}
+            >
+              {components.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name} ({fmt(c.mass_percent, 2)}%)
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">
+              {t("heatmap.property")}
+            </label>
+            <select
+              className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+              value={property}
+              onChange={(e) => setProperty(e.target.value)}
+            >
+              {(models ?? []).map((m) => (
+                <option key={m.property_code} value={m.property_code}>
+                  {m.property_code}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <RangeInput
+            label={t("heatmap.a_range")}
+            min={aMin}
+            max={aMax}
+            onMin={setAMin}
+            onMax={setAMax}
+          />
+          <RangeInput
+            label={t("heatmap.b_range")}
+            min={bMin}
+            max={bMax}
+            onMin={setBMin}
+            onMax={setBMax}
+          />
+          <div>
+            <label className="text-xs text-muted-foreground">{t("heatmap.steps")}</label>
+            <input
+              type="number"
+              min={2}
+              max={20}
+              value={steps}
+              onChange={(e) => setSteps(Math.min(20, Math.max(2, Number(e.target.value) || 9)))}
+              className="w-full h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+            />
+          </div>
+
+          <div className="md:col-span-3 flex items-center gap-3">
+            <Button
+              onClick={run}
+              disabled={busy || noModels || !componentA || !componentB || componentA === componentB}
+            >
+              {busy ? t("heatmap.running") : t("heatmap.run")}
+            </Button>
+            {noModels && (
+              <span className="text-sm text-amber-700">{t("sensitivity.no_models")}</span>
+            )}
+            {err && <span className="text-sm text-red-700">{err}</span>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {result && <HeatmapPlot result={result} />}
+    </div>
+  );
+}
+
+function RangeInput({
+  label,
+  min,
+  max,
+  onMin,
+  onMax,
+}: {
+  label: string;
+  min: number;
+  max: number;
+  onMin: (v: number) => void;
+  onMax: (v: number) => void;
+}) {
+  return (
+    <div>
+      <label className="text-xs text-muted-foreground">{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          step="0.1"
+          value={min}
+          onChange={(e) => onMin(Number(e.target.value))}
+          className="w-1/2 h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+        />
+        <span className="text-muted-foreground">–</span>
+        <input
+          type="number"
+          step="0.1"
+          value={max}
+          onChange={(e) => onMax(Number(e.target.value))}
+          className="w-1/2 h-9 rounded-md border border-input px-2 text-sm font-mono bg-white"
+        />
+      </div>
+    </div>
+  );
+}
+
+function HeatmapPlot({ result }: { result: HeatmapResult }) {
+  const t = useT();
+  const na = result.a_values.length;
+  const nb = result.b_values.length;
+  const cellW = 32;
+  const cellH = 24;
+  const marginL = 90;
+  const marginT = 60;
+  const marginR = 20;
+  const marginB = 40;
+  const W = marginL + nb * cellW + marginR;
+  const H = marginT + na * cellH + marginB;
+
+  const zMin = result.z_min ?? 0;
+  const zMax = result.z_max ?? 1;
+  const zRange = Math.max(1e-9, zMax - zMin);
+
+  const colour = (v: number | null): string => {
+    if (v === null || Number.isNaN(v)) return "hsl(0 0% 90%)";
+    const t01 = (v - zMin) / zRange;
+    // Blue → yellow → red diverging-ish scale.
+    const hue = 220 - 220 * t01; // 220 (blue) → 0 (red)
+    return `hsl(${hue.toFixed(1)} 70% 55%)`;
+  };
+
+  // Baseline nearest-cell indices for the "current composition" marker.
+  const nearestIdx = (arr: number[], target: number): number => {
+    let best = 0;
+    let bestDist = Math.abs(arr[0] - target);
+    for (let i = 1; i < arr.length; i++) {
+      const d = Math.abs(arr[i] - target);
+      if (d < bestDist) {
+        best = i;
+        bestDist = d;
+      }
+    }
+    return best;
+  };
+  const baseI = nearestIdx(result.a_values, result.baseline_a);
+  const baseJ = nearestIdx(result.b_values, result.baseline_b);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>
+            {result.property_code} — {result.component_a} × {result.component_b}
+          </span>
+          <span className="text-xs font-normal text-muted-foreground">
+            {result.baseline_value !== null &&
+              `${t("heatmap.baseline_marker")}: ${result.baseline_value.toFixed(3)}`}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <svg width={W} height={H} className="block">
+            {/* axis labels */}
+            <text
+              x={marginL + (nb * cellW) / 2}
+              y={marginT - 30}
+              textAnchor="middle"
+              className="text-xs"
+              fill="hsl(215 16% 47%)"
+            >
+              {result.component_b}
+            </text>
+            <text
+              x={12}
+              y={marginT + (na * cellH) / 2}
+              textAnchor="middle"
+              transform={`rotate(-90, 12, ${marginT + (na * cellH) / 2})`}
+              className="text-xs"
+              fill="hsl(215 16% 47%)"
+            >
+              {result.component_a}
+            </text>
+
+            {/* column labels (B, x axis) — show every other one to keep it clean */}
+            {result.b_values.map((b, j) =>
+              j % Math.max(1, Math.floor(nb / 6)) === 0 || j === nb - 1 ? (
+                <text
+                  key={`bl-${j}`}
+                  x={marginL + j * cellW + cellW / 2}
+                  y={marginT - 8}
+                  textAnchor="middle"
+                  className="text-[10px]"
+                  fill="hsl(215 16% 47%)"
+                >
+                  {b.toFixed(1)}
+                </text>
+              ) : null
+            )}
+            {/* row labels (A, y axis) */}
+            {result.a_values.map((a, i) => (
+              <text
+                key={`al-${i}`}
+                x={marginL - 6}
+                y={marginT + i * cellH + cellH / 2 + 3}
+                textAnchor="end"
+                className="text-[10px]"
+                fill="hsl(215 16% 47%)"
+              >
+                {a.toFixed(1)}
+              </text>
+            ))}
+
+            {/* cells */}
+            {result.values.map((row, i) =>
+              row.map((v, j) => (
+                <rect
+                  key={`c-${i}-${j}`}
+                  x={marginL + j * cellW}
+                  y={marginT + i * cellH}
+                  width={cellW}
+                  height={cellH}
+                  fill={colour(v)}
+                  stroke="white"
+                  strokeWidth={0.5}
+                >
+                  <title>
+                    {`${result.component_a}=${result.a_values[i].toFixed(2)}%, ` +
+                      `${result.component_b}=${result.b_values[j].toFixed(2)}%\n` +
+                      (v === null
+                        ? t("heatmap.infeasible")
+                        : `${t("heatmap.value")}: ${v.toFixed(4)}`)}
+                  </title>
+                </rect>
+              ))
+            )}
+
+            {/* baseline marker (star, drawn only if within range) */}
+            {result.baseline_a >= result.a_values[0] &&
+              result.baseline_a <= result.a_values[na - 1] &&
+              result.baseline_b >= result.b_values[0] &&
+              result.baseline_b <= result.b_values[nb - 1] && (
+                <g
+                  transform={`translate(${marginL + baseJ * cellW + cellW / 2}, ${
+                    marginT + baseI * cellH + cellH / 2
+                  })`}
+                >
+                  <circle r={6} fill="white" stroke="black" strokeWidth={1.5} />
+                  <circle r={2.5} fill="black" />
+                </g>
+              )}
+          </svg>
+        </div>
+
+        {/* Colour legend */}
+        <div className="flex items-center gap-3 mt-4 text-xs">
+          <span className="text-muted-foreground">{t("heatmap.legend")}:</span>
+          <div
+            className="h-3 flex-1 max-w-xs rounded"
+            style={{
+              background:
+                "linear-gradient(to right, hsl(220 70% 55%), hsl(60 70% 55%), hsl(0 70% 55%))",
+            }}
+          />
+          <span className="font-mono">
+            {zMin.toFixed(2)} … {zMax.toFixed(2)}
+          </span>
+          <span className="inline-flex items-center gap-1 text-muted-foreground">
+            <span
+              className="inline-block w-3 h-3 rounded"
+              style={{ background: "hsl(0 0% 90%)" }}
+            />
+            {t("heatmap.infeasible")}
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">{t("heatmap.hint")}</p>
+      </CardContent>
+    </Card>
   );
 }
 

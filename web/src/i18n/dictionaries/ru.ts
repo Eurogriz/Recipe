@@ -110,7 +110,30 @@ export const ru: Dict = {
   "recipe.tab.similar": "Похожие",
   "recipe.tab.sensitivity": "Чувствительность",
   "recipe.export.csv": "Скачать в CSV",
+  "recipe.export.pdf": "Скачать в PDF",
   "recipes.export.csv": "Скачать каталог (CSV)",
+
+  // sensitivity heatmap (2D)
+  "heatmap.title": "Тепловая карта: два компонента одновременно",
+  "heatmap.subtitle":
+    "Меняем массовые доли двух компонентов на прямоугольной сетке; остальные пересчитываются пропорционально. Модель предсказывает одно свойство в каждой ячейке.",
+  "heatmap.component_a": "Компонент A (ось Y)",
+  "heatmap.component_b": "Компонент B (ось X)",
+  "heatmap.property": "Свойство",
+  "heatmap.a_range": "Диапазон A, %",
+  "heatmap.b_range": "Диапазон B, %",
+  "heatmap.steps": "Шагов по оси",
+  "heatmap.run": "Построить карту",
+  "heatmap.running": "Считаем…",
+  "heatmap.failed": "Не удалось: {msg}",
+  "heatmap.legend": "Легенда",
+  "heatmap.baseline_marker": "текущий состав",
+  "heatmap.infeasible": "нет решения",
+  "heatmap.value": "значение",
+  "heatmap.hint":
+    "Ячейки, где остальным компонентам не хватает массы, показаны серым.",
+  "heatmap.mode.1d": "По одному компоненту",
+  "heatmap.mode.2d": "По двум компонентам (тепловая карта)",
 
   // sensitivity
   "sensitivity.title": "Анализ чувствительности",

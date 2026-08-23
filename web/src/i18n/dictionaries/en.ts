@@ -101,7 +101,30 @@ export const en: Dict = {
   "recipe.tab.similar": "Similar",
   "recipe.tab.sensitivity": "Sensitivity",
   "recipe.export.csv": "Download as CSV",
+  "recipe.export.pdf": "Download as PDF",
   "recipes.export.csv": "Download catalog (CSV)",
+
+  // sensitivity heatmap (2D)
+  "heatmap.title": "Heatmap: two components at once",
+  "heatmap.subtitle":
+    "Sweep mass fractions of two components on a rectangular grid; the rest are rebalanced pro-rata. The model predicts one property per cell.",
+  "heatmap.component_a": "Component A (Y axis)",
+  "heatmap.component_b": "Component B (X axis)",
+  "heatmap.property": "Property",
+  "heatmap.a_range": "Range A, %",
+  "heatmap.b_range": "Range B, %",
+  "heatmap.steps": "Steps per axis",
+  "heatmap.run": "Build heatmap",
+  "heatmap.running": "Running…",
+  "heatmap.failed": "Failed: {msg}",
+  "heatmap.legend": "Legend",
+  "heatmap.baseline_marker": "current composition",
+  "heatmap.infeasible": "infeasible",
+  "heatmap.value": "value",
+  "heatmap.hint":
+    "Cells where the remaining components run out of mass budget are shown in grey.",
+  "heatmap.mode.1d": "Single component",
+  "heatmap.mode.2d": "Two components (heatmap)",
 
   // sensitivity
   "sensitivity.title": "Sensitivity analysis",

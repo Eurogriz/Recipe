@@ -116,6 +116,37 @@ class SensitivityResultOut(BaseModel):
     points: list[SensitivityPointOut]
 
 
+class HeatmapRequest(BaseModel):
+    """Two-axis what-if sweep for a pair of components."""
+
+    component_a: str = Field(min_length=1, examples=["TiO2 R-902+"])
+    component_b: str = Field(min_length=1, examples=["Acronal 290 D (50%)"])
+    property_code: str = Field(min_length=1, examples=["gloss_60"])
+    a_min: float = Field(ge=0.0, le=100.0)
+    a_max: float = Field(ge=0.0, le=100.0)
+    b_min: float = Field(ge=0.0, le=100.0)
+    b_max: float = Field(ge=0.0, le=100.0)
+    steps_a: int = Field(default=11, ge=2, le=25)
+    steps_b: int = Field(default=11, ge=2, le=25)
+
+
+class HeatmapResultOut(BaseModel):
+    recipe_id: str
+    component_a: str
+    component_b: str
+    property_code: str
+    baseline_a: float
+    baseline_b: float
+    baseline_value: float | None
+    a_values: list[float]
+    b_values: list[float]
+    # values[i][j] = predicted property at (a=a_values[i], b=b_values[j])
+    # null cells are infeasible (no rebalancing budget).
+    values: list[list[float | None]]
+    z_min: float | None
+    z_max: float | None
+
+
 class CatalogStats(BaseModel):
     total: int = Field(examples=[500])
     by_status: dict[str, int] = Field(
@@ -888,6 +919,8 @@ __all__ = [
     "FeatureImpactOut",
     "FeatureImpactOutBase",
     "HealthResponse",
+    "HeatmapRequest",
+    "HeatmapResultOut",
     "JobRecordOut",
     "JobsListOut",
     "MassBalanceOut",

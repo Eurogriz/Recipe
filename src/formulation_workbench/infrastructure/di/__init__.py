@@ -27,6 +27,7 @@ from ...application.use_cases.search_recipes import (
     SearchRecipesUseCase,
 )
 from ...application.use_cases.sensitivity_analysis import SensitivityAnalysisUseCase
+from ...application.use_cases.sensitivity_heatmap import SensitivityHeatmapUseCase
 from ...application.use_cases.similar_recipes import FindSimilarRecipesUseCase
 from ...application.use_cases.update_recipe import UpdateRecipeUseCase
 from ...application.use_cases.verification_workflow import (
@@ -74,6 +75,7 @@ class Container:
     search_recipes: SearchRecipesUseCase
     find_similar_recipes: FindSimilarRecipesUseCase
     sensitivity_analysis: SensitivityAnalysisUseCase
+    sensitivity_heatmap: SensitivityHeatmapUseCase
     catalog_stats: GetCatalogStatisticsUseCase
     submit_for_review: SubmitRecipeForReviewUseCase
     verify_recipe: VerifyRecipeUseCase
@@ -156,6 +158,7 @@ class Container:
             search_recipes=SearchRecipesUseCase(recipe_repository),
             find_similar_recipes=FindSimilarRecipesUseCase(recipe_repository),
             sensitivity_analysis=SensitivityAnalysisUseCase(recipe_repository, property_regressor),
+            sensitivity_heatmap=SensitivityHeatmapUseCase(recipe_repository, property_regressor),
             catalog_stats=GetCatalogStatisticsUseCase(recipe_repository),
             submit_for_review=SubmitRecipeForReviewUseCase(recipe_repository, audit_logger),
             verify_recipe=VerifyRecipeUseCase(recipe_repository, audit_logger),

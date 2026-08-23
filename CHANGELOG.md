@@ -7,6 +7,103 @@
 
 ---
 
+## [1.12.0] — PDF-экспорт + двумерная тепловая карта чувствительности (2026-08-23)
+
+Продолжение отложенного плана: два новых способа посмотреть/поделиться
+рецептом и его поведением.
+
+### Added — PDF-экспорт технической карты рецепта
+
+- Новый модуль `infrastructure/reporting/pdf.py` с двумя точками входа:
+  - `render_recipe_pdf(recipe, path)` — записать в файл (используется
+    существующим CLI `formulation-export-pdf`);
+  - `render_recipe_pdf_bytes(recipe) → bytes` — вернуть PDF в памяти
+    (используется HTTP-endpoint'ом, чтобы не трогать диск).
+- `commands/export_pdf.py` теперь — тонкий wrapper над этим модулем;
+  раскладка меняется в одном месте.
+- Улучшена вёрстка карточки: header с ID/версией/finish/color,
+  секция stage со ссылкой на оборудование и параметры процесса,
+  таблица с итоговой строкой Total, cross_references отдельным
+  списком. Corporate-стиль: серые заголовки, тонкие границы.
+- Новый endpoint `GET /recipes/{id}/export.pdf` стримит
+  `application/pdf` с `Content-Disposition: attachment`.
+- В UI: кнопка **«Скачать в PDF»** в шапке карточки рядом с CSV.
+
+### Added — 2D-тепловая карта чувствительности
+
+Расширение одномерного sensitivity: теперь можно свипить **два**
+компонента одновременно и увидеть, как одно свойство ведёт себя на
+всей плоскости `(A%, B%)`.
+
+- Новый use case `SensitivityHeatmapUseCase` +
+  `_rebalance_pair()` — атомарно ставит новые mass % обоим
+  компонентам сразу и пересчитывает остальные pro-rata, чтобы
+  промежуточные состояния никогда не превышали 100 %.
+- Endpoint `POST /recipes/{id}/sensitivity-heatmap` возвращает
+  прямоугольную решётку `N × M` предсказанных значений; ячейки,
+  где перебалансировка невозможна, помечены `null`. Ограничение:
+  25 × 25 = 625 max (реализован cap на `MAX_CELLS = 400`).
+- В UI: таб «Чувствительность» получил переключатель между
+  **«По одному компоненту»** (старый режим) и **«По двум
+  компонентам (тепловая карта)»** (новый). Второй режим рисует
+  SVG-heatmap с:
+  - осями A (Y) и B (X) с числовыми делениями;
+  - диверджентной шкалой синий→жёлтый→красный;
+  - серыми ячейками для infeasible-точек;
+  - маркером «текущий состав» (кружок с чёрной точкой) в ячейке,
+    ближайшей к baseline рецепта;
+  - легендой с диапазоном z_min..z_max;
+  - hover-tooltip'ом на каждой ячейке (A%, B%, value / infeasible).
+
+### Endpoints
+
+**41 REST endpoint** (+2 к v1.11.0):
+- `GET  /recipes/{id}/export.pdf`
+- `POST /recipes/{id}/sensitivity-heatmap`
+
+### i18n
+
++19 новых ключей (PDF-кнопка, heatmap-панель, легенда).
+**Итого 264 переведённых строк, паритет RU/EN 100 %.**
+
+### Tests
+
+- 8 unit-тестов для `SensitivityHeatmapUseCase` и `_rebalance_pair`
+  (сумма = 100 %, pro-rata scaling, отказ на same-component, отказ на
+  overbudget, cap на cells, infeasible → null, монотонность по осям).
+- 4 integration-теста для `POST /sensitivity-heatmap` (базовый grid,
+  422 same-component, 404 unknown, cell cap).
+- 2 integration-теста для PDF (валидный `%PDF` header, 404).
+- **Итого: 468 passed, 0 failed** (+15 к v1.11.0).
+
+### Metrics
+
+| | v1.11.0 | v1.12.0 |
+|---|---|---|
+| Тесты | 453 | **468** (+15) |
+| REST endpoints | 39 | **41** (+2) |
+| i18n ключей | 245 | **264** (+19) |
+| Source files | 105 | **108** (+3) |
+| Табов в Recipe | 7 | 7 (+ подрежимы) |
+| ruff / mypy / bandit | clean | clean |
+
+### Files
+
+- src/formulation_workbench/infrastructure/reporting/__init__.py         (new)
+- src/formulation_workbench/infrastructure/reporting/pdf.py              (new, shared renderer)
+- src/formulation_workbench/application/use_cases/sensitivity_heatmap.py (new)
+- src/formulation_workbench/infrastructure/di/__init__.py                (регистрация)
+- src/formulation_workbench/presentation/api/{routes,schemas}.py         (+2 endpoints, +2 DTOs)
+- src/formulation_workbench/presentation/commands/export_pdf.py          (delegates to shared renderer)
+- tests/unit/application/test_sensitivity_heatmap.py                     (new, 8 tests)
+- tests/integration/test_api_sensitivity_heatmap.py                      (new, 4 tests)
+- tests/integration/test_api_export_pdf.py                               (new, 2 tests)
+- web/src/lib/api.ts                                                     (HeatmapRequest/Result + PDF URL)
+- web/src/i18n/dictionaries/{ru,en}.ts                                   (+19 keys)
+- web/src/app/recipes/[id]/page.tsx                                      (PDF button + 1D/2D toggle + HeatmapPlot)
+
+---
+
 ## [1.11.0] — Анализ чувствительности + экспорт в CSV (2026-08-23)
 
 Две ценные визуальные фичи в одном раунде.

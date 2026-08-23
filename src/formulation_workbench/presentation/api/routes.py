@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import PlainTextResponse
 
 from ... import __version__
@@ -72,6 +72,8 @@ from .schemas import (
     ExperimentPlanIn,
     FeatureImpactOutBase,
     HealthResponse,
+    HeatmapRequest,
+    HeatmapResultOut,
     JobRecordOut,
     JobsListOut,
     MassBalanceOut,
@@ -420,6 +422,69 @@ async def sensitivity_analysis(
 
 
 # ---------------------------------------------------------------------------
+# 2D what-if heatmap (two components at once)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recipes/{recipe_id}/sensitivity-heatmap",
+    response_model=HeatmapResultOut,
+    tags=["recipes", "ml"],
+    dependencies=[Depends(require_reader)],
+    summary=(
+        "Two-axis what-if heatmap: sweep two components on a grid, predict one property per cell"
+    ),
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def sensitivity_heatmap(
+    recipe_id: str,
+    payload: HeatmapRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> HeatmapResultOut:
+    from ...application.use_cases.sensitivity_analysis import ComponentNotInRecipeError
+    from ...application.use_cases.sensitivity_heatmap import HeatmapQuery
+
+    try:
+        result = await container.sensitivity_heatmap.execute(
+            HeatmapQuery(
+                recipe_id=recipe_id,
+                component_a=payload.component_a,
+                component_b=payload.component_b,
+                property_code=payload.property_code,
+                a_min=payload.a_min,
+                a_max=payload.a_max,
+                b_min=payload.b_min,
+                b_max=payload.b_max,
+                steps_a=payload.steps_a,
+                steps_b=payload.steps_b,
+            )
+        )
+    except ComponentNotInRecipeError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+
+    if result is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    def _round(v: float | None) -> float | None:
+        return None if v is None else round(v, 4)
+
+    return HeatmapResultOut(
+        recipe_id=result.recipe_id,
+        component_a=result.component_a,
+        component_b=result.component_b,
+        property_code=result.property_code,
+        baseline_a=round(result.baseline_a, 4),
+        baseline_b=round(result.baseline_b, 4),
+        baseline_value=_round(result.baseline_value),
+        a_values=[round(a, 4) for a in result.a_values],
+        b_values=[round(b, 4) for b in result.b_values],
+        values=[[_round(v) for v in row] for row in result.values],
+        z_min=_round(result.z_min),
+        z_max=_round(result.z_max),
+    )
+
+
+# ---------------------------------------------------------------------------
 # CSV export
 # ---------------------------------------------------------------------------
 def _csv_escape(value: object) -> str:
@@ -489,6 +554,45 @@ async def export_recipe_csv(
     return PlainTextResponse(
         content=body,
         media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/export.pdf",
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Render the recipe technical card as a PDF (streamed, in-memory)",
+    responses={
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "PDF technical card of the recipe.",
+        },
+        **_UNAUTHORIZED,
+        **_NOT_FOUND,
+    },
+)
+async def export_recipe_pdf(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> Response:
+    from ...infrastructure.reporting import render_recipe_pdf_bytes
+
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    try:
+        pdf_bytes = render_recipe_pdf_bytes(recipe)
+    except ImportError as exc:  # pragma: no cover — reportlab is a hard dep
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "PDF renderer is not available (install 'reportlab').",
+        ) from exc
+
+    filename = f"recipe_{recipe.id[:16]}_v{recipe.version}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 

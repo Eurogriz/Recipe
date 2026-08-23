@@ -114,7 +114,15 @@ export const api = {
   // Direct URL helpers for downloads — the browser triggers the actual
   // GET so we get the Content-Disposition attachment behaviour.
   recipeCsvUrl: (id: string) => `/api/recipes/${encodeURIComponent(id)}/export.csv`,
+  recipePdfUrl: (id: string) => `/api/recipes/${encodeURIComponent(id)}/export.pdf`,
   catalogCsvUrl: () => `/api/catalog/export.csv`,
+
+  // heatmap
+  sensitivityHeatmap: (id: string, body: HeatmapRequest) =>
+    request<HeatmapResult>(`/recipes/${id}/sensitivity-heatmap`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 
   // similar recipes
   similarRecipes: (
@@ -441,6 +449,34 @@ export interface SensitivityResult {
   steps: number;
   property_codes: string[];
   points: SensitivityPoint[];
+}
+
+// ---- 2D heatmap ------------------------------------------------------------
+export interface HeatmapRequest {
+  component_a: string;
+  component_b: string;
+  property_code: string;
+  a_min: number;
+  a_max: number;
+  b_min: number;
+  b_max: number;
+  steps_a?: number;
+  steps_b?: number;
+}
+
+export interface HeatmapResult {
+  recipe_id: string;
+  component_a: string;
+  component_b: string;
+  property_code: string;
+  baseline_a: number;
+  baseline_b: number;
+  baseline_value: number | null;
+  a_values: number[];
+  b_values: number[];
+  values: (number | null)[][];
+  z_min: number | null;
+  z_max: number | null;
 }
 
 export interface SimilarRecipe {
