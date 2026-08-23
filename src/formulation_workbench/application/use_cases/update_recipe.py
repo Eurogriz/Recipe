@@ -10,6 +10,7 @@ from ...domain.entities.recipe import Recipe
 from ...domain.events import RecipeUpdated
 from ...domain.exceptions import RecipeInvariantViolation
 from ...domain.services.verification_rules import VerificationRules
+from ...infrastructure.observability._helpers import observed
 
 if TYPE_CHECKING:
     from ..ports.audit_logger import AuditLogger
@@ -45,6 +46,7 @@ class UpdateRecipeUseCase:
         self._recipe_repo = recipe_repo
         self._audit_logger = audit_logger
 
+    @observed("update_recipe")
     async def execute(self, command: UpdateRecipeCommand) -> Recipe:
         """Execute the update.
 

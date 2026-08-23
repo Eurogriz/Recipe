@@ -1,6 +1,6 @@
 [project]
 name = "formulation-workbench"
-version = "1.1.1"
+version = "1.1.2"
 description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -120,6 +120,7 @@ formulation-api = "formulation_workbench.presentation.api.main:run"
 formulation-init-db = "formulation_workbench.presentation.commands.init_db:main"
 formulation-import-seed = "formulation_workbench.presentation.commands.import_seed:main"
 formulation-export-pdf = "formulation_workbench.presentation.commands.export_pdf:main"
+formulation-backup = "formulation_workbench.presentation.commands.backup:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -322,7 +323,17 @@ exclude_dirs = ["tests", "migrations/versions", "scripts", ".venv", "build", "di
 # B105 possible hard-coded password (false positives on placeholder strings);
 # B403/B301 pickle (only used to load our own trained model on the same host);
 # B405 xml.etree.ElementTree (build-only; parsing routes through defusedxml).
-skips = ["B101", "B104", "B105", "B301", "B403", "B404", "B405", "B603"]
+skips = [
+    "B101",   # assert usage — pytest style
+    "B104",   # bind to 0.0.0.0 (intentional inside containers)
+    "B105",   # possible hard-coded password (placeholder strings)
+    "B301",   # pickle deserialisation of *our own* model files
+    "B311",   # random for backoff jitter — not cryptography
+    "B403",   # pickle import
+    "B404",   # subprocess import (used by ops tooling)
+    "B405",   # xml.etree import (build-only; parsing routes through defusedxml)
+    "B603",   # subprocess call without shell=False (we always pass a list)
+]
 
 # ============================================================================
 # PYDANTIC

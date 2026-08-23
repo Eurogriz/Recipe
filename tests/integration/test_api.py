@@ -78,7 +78,9 @@ async def test_metrics_endpoint(api_client: AsyncClient) -> None:
     response = await api_client.get("/metrics")
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/plain")
-    assert b"python_gc_objects_collected_total" in response.content
+    # Our dedicated registry always publishes app_info, even before any
+    # business use case has run.
+    assert b"formulation_app_info" in response.content
 
 
 async def test_request_id_header(api_client: AsyncClient) -> None:

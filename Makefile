@@ -70,6 +70,9 @@ sbom: ## Generate a CycloneDX SBOM to sbom.cdx.json
 db-init: ## Initialise the database schema
 	formulation-workbench init-db
 
+db-backup: ## Take an online backup to ./backups
+	formulation-backup backup --output-dir ./backups
+
 db-migrate: ## Apply pending Alembic migrations
 	$(PYTHON) -m alembic upgrade head
 

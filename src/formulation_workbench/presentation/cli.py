@@ -182,6 +182,161 @@ def import_seed(
     )
 
 
+@app.command("recipe-get")
+def recipe_get(recipe_id: str = typer.Argument(..., help="Recipe ID to fetch.")) -> None:
+    """Fetch a single recipe by ID and print it as JSON."""
+    from ..application.use_cases.get_recipe import GetRecipeByIdQuery
+
+    settings = get_settings()
+    _init_logging(settings)
+
+    async def _run_get() -> None:
+        container = await Container.build(settings)
+        try:
+            recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+            if recipe is None:
+                typer.secho(f"Recipe not found: {recipe_id}", fg=typer.colors.RED)
+                raise typer.Exit(code=1)
+            payload = {
+                "id": recipe.id,
+                "category": recipe.category,
+                "subcategory": recipe.subcategory,
+                "binder_type": recipe.binder_type,
+                "product_class": recipe.product_class.value,
+                "status": recipe.status.state.value,
+                "version": recipe.version,
+                "intended_use": recipe.intended_use,
+                "stages": [
+                    {
+                        "stage_number": s.stage_number,
+                        "name": s.name,
+                        "components": [
+                            {
+                                "name": c.name,
+                                "cas_number": c.cas_number,
+                                "function": c.function,
+                                "mass_percent": c.mass_percent,
+                            }
+                            for c in s.components
+                        ],
+                    }
+                    for s in recipe.stages
+                ],
+                "primary_source": str(recipe.primary_source),
+            }
+            typer.echo(json.dumps(payload, indent=2, ensure_ascii=False))
+        finally:
+            await container.close()
+
+    _run(_run_get())
+
+
+@app.command("verify")
+def verify_recipe(
+    recipe_id: str = typer.Argument(..., help="Recipe ID to add a verification to."),
+    verifier: str = typer.Option(..., "--verifier", help="Verifier user id / login."),
+    citation_id: str = typer.Option(
+        "manual", "--citation-id", help="Identifier of the citation being verified."
+    ),
+    comment: str = typer.Option("", "--comment", help="Optional review note."),
+) -> None:
+    """Add one verification to a recipe (peer review)."""
+    from ..application.use_cases.verification_workflow import VerifyRecipeCommand
+
+    settings = get_settings()
+    _init_logging(settings)
+
+    async def _run_verify() -> None:
+        container = await Container.build(settings)
+        try:
+            result = await container.verify_recipe.execute(
+                VerifyRecipeCommand(
+                    recipe_id=recipe_id,
+                    verifier=verifier,
+                    source_citation_id=citation_id,
+                    comment=comment,
+                )
+            )
+            typer.secho(
+                f"✓ Verification recorded — {result.status.verification_count}/"
+                f"{result.status.required_verifications} "
+                f"({result.status.state.value})",
+                fg=typer.colors.GREEN,
+            )
+        finally:
+            await container.close()
+
+    _run(_run_verify())
+
+
+@app.command("audit-log")
+def audit_log(
+    aggregate_id: str = typer.Option("", "--aggregate-id", help="Filter by recipe id."),
+    limit: int = typer.Option(50, help="Max entries returned."),
+) -> None:
+    """Tail entries from the audit log (newest first)."""
+    from sqlalchemy import select
+
+    from ..infrastructure.db.models import AuditLogEntryModel
+
+    settings = get_settings()
+    _init_logging(settings)
+
+    async def _run_audit() -> None:
+        container = await Container.build(settings)
+        try:
+            async with container.database.session() as session:
+                stmt = (
+                    select(AuditLogEntryModel)
+                    .order_by(AuditLogEntryModel.timestamp.desc())
+                    .limit(limit)
+                )
+                if aggregate_id:
+                    stmt = stmt.where(AuditLogEntryModel.recipe_id == aggregate_id)
+                rows = (await session.execute(stmt)).scalars().all()
+                for row in rows:
+                    typer.echo(
+                        json.dumps(
+                            {
+                                "timestamp": row.timestamp.isoformat(),
+                                "action": row.action,
+                                "actor": row.user_id,
+                                "recipe_id": row.recipe_id,
+                                "changes": row.changes_json,
+                                "ip_address": row.ip_address,
+                            },
+                            default=str,
+                            ensure_ascii=False,
+                        )
+                    )
+        finally:
+            await container.close()
+
+    _run(_run_audit())
+
+
+@app.command("backup")
+def backup_cmd(
+    output_dir: Path = typer.Option(
+        Path("./backups"), "--output-dir", help="Directory to place the backup archive in."
+    ),
+    no_compress: bool = typer.Option(False, "--no-compress", help="Skip gzip."),
+) -> None:
+    """Create an online backup of the SQLite database."""
+    from .commands.backup import _sqlite_path_from_url, backup
+
+    settings = get_settings()
+    _init_logging(settings)
+    db_path = _sqlite_path_from_url(settings.database_url)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    from datetime import datetime
+    from datetime import timezone as _tz
+
+    stamp = datetime.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+    archive = backup(db_path, output_dir / f"{db_path.stem}-{stamp}.db", compress=not no_compress)
+    typer.secho(f"✓ Backup written: {archive}", fg=typer.colors.GREEN)
+
+
 @app.command("serve")
 def serve(
     host: str | None = typer.Option(None, help="Bind host (default: FW_API_HOST)."),

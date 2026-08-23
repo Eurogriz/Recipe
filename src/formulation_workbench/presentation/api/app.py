@@ -18,6 +18,7 @@ from ... import __version__
 from ...infrastructure.config import AppSettings, get_settings
 from ...infrastructure.di import Container
 from ...infrastructure.observability import configure_tracing
+from ...infrastructure.observability.metrics import record_app_info, render_metrics
 from .middleware import (
     RateLimitMiddleware,
     RequestContextMiddleware,
@@ -85,14 +86,12 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
     app.include_router(router)
 
     if settings.metrics_enabled:
-        try:
-            from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+        record_app_info(__version__, settings.environment)
 
-            @app.get("/metrics", include_in_schema=False)
-            async def _metrics() -> Response:
-                return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
-        except ImportError:  # pragma: no cover
-            logger.warning("prometheus_client not installed; /metrics disabled")
+        @app.get("/metrics", include_in_schema=False)
+        async def _metrics() -> Response:
+            payload, content_type = render_metrics()
+            return Response(content=payload, media_type=content_type)
 
     configure_tracing(settings, app)
 

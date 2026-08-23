@@ -8,6 +8,12 @@ from typing import TYPE_CHECKING
 
 from ...domain.entities.recipe import Recipe
 from ...domain.value_objects.verification_status import VerificationState
+from ...infrastructure.observability._helpers import observed
+from ...infrastructure.observability.metrics import (
+    get_catalog_size,
+    get_catalog_size_by_status,
+    get_recipe_search_results,
+)
 
 if TYPE_CHECKING:
     from ..ports.recipe_repository import RecipeRepository
@@ -52,6 +58,7 @@ class SearchRecipesUseCase:
     def __init__(self, recipe_repo: RecipeRepository) -> None:
         self._recipe_repo = recipe_repo
 
+    @observed("search_recipes")
     async def execute(self, filter_: SearchFilter) -> SearchResult:
         """Execute search with filter."""
         logger.debug(
@@ -102,6 +109,8 @@ class SearchRecipesUseCase:
         has_more = len(recipes) > filter_.limit
         recipes = recipes[: filter_.limit]
 
+        get_recipe_search_results().observe(len(recipes))
+
         return SearchResult(
             recipes=tuple(recipes),
             total_count=len(recipes),
@@ -132,10 +141,16 @@ class GetCatalogStatisticsUseCase:
     def __init__(self, recipe_repo: RecipeRepository) -> None:
         self._recipe_repo = recipe_repo
 
+    @observed("catalog_stats")
     async def execute(self, query: GetCatalogStatisticsQuery) -> CatalogStatistics:
         """Compute statistics."""
         by_status = await self._recipe_repo.count_by_status()
         total = sum(by_status.values())
+
+        get_catalog_size().set(total)
+        gauge = get_catalog_size_by_status()
+        for state, count in by_status.items():
+            gauge.labels(state=state.value).set(count)
 
         # Category and class breakdowns require additional queries
         # For MVP, return partial stats

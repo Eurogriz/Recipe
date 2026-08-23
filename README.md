@@ -18,10 +18,15 @@ of paints, coatings, adhesives, sealants, and construction chemistry.
 A headless catalog + reasoning engine for verified formulations. Two entry
 points share one core:
 
-- **`formulation-api`** — FastAPI REST facade (OpenAPI at `/docs`, Prometheus
-  at `/metrics`, JSON logs, request-id middleware, bearer-token auth).
-- **`formulation-workbench`** — Typer CLI for day-to-day admin tasks (init-db,
-  import-seed, search, stats, generate-key, serve).
+- **`formulation-api`** — FastAPI REST facade with OpenAPI at `/docs`,
+  liveness at `/health`, build metadata at `/info`, Prometheus (business +
+  runtime metrics) at `/metrics`, JSON logs, request-id middleware,
+  bearer-token auth, security headers and rate limiting.
+- **`formulation-workbench`** — Typer CLI for day-to-day admin tasks:
+  `init-db`, `import-seed`, `stats`, `search`, `recipe-get`, `verify`,
+  `audit-log`, `backup`, `generate-key`, `serve`, `info`, `version`.
+- **`formulation-backup`** — dedicated online backup / restore command
+  (safe against concurrent writers, gzip + SHA-256 sidecar).
 
 Both are packaged as:
 
@@ -123,6 +128,29 @@ Key variables:
 
 Running in production without `FW_API_TOKEN` or `FW_ENCRYPTION_KEY_HEX`
 (SQLite only) fails fast at startup.
+
+## Operations
+
+| Task | Command |
+| --- | --- |
+| Fresh install | `formulation-workbench init-db` |
+| Backup (cron / Task Scheduler) | `scripts/ops/backup.sh` / `scripts/ops/backup.ps1` |
+| One-off backup | `formulation-backup backup --output-dir ./backups` |
+| Restore | `formulation-backup restore backup.db.gz --force` |
+| Audit trail | `formulation-workbench audit-log --limit 100` |
+| Peer review | `formulation-workbench verify RECIPE_ID --verifier alice` |
+| Health probe | `curl http://localhost:8000/health` |
+| Build info | `curl http://localhost:8000/info` |
+| Metrics scrape | `curl http://localhost:8000/metrics` (Prometheus format) |
+
+Business metrics exposed at `/metrics`:
+
+- `formulation_recipe_operations_total{operation,outcome}` — counter per
+  use case per outcome.
+- `formulation_recipe_operation_seconds{operation}` — latency histogram.
+- `formulation_recipe_search_results` — result-size histogram.
+- `formulation_catalog_size` and `formulation_catalog_size_by_status{state}`.
+- `formulation_app_info{version,environment}`.
 
 ## Testing & quality
 

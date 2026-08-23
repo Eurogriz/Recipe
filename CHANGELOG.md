@@ -7,6 +7,66 @@
 
 ---
 
+## [1.1.2] — Hardening pass 3 (2026-08-23)
+
+Третий раунд production-grade доработок поверх 1.1.1.
+
+### Added
+
+- **Business Prometheus метрики** (`infrastructure/observability/metrics.py`):
+  - `formulation_recipe_operations_total{operation,outcome}` — счётчик
+    успехов/фейлов по каждой операции use case.
+  - `formulation_recipe_operation_seconds{operation}` — гистограмма
+    латентности use cases (buckets 5 мс … 10 с).
+  - `formulation_recipe_search_results` — распределение размера
+    результатов поиска.
+  - `formulation_catalog_size` / `formulation_catalog_size_by_status{state}`
+    — gauge каталога (обновляются в `catalog_stats`).
+  - `formulation_app_info{version,environment}` — статические лейблы билда.
+  - Отдельный `CollectorRegistry` — не смешивается с default-ом.
+  - Опциональный `prometheus_client` — если не установлен, метрики
+    no-op, но код продолжает работать.
+- **`@observed(operation)`-декоратор** для async use cases; обвязаны
+  `create_recipe`, `update_recipe`, `delete_recipe`, `search_recipes`,
+  `catalog_stats`, `submit_for_review`, `verify_recipe`, `reject_recipe`,
+  `create_new_version`.
+- **`GET /info`** endpoint (actuator-style): name, version, environment,
+  python, platform, `FW_GIT_SHA`, `FW_BUILD_DATE`.
+- **Backup / restore** (`formulation-backup` + `formulation-workbench backup`):
+  - SQLite `VACUUM INTO` даёт online-consistent копию под нагрузкой.
+  - Gzip-компрессия + `.sha256` sidecar.
+  - Работает и с SQLCipher-БД (шифрование наследуется файлом).
+  - Обёртки для cron / Task Scheduler: `scripts/ops/backup.sh` (Bash) и
+    `scripts/ops/backup.ps1` (PowerShell) с логированием и retention.
+- **Retry + Circuit Breaker** (`infrastructure/resilience.py`):
+  - `with_retry` / `with_retry_async` — exponential backoff с equal-jitter.
+  - `CircuitBreaker` — 3-state (closed → open → half-open), thread-safe.
+  - CommerceML importer обёрнут в `with_retry(retry_on=(OSError,))` для
+    защиты от flaky SMB-шар.
+- **Расширенный CLI**:
+  - `recipe-get RECIPE_ID` — JSON-дамп конкретного рецепта.
+  - `verify --verifier ...` — добавить одну верификацию.
+  - `audit-log [--aggregate-id X] [--limit N]` — журнал аудита в JSON.
+  - `backup [--output-dir]` — inline-бэкап через тот же код что и
+    `formulation-backup`.
+- **Тесты**: +10 unit-тестов на `resilience`, +7 integration на backup/
+  restore, +2 integration на `/info` и business-метрики. Всего 180
+  (было 161), coverage **74.52%**.
+
+### Changed
+
+- **`/metrics`** теперь публикует наш выделенный registry, а не default
+  (это делает вывод чистым и предсказуемым — `formulation_app_info`
+  всегда присутствует).
+
+### Fixed
+
+- CLI `audit-log` подгоняет поля под реальную схему `AuditLogEntryModel`
+  (`user_id`, `recipe_id`, `changes_json`, `ip_address` — а не
+  выдуманные `actor`/`aggregate_id`).
+
+---
+
 ## [1.1.1] — Hardening pass 2 (2026-08-23)
 
 Второй раунд production-grade доработок поверх 1.1.0.

@@ -17,6 +17,18 @@ class HealthResponse(BaseModel):
     environment: str
 
 
+class AppInfo(BaseModel):
+    """Build + runtime information (Spring-Boot ``/actuator/info``-style)."""
+
+    name: str
+    version: str
+    environment: str
+    python: str
+    platform: str
+    git_sha: str
+    build_date: str
+
+
 class RecipeSummary(BaseModel):
     """Lightweight recipe representation for list endpoints."""
 
@@ -53,6 +65,7 @@ class ErrorResponse(BaseModel):
 
 
 __all__ = [
+    "AppInfo",
     "CatalogStats",
     "ErrorResponse",
     "HealthResponse",

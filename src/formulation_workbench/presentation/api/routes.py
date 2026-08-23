@@ -15,7 +15,7 @@ from ...application.use_cases.search_recipes import (
 from ...infrastructure.config import AppSettings
 from ...infrastructure.di import Container
 from .dependencies import get_container, get_settings, require_api_token
-from .schemas import CatalogStats, HealthResponse, RecipeSummary, SearchResponse
+from .schemas import AppInfo, CatalogStats, HealthResponse, RecipeSummary, SearchResponse
 
 router = APIRouter()
 
@@ -99,6 +99,28 @@ async def catalog_stats(
     return CatalogStats(
         total=result.total,
         by_status={s.value: n for s, n in result.by_status.items()},
+    )
+
+
+@router.get(
+    "/info",
+    response_model=AppInfo,
+    tags=["ops"],
+    summary="Build & runtime information",
+)
+async def app_info(settings: Annotated[AppSettings, Depends(get_settings)]) -> AppInfo:
+    import os
+    import platform
+    import sys
+
+    return AppInfo(
+        name="formulation-workbench",
+        version=__version__,
+        environment=settings.environment,
+        python=sys.version.split()[0],
+        platform=platform.platform(terse=True),
+        git_sha=os.environ.get("FW_GIT_SHA", "unknown"),
+        build_date=os.environ.get("FW_BUILD_DATE", "unknown"),
     )
 
 

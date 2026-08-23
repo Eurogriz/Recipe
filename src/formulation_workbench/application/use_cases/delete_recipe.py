@@ -6,6 +6,8 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from ...infrastructure.observability._helpers import observed
+
 if TYPE_CHECKING:
     from ..ports.audit_logger import AuditLogger
     from ..ports.recipe_repository import RecipeRepository
@@ -38,6 +40,7 @@ class DeleteRecipeUseCase:
         self._recipe_repo = recipe_repo
         self._audit_logger = audit_logger
 
+    @observed("delete_recipe")
     async def execute(self, command: DeleteRecipeCommand) -> None:
         """Execute the delete."""
         existing = await self._recipe_repo.get_by_id(command.recipe_id)

@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 from ...domain.entities.recipe import Recipe
 from ...domain.events import RecipeCreated
 from ...domain.services.verification_rules import VerificationRules
+from ...infrastructure.observability._helpers import observed
 
 if TYPE_CHECKING:
     from ..ports.audit_logger import AuditLogger
@@ -48,6 +49,7 @@ class CreateRecipeUseCase:
         self._recipe_repo = recipe_repo
         self._audit_logger = audit_logger
 
+    @observed("create_recipe")
     async def execute(self, command: CreateRecipeCommand) -> Recipe:
         """Execute the use case. Returns the persisted recipe."""
         recipe = command.recipe

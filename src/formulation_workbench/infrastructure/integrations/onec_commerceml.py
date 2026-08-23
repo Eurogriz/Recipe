@@ -279,7 +279,18 @@ class OneCCommerceMlImporter:
 
         logger.info("Importing 1С catalog: %s", input_path)
 
-        tree = _safe_parse(input_path)
+        from ..resilience import with_retry
+
+        # File IO can be flaky on network shares (Windows SMB / Samba).
+        # 3 attempts with jittered exponential backoff is cheap insurance.
+        tree = with_retry(
+            _safe_parse,
+            input_path,
+            attempts=3,
+            base_delay=0.5,
+            max_delay=2.0,
+            retry_on=(OSError,),
+        )
         root = tree.getroot()
 
         items: list[OneCNomenclatureItem] = []

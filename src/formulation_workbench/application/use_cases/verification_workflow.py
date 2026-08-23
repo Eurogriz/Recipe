@@ -14,6 +14,7 @@ from ...domain.entities.recipe import Recipe
 from ...domain.events import RecipeRejected, RecipeSubmittedForReview, RecipeVerified
 from ...domain.services.verification_rules import VerificationRules
 from ...domain.value_objects.verification_status import VerificationState
+from ...infrastructure.observability._helpers import observed
 
 if TYPE_CHECKING:
     from ..ports.audit_logger import AuditLogger
@@ -43,6 +44,7 @@ class SubmitRecipeForReviewUseCase:
         self._recipe_repo = recipe_repo
         self._audit_logger = audit_logger
 
+    @observed("submit_for_review")
     async def execute(self, command: SubmitRecipeForReviewCommand) -> Recipe:
         """Submit recipe for review.
 
@@ -106,6 +108,7 @@ class VerifyRecipeUseCase:
         self._recipe_repo = recipe_repo
         self._audit_logger = audit_logger
 
+    @observed("verify_recipe")
     async def execute(self, command: VerifyRecipeCommand) -> Recipe:
         """Add verification."""
         existing = await self._recipe_repo.get_by_id(command.recipe_id)
@@ -180,6 +183,7 @@ class RejectRecipeUseCase:
         self._recipe_repo = recipe_repo
         self._audit_logger = audit_logger
 
+    @observed("reject_recipe")
     async def execute(self, command: RejectRecipeCommand) -> Recipe:
         """Reject recipe."""
         existing = await self._recipe_repo.get_by_id(command.recipe_id)
@@ -230,6 +234,7 @@ class CreateNewVersionUseCase:
         self._recipe_repo = recipe_repo
         self._audit_logger = audit_logger
 
+    @observed("create_new_version")
     async def execute(self, command: CreateNewVersionCommand) -> Recipe:
         """Create new version."""
         existing = await self._recipe_repo.get_by_id(command.recipe_id)
