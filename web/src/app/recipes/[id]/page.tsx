@@ -38,6 +38,7 @@ import { fmt } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TBody, THead, TH, TR, TD } from "@/components/ui/table";
 import { useT } from "@/i18n/I18nProvider";
 
@@ -59,9 +60,10 @@ export default function RecipeDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("composition");
 
-  useEffect(() => {
+  const refresh = () => {
     api.getRecipeFull(id).then(setRecipe).catch((e) => setError(e.message ?? String(e)));
-  }, [id]);
+  };
+  useEffect(refresh, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (
@@ -132,6 +134,9 @@ export default function RecipeDetailPage() {
           </div>
         )}
       </header>
+
+      <WorkflowSection recipe={recipe} onChanged={refresh} />
+
 
       <div className="flex gap-2 border-b border-border overflow-x-auto">
         <TabButton
@@ -1013,20 +1018,18 @@ function ParetoResultCard({ result }: { result: ParetoResult }) {
     );
   }
   const objKeys = Object.keys(result.front[0].objectives);
-  // We plot a 2D scatter of the first two objectives.
-  const xKey = objKeys[0];
-  const yKey = objKeys[1] ?? objKeys[0];
-  const xs = result.front.map((p) => p.objectives[xKey]);
-  const ys = result.front.map((p) => p.objectives[yKey]);
-  const xMin = Math.min(...xs);
-  const xMax = Math.max(...xs);
-  const yMin = Math.min(...ys);
-  const yMax = Math.max(...ys);
-  const W = 560;
-  const H = 320;
-  const M = 40;
-  const nx = (x: number) => M + ((x - xMin) / Math.max(1e-9, xMax - xMin)) * (W - 2 * M);
-  const ny = (y: number) => H - M - ((y - yMin) / Math.max(1e-9, yMax - yMin)) * (H - 2 * M);
+  const isMulti = objKeys.length > 2;
+  const [xKey, setXKey] = useState<string>(objKeys[0]);
+  const [yKey, setYKey] = useState<string>(objKeys[1] ?? objKeys[0]);
+  const [allPairs, setAllPairs] = useState<boolean>(false);
+
+  // All ordered pairs (i, j) with i < j — the projection matrix.
+  const pairs: [string, string][] = [];
+  for (let i = 0; i < objKeys.length; i++) {
+    for (let j = i + 1; j < objKeys.length; j++) {
+      pairs.push([objKeys[i], objKeys[j]]);
+    }
+  }
 
   return (
     <Card>
@@ -1038,66 +1041,143 @@ function ParetoResultCard({ result }: { result: ParetoResult }) {
             gen: result.generations,
           })}
         </p>
+        {isMulti && (
+          <p className="text-xs text-muted-foreground pt-1">
+            {t("optimise.pareto.projection_help")}
+          </p>
+        )}
       </CardHeader>
-      <CardContent>
-        <svg width={W} height={H} className="mx-auto block max-w-full">
-          {/* axes */}
-          <line x1={M} y1={H - M} x2={W - M} y2={H - M} stroke="hsl(215 16% 65%)" />
-          <line x1={M} y1={M} x2={M} y2={H - M} stroke="hsl(215 16% 65%)" />
-          <text x={W / 2} y={H - 8} textAnchor="middle" className="text-xs" fill="hsl(215 16% 47%)">
-            {xKey}
-          </text>
-          <text
-            x={12}
-            y={H / 2}
-            transform={`rotate(-90, 12, ${H / 2})`}
-            textAnchor="middle"
-            className="text-xs"
-            fill="hsl(215 16% 47%)"
-          >
-            {yKey}
-          </text>
-          {/* min / max labels */}
-          <text x={M} y={H - M + 16} className="text-[10px]" fill="hsl(215 16% 47%)">
-            {fmt(xMin, 2)}
-          </text>
-          <text
-            x={W - M}
-            y={H - M + 16}
-            textAnchor="end"
-            className="text-[10px]"
-            fill="hsl(215 16% 47%)"
-          >
-            {fmt(xMax, 2)}
-          </text>
-          <text x={M - 6} y={H - M} textAnchor="end" className="text-[10px]" fill="hsl(215 16% 47%)">
-            {fmt(yMin, 2)}
-          </text>
-          <text x={M - 6} y={M + 4} textAnchor="end" className="text-[10px]" fill="hsl(215 16% 47%)">
-            {fmt(yMax, 2)}
-          </text>
-          {/* points */}
-          {result.front.map((p, i) => (
-            <circle
-              key={i}
-              cx={nx(p.objectives[xKey])}
-              cy={ny(p.objectives[yKey])}
-              r={5}
-              fill="hsl(221 83% 53%)"
-              fillOpacity={0.7}
-              stroke="hsl(221 83% 33%)"
-            >
-              <title>
-                {`${xKey}=${fmt(p.objectives[xKey], 3)}, ${yKey}=${fmt(
-                  p.objectives[yKey],
-                  3
-                )}`}
-              </title>
-            </circle>
-          ))}
-        </svg>
+      <CardContent className="space-y-4">
+        {isMulti && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">
+                {t("optimise.pareto.axis_x")}
+              </label>
+              <select
+                className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+                value={xKey}
+                onChange={(e) => setXKey(e.target.value)}
+              >
+                {objKeys.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">
+                {t("optimise.pareto.axis_y")}
+              </label>
+              <select
+                className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+                value={yKey}
+                onChange={(e) => setYKey(e.target.value)}
+              >
+                {objKeys.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Button variant="outline" size="sm" onClick={() => setAllPairs((v) => !v)}>
+                {t("optimise.pareto.all_pairs", { n: pairs.length })}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {allPairs ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {pairs.map(([x, y]) => (
+              <ParetoScatter key={`${x}|${y}`} result={result} xKey={x} yKey={y} />
+            ))}
+          </div>
+        ) : (
+          <ParetoScatter result={result} xKey={xKey} yKey={xKey === yKey ? (objKeys[1] ?? xKey) : yKey} />
+        )}
       </CardContent>
     </Card>
+  );
+}
+
+function ParetoScatter({
+  result,
+  xKey,
+  yKey,
+}: {
+  result: ParetoResult;
+  xKey: string;
+  yKey: string;
+}) {
+  const xs = result.front.map((p) => p.objectives[xKey]);
+  const ys = result.front.map((p) => p.objectives[yKey]);
+  const xMin = Math.min(...xs);
+  const xMax = Math.max(...xs);
+  const yMin = Math.min(...ys);
+  const yMax = Math.max(...ys);
+  const W = 480;
+  const H = 260;
+  const M = 40;
+  const nx = (x: number) => M + ((x - xMin) / Math.max(1e-9, xMax - xMin)) * (W - 2 * M);
+  const ny = (y: number) => H - M - ((y - yMin) / Math.max(1e-9, yMax - yMin)) * (H - 2 * M);
+  return (
+    <svg width={W} height={H} className="mx-auto block max-w-full">
+      <line x1={M} y1={H - M} x2={W - M} y2={H - M} stroke="hsl(215 16% 65%)" />
+      <line x1={M} y1={M} x2={M} y2={H - M} stroke="hsl(215 16% 65%)" />
+      <text x={W / 2} y={H - 8} textAnchor="middle" className="text-xs" fill="hsl(215 16% 47%)">
+        {xKey}
+      </text>
+      <text
+        x={12}
+        y={H / 2}
+        transform={`rotate(-90, 12, ${H / 2})`}
+        textAnchor="middle"
+        className="text-xs"
+        fill="hsl(215 16% 47%)"
+      >
+        {yKey}
+      </text>
+      <text x={M} y={H - M + 16} className="text-[10px]" fill="hsl(215 16% 47%)">
+        {fmt(xMin, 2)}
+      </text>
+      <text
+        x={W - M}
+        y={H - M + 16}
+        textAnchor="end"
+        className="text-[10px]"
+        fill="hsl(215 16% 47%)"
+      >
+        {fmt(xMax, 2)}
+      </text>
+      <text x={M - 6} y={H - M} textAnchor="end" className="text-[10px]" fill="hsl(215 16% 47%)">
+        {fmt(yMin, 2)}
+      </text>
+      <text x={M - 6} y={M + 4} textAnchor="end" className="text-[10px]" fill="hsl(215 16% 47%)">
+        {fmt(yMax, 2)}
+      </text>
+      {result.front.map((p, i) => (
+        <circle
+          key={i}
+          cx={nx(p.objectives[xKey])}
+          cy={ny(p.objectives[yKey])}
+          r={5}
+          fill="hsl(221 83% 53%)"
+          fillOpacity={0.7}
+          stroke="hsl(221 83% 33%)"
+        >
+          <title>
+            {`${xKey}=${fmt(p.objectives[xKey], 3)}, ${yKey}=${fmt(
+              p.objectives[yKey],
+              3
+            )}`}
+          </title>
+        </circle>
+      ))}
+    </svg>
   );
 }
 
@@ -2309,6 +2389,295 @@ function DiffView({ diff }: { diff: RecipeDiffOut }) {
           </Table>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------- Workflow */
+type WorkflowAction = "submit" | "verify" | "reject" | null;
+
+function WorkflowSection({
+  recipe,
+  onChanged,
+}: {
+  recipe: RecipeFull;
+  onChanged: () => void;
+}) {
+  const t = useT();
+  const [action, setAction] = useState<WorkflowAction>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Dialog form state — reset on every open.
+  const [actor, setActor] = useState("");
+  const [comment, setComment] = useState("");
+  const [citation, setCitation] = useState("primary");
+  const [reason, setReason] = useState("");
+
+  const openDialog = (a: WorkflowAction) => {
+    setAction(a);
+    setActor("");
+    setComment("");
+    setCitation("primary");
+    setReason("");
+    setErrorMsg(null);
+  };
+  const closeDialog = () => setAction(null);
+
+  const submit = async () => {
+    setBusy(true);
+    setErrorMsg(null);
+    try {
+      let updated;
+      if (action === "submit") {
+        if (!actor.trim()) throw new Error("actor required");
+        updated = await api.submitReview(recipe.id, {
+          actor: actor.trim(),
+          comment,
+        });
+      } else if (action === "verify") {
+        if (!actor.trim()) throw new Error("verifier required");
+        updated = await api.verifyRecipe(recipe.id, {
+          verifier: actor.trim(),
+          source_citation_id: citation || "primary",
+          comment,
+        });
+      } else if (action === "reject") {
+        if (!actor.trim()) throw new Error("actor required");
+        if (!reason.trim()) throw new Error("reason required");
+        updated = await api.rejectRecipe(recipe.id, {
+          actor: actor.trim(),
+          reason: reason.trim(),
+        });
+      } else {
+        return;
+      }
+      setMessage(t("workflow.applied", { state: updated.status }));
+      closeDialog();
+      onChanged();
+    } catch (e: any) {
+      setErrorMsg(t("workflow.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const state = recipe.status;
+  const isDraft = state === "Draft";
+  const isPending = state === "PendingReview";
+  const isVerified = state === "Verified";
+  const isRejected = state === "Rejected";
+
+  const stateLabelKey =
+    ("workflow.state." +
+      (isVerified ? "verified" : isPending ? "pending" : isRejected ? "rejected" : "draft")) as
+      | "workflow.state.verified"
+      | "workflow.state.pending"
+      | "workflow.state.rejected"
+      | "workflow.state.draft";
+
+  const hintKey = isVerified
+    ? "workflow.hint.verified"
+    : isPending
+      ? "workflow.hint.pending"
+      : isRejected
+        ? "workflow.hint.rejected"
+        : "workflow.hint.draft";
+
+  const left = Math.max(0, recipe.verification_required - recipe.verification_count);
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between gap-3 flex-wrap">
+            <span>{t("workflow.section")}</span>
+            <Badge
+              variant={
+                isVerified
+                  ? "success"
+                  : isRejected
+                    ? "destructive"
+                    : isPending
+                      ? "warning"
+                      : "outline"
+              }
+            >
+              {t(stateLabelKey)}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {t(hintKey, {
+              n: recipe.verification_required,
+              left,
+              required: recipe.verification_required,
+              reason: "—",
+            })}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {isDraft && (
+              <Button size="sm" onClick={() => openDialog("submit")}>
+                {t("workflow.actions.submit")}
+              </Button>
+            )}
+            {isPending && (
+              <Button size="sm" onClick={() => openDialog("verify")}>
+                <ClipboardCheck className="h-4 w-4" />
+                {t("workflow.actions.verify")}
+              </Button>
+            )}
+            {(isDraft || isPending) && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => openDialog("reject")}
+              >
+                {t("workflow.actions.reject")}
+              </Button>
+            )}
+          </div>
+          {message && (
+            <div className="text-sm text-green-700 border border-green-200 bg-green-50 rounded px-3 py-2">
+              {message}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {action !== null && (
+        <WorkflowDialog
+          title={t(`workflow.dialog.${action}.title` as any)}
+          onCancel={closeDialog}
+          onOk={submit}
+          okLabel={t("workflow.dialog.ok")}
+          cancelLabel={t("workflow.dialog.cancel")}
+          busy={busy}
+          error={errorMsg}
+        >
+          {action === "submit" && (
+            <>
+              <DialogInput
+                label={t("workflow.dialog.submit.actor")}
+                value={actor}
+                onChange={setActor}
+                autoFocus
+              />
+              <DialogInput
+                label={t("workflow.dialog.submit.comment")}
+                value={comment}
+                onChange={setComment}
+              />
+            </>
+          )}
+          {action === "verify" && (
+            <>
+              <DialogInput
+                label={t("workflow.dialog.verify.verifier")}
+                value={actor}
+                onChange={setActor}
+                autoFocus
+              />
+              <DialogInput
+                label={t("workflow.dialog.verify.citation")}
+                value={citation}
+                onChange={setCitation}
+              />
+              <DialogInput
+                label={t("workflow.dialog.verify.comment")}
+                value={comment}
+                onChange={setComment}
+              />
+            </>
+          )}
+          {action === "reject" && (
+            <>
+              <DialogInput
+                label={t("workflow.dialog.reject.actor")}
+                value={actor}
+                onChange={setActor}
+                autoFocus
+              />
+              <DialogInput
+                label={t("workflow.dialog.reject.reason")}
+                value={reason}
+                onChange={setReason}
+              />
+            </>
+          )}
+        </WorkflowDialog>
+      )}
+    </>
+  );
+}
+
+function WorkflowDialog({
+  title,
+  onCancel,
+  onOk,
+  okLabel,
+  cancelLabel,
+  busy,
+  error,
+  children,
+}: {
+  title: string;
+  onCancel: () => void;
+  onOk: () => void;
+  okLabel: string;
+  cancelLabel: string;
+  busy: boolean;
+  error: string | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="w-full max-w-md rounded-xl bg-white border border-border shadow-lg">
+        <div className="border-b border-border px-5 py-3 font-semibold">{title}</div>
+        <div className="p-5 space-y-3">{children}</div>
+        {error && (
+          <div className="mx-5 mb-3 text-sm text-red-700 border border-red-200 bg-red-50 rounded px-3 py-2">
+            {error}
+          </div>
+        )}
+        <div className="border-t border-border px-5 py-3 flex justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={onCancel} disabled={busy}>
+            {cancelLabel}
+          </Button>
+          <Button size="sm" onClick={onOk} disabled={busy}>
+            {okLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DialogInput({
+  label,
+  value,
+  onChange,
+  autoFocus,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoFocus?: boolean;
+}) {
+  return (
+    <div>
+      <label className="text-xs text-muted-foreground block mb-1">{label}</label>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        autoFocus={autoFocus}
+      />
     </div>
   );
 }

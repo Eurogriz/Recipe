@@ -211,6 +211,55 @@ export const ru: Dict = {
   "wizard.func.help":
     "Допустимые: vehicle, solvent, binder, hardener, pigment, extender, dispersant, defoamer, biocide, thickener, coalescent, plasticizer, additive_other …",
 
+  // workflow (кнопки в шапке рецепта)
+  "workflow.section": "Рабочий процесс",
+  "workflow.state.draft": "Черновик",
+  "workflow.state.pending": "На проверке",
+  "workflow.state.verified": "Верифицирован",
+  "workflow.state.rejected": "Отклонён",
+  "workflow.actions.submit": "Отправить на проверку",
+  "workflow.actions.verify": "Подтвердить проверку",
+  "workflow.actions.reject": "Отклонить",
+  "workflow.actions.new_version": "Новая версия",
+  "workflow.hint.draft":
+    "Draft можно свободно редактировать и удалять. Когда рецепт готов, отправьте его на проверку — потребуется {n} независимых подтверждений от инженеров.",
+  "workflow.hint.pending":
+    "Рецепт ждёт подтверждений. Осталось: {left} из {required}. Каждый рецензент указывает свой идентификатор, ссылку на источник и комментарий.",
+  "workflow.hint.verified":
+    "Рецепт верифицирован и заморожен. Любые изменения — только через «Новую версию» (создаст черновик с ссылкой на текущую версию).",
+  "workflow.hint.rejected":
+    "Рецепт отклонён и не может использоваться в производстве. Причина: {reason}",
+  "workflow.dialog.submit.title": "Отправка на проверку",
+  "workflow.dialog.submit.actor": "Ваш идентификатор (обязательно)",
+  "workflow.dialog.submit.comment": "Комментарий (необязательно)",
+  "workflow.dialog.verify.title": "Подтверждение проверки",
+  "workflow.dialog.verify.verifier": "Идентификатор рецензента (обязательно)",
+  "workflow.dialog.verify.citation": "Идентификатор источника",
+  "workflow.dialog.verify.comment": "Комментарий (необязательно)",
+  "workflow.dialog.reject.title": "Отклонение рецепта",
+  "workflow.dialog.reject.actor": "Ваш идентификатор (обязательно)",
+  "workflow.dialog.reject.reason": "Причина отклонения (обязательно)",
+  "workflow.dialog.ok": "Подтвердить",
+  "workflow.dialog.cancel": "Отмена",
+  "workflow.failed": "Не удалось: {msg}",
+  "workflow.applied": "Готово, новое состояние: {state}",
+
+  // production vectors (drift monitoring)
+  "drift.source.production": "Реальные production-вектора",
+  "drift.source.production_missing":
+    "Ещё не загружено ни одного production-вектора. Загрузите их через API {endpoint} или используйте выбор «Все текущие рецепты каталога» / «Случайные значения».",
+  "drift.production.ingest_from_current": "Загрузить сэмпл: {n} рецептов сейчас в каталоге",
+  "drift.production.count": "Всего production-векторов: {n}",
+  "drift.production.ingest_ok": "Загружено {n} векторов.",
+  "drift.production.ingest_failed": "Не удалось загрузить: {msg}",
+
+  // multi-property Pareto
+  "optimise.pareto.axis_x": "Ось X",
+  "optimise.pareto.axis_y": "Ось Y",
+  "optimise.pareto.projection_help":
+    "Для более двух целей показывается двумерная проекция; переключайте оси, чтобы увидеть все компромиссы.",
+  "optimise.pareto.all_pairs": "Показать все пары ({n})",
+
   // sensitivity
   "sensitivity.title": "Анализ чувствительности",
   "sensitivity.subtitle":

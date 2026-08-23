@@ -202,6 +202,55 @@ export const en: Dict = {
   "wizard.func.help":
     "Accepted: vehicle, solvent, binder, hardener, pigment, extender, dispersant, defoamer, biocide, thickener, coalescent, plasticizer, additive_other …",
 
+  // workflow (recipe header actions)
+  "workflow.section": "Workflow",
+  "workflow.state.draft": "Draft",
+  "workflow.state.pending": "Pending review",
+  "workflow.state.verified": "Verified",
+  "workflow.state.rejected": "Rejected",
+  "workflow.actions.submit": "Submit for review",
+  "workflow.actions.verify": "Verify",
+  "workflow.actions.reject": "Reject",
+  "workflow.actions.new_version": "New version",
+  "workflow.hint.draft":
+    "Draft recipes can be freely edited and deleted. When ready, submit for review — you need {n} independent verifier confirmations.",
+  "workflow.hint.pending":
+    "Recipe is awaiting verifications. {left} of {required} left. Each reviewer supplies their id, a source citation, and a comment.",
+  "workflow.hint.verified":
+    "Recipe is verified and immutable. Any changes must go through “New version” (creates a draft anchored to this version).",
+  "workflow.hint.rejected":
+    "Recipe was rejected and cannot be used in production. Reason: {reason}",
+  "workflow.dialog.submit.title": "Submit for review",
+  "workflow.dialog.submit.actor": "Your identifier (required)",
+  "workflow.dialog.submit.comment": "Comment (optional)",
+  "workflow.dialog.verify.title": "Verify",
+  "workflow.dialog.verify.verifier": "Reviewer identifier (required)",
+  "workflow.dialog.verify.citation": "Source citation id",
+  "workflow.dialog.verify.comment": "Comment (optional)",
+  "workflow.dialog.reject.title": "Reject recipe",
+  "workflow.dialog.reject.actor": "Your identifier (required)",
+  "workflow.dialog.reject.reason": "Rejection reason (required)",
+  "workflow.dialog.ok": "Confirm",
+  "workflow.dialog.cancel": "Cancel",
+  "workflow.failed": "Failed: {msg}",
+  "workflow.applied": "Done, new state: {state}",
+
+  // production vectors (drift monitoring)
+  "drift.source.production": "Real production vectors",
+  "drift.source.production_missing":
+    "No production vectors ingested yet. Push them via {endpoint} or pick “All current catalog recipes” / “Random values”.",
+  "drift.production.ingest_from_current": "Ingest a sample: {n} recipes currently in catalog",
+  "drift.production.count": "Production vectors on file: {n}",
+  "drift.production.ingest_ok": "Ingested {n} vectors.",
+  "drift.production.ingest_failed": "Ingestion failed: {msg}",
+
+  // multi-property Pareto
+  "optimise.pareto.axis_x": "X axis",
+  "optimise.pareto.axis_y": "Y axis",
+  "optimise.pareto.projection_help":
+    "For more than two objectives we show a 2D projection; toggle axes to inspect every trade-off.",
+  "optimise.pareto.all_pairs": "Show all pairs ({n})",
+
   // sensitivity
   "sensitivity.title": "Sensitivity analysis",
   "sensitivity.subtitle":

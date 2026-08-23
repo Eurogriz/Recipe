@@ -142,6 +142,63 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  // workflow — draft → pending review → verified/rejected
+  submitReview: (id: string, body: { actor: string; comment?: string }) =>
+    request<RecipeSummary>(`/recipes/${id}/submit-review`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  verifyRecipe: (
+    id: string,
+    body: { verifier: string; source_citation_id?: string; comment?: string }
+  ) =>
+    request<RecipeSummary>(`/recipes/${id}/verify`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  rejectRecipe: (id: string, body: { actor: string; reason: string }) =>
+    request<RecipeSummary>(`/recipes/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  // production feature vectors (drift telemetry)
+  ingestProductionVectors: (items: ProductionVectorIngestItem[]) =>
+    request<{ accepted: number; ids: string[]; skipped: Record<string, string> }>(
+      `/ml/production-vectors`,
+      { method: "POST", body: JSON.stringify({ items }) }
+    ),
+  listProductionVectors: (params?: { recipe_id?: string; source?: string; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.recipe_id) q.set("recipe_id", params.recipe_id);
+    if (params?.source) q.set("source", params.source);
+    if (params?.limit) q.set("limit", String(params.limit));
+    const qs = q.toString();
+    return request<{
+      total: number;
+      samples: Array<{
+        id: string;
+        recipe_id: string;
+        recorded_at: string;
+        source: string;
+        features: number[];
+        notes: string;
+      }>;
+    }>(`/ml/production-vectors${qs ? "?" + qs : ""}`);
+  },
+  driftFromCatalogSource: (
+    code: string,
+    params: { limit?: number; source: "catalog" | "production"; category?: string }
+  ) => {
+    const q = new URLSearchParams();
+    q.set("source", params.source);
+    if (params.limit) q.set("limit", String(params.limit));
+    if (params.category) q.set("category", params.category);
+    return request<DriftFullOut>(
+      `/ml/models/${code}/drift-from-catalog?${q.toString()}`
+    );
+  },
+
   // similar recipes
   similarRecipes: (
     id: string,
@@ -577,6 +634,13 @@ export interface CitationInBody {
   doi?: string | null;
   url?: string | null;
   page_or_formula?: string;
+}
+
+export interface ProductionVectorIngestItem {
+  recipe_id: string;
+  features?: number[];
+  source?: string;
+  notes?: string;
 }
 
 export interface CreateRecipeBody {

@@ -7,6 +7,127 @@
 
 ---
 
+## [1.14.0] — Workflow-кнопки, production-вектора для дрейфа, multi-property Парето (2026-08-23)
+
+Три отложенных пункта из v1.13 плана.
+
+### Added — Workflow-кнопки в UI
+
+Раньше все workflow-endpoint'ы (submit-review / verify / reject /
+new-version) были доступны только через API. Теперь в карточке
+рецепта — новый блок **«Рабочий процесс»** с большой Badge текущего
+состояния и контекст-зависимыми кнопками:
+
+- **Draft** → кнопки **«Отправить на проверку»**, **«Отклонить»**.
+- **PendingReview** → **«Подтвердить проверку»**, **«Отклонить»**.
+  Счётчик «осталось N из требуемых M» в подсказке.
+- **Verified** → напоминание, что рецепт заморожен; менять только через
+  **«Новая версия»** (кнопка была ещё в v1.13 в табе «Версии»).
+- **Rejected** → показывается причина.
+
+Каждая кнопка открывает модальное окно (custom light-weight
+dialog — без внешних библиотек) с полями actor/verifier + comment /
+reason / source_citation. После успеха форма перерисовывает
+рецепт и показывает `«Готово, новое состояние: {state}»` в зелёной
+плашке.
+
+### Added — Реальные production feature vectors для drift
+
+Новая табличка `production_feature_vector` (миграция **0004**) —
+телеметрия для MLOps: 37-мерные композиционные вектора, ингестируемые
+из live production lots.
+
+**Backend:**
+- `POST /ml/production-vectors` — принимает список `{recipe_id,
+  features?, source, notes}`. Если `features` не указан — сервер
+  сам извлекает вектор через `to_vector(recipe)`, что избавляет
+  клиента от повтора feature-engineering. Валидация: `len(features)
+  == 37`, `recipe_id` должен существовать.
+- `GET /ml/production-vectors?recipe_id&source&limit=100` — список с
+  фильтрами.
+- Endpoint `GET /ml/models/{code}/drift-from-catalog` расширен
+  параметром `source=catalog|production`. `production` вместо
+  расчёта фич по каталогу читает из production-таблицы. 422 если
+  source unknown, 404 если source=production и таблица пуста.
+
+**Frontend:**
+- Селектор источника на `/ml/drift` пополнен опцией
+  **«Реальные production-вектора (N)»** — N обновляется live.
+- Появилась кнопка **«Загрузить сэмпл: N рецептов сейчас в каталоге»**
+  которая создаёт demo-ingest из текущего каталога (моделируя,
+  что было бы в проде без реальной интеграции).
+
+### Added — Multi-property Pareto projection
+
+Раньше `ParetoResultCard` жёстко показывал первые два objectives.
+Теперь для N > 2 objectives:
+- Появляются dropdown'ы **«Ось X»** и **«Ось Y»** для переключения
+  проекции;
+- Кнопка **«Показать все пары (n)»** рисует сетку `n(n-1)/2` scatter'ов
+  за один раз;
+- Компактный `ParetoScatter` вынесен в отдельный компонент,
+  переиспользуется одиночным + сеточным режимом.
+- Всё через SVG, без dependencies на графические либы.
+
+### Endpoints
+
+**46 REST endpoints** (+2 к v1.13.0):
+- `POST /ml/production-vectors`
+- `GET  /ml/production-vectors`
+- `GET  /ml/models/{code}/drift-from-catalog?source=production` (расширение)
+
+### i18n
+
++37 новых ключей (workflow section + workflow dialogs, production
+vectors, pareto axis pickers). **Итого 370 переведённых строк,
+паритет RU/EN 100 %.**
+
+### Tests
+
+- 8 integration-тестов для `/ml/production-vectors` и `drift-from-catalog`:
+  - ingest by recipe_id (server-side feature extraction),
+  - ingest with explicit vector (verbatim),
+  - reject wrong feature width,
+  - partial success (skip unknown recipes),
+  - filter by recipe/source,
+  - drift with source=production,
+  - 404 when production empty,
+  - 422 on unknown source.
+- **Итого: 483 passed, 0 failed** (+8 к v1.13.0).
+
+### Migrations
+
+- **0004_production_feature_vector.py** — новая таблица с индексом
+  `(recipe_id, recorded_at)`. Без FK на recipe (production data
+  должна пережить архивацию/удаление рецепта).
+
+### Metrics
+
+| | v1.13.0 | v1.14.0 |
+|---|---|---|
+| Тесты | 475 | **483** (+8) |
+| REST endpoints | 44 | **46** (+2) |
+| i18n ключей | 333 | **370** (+37) |
+| Миграции | 3 | **4** |
+| Source files | 108 | **109** (+production_vectors.py) |
+| ruff / mypy / bandit | clean | clean |
+
+### Files
+
+- migrations/versions/0004_production_feature_vector.py                  (new)
+- src/formulation_workbench/infrastructure/db/models.py                  (+ProductionFeatureVectorModel)
+- src/formulation_workbench/infrastructure/db/repositories/production_vectors.py (new)
+- src/formulation_workbench/infrastructure/di/__init__.py                (регистрация)
+- src/formulation_workbench/presentation/api/{routes,schemas}.py         (+2 endpoints, +5 DTOs, source=production в drift)
+- tests/integration/test_api_production_vectors.py                       (new, 8 tests)
+- web/src/lib/api.ts                                                     (+workflow API + ingest + list production + drift-source)
+- web/src/i18n/dictionaries/{ru,en}.ts                                   (+37 keys)
+- web/src/app/recipes/[id]/page.tsx                                      (WorkflowSection, WorkflowDialog, multi-axis ParetoResultCard)
+- web/src/app/ml/drift/page.tsx                                          (production source + ingest button)
+- CHANGELOG.md, pyproject.toml, __init__.py, AppShell.tsx                (v1.14.0)
+
+---
+
 ## [1.13.0] — Мастер создания рецепта + история версий и diff (2026-08-23)
 
 Закрываем полный жизненный цикл рецепта в UI: раньше можно было

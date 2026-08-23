@@ -83,6 +83,47 @@ class SimilarRecipesOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Production feature vectors (drift telemetry)
+# ---------------------------------------------------------------------------
+class ProductionVectorIngestItem(BaseModel):
+    """One row for ``POST /ml/production-vectors``.
+
+    Either ``recipe_id`` alone (in which case the server extracts the
+    feature vector from the current version of that recipe) or a raw
+    ``features`` list of length ``FEATURE_NAMES``.
+    """
+
+    recipe_id: str = Field(min_length=1, examples=["demo_acrylic_matte_interior"])
+    features: list[float] | None = None
+    source: str = Field(default="lab", examples=["lab", "production", "qa"])
+    notes: str = ""
+
+
+class ProductionVectorIngestRequest(BaseModel):
+    items: list[ProductionVectorIngestItem] = Field(min_length=1)
+
+
+class ProductionVectorIngestOut(BaseModel):
+    accepted: int
+    ids: list[str]
+    skipped: dict[str, str] = Field(default_factory=dict)
+
+
+class ProductionVectorOut(BaseModel):
+    id: str
+    recipe_id: str
+    recorded_at: str
+    source: str
+    features: list[float]
+    notes: str = ""
+
+
+class ProductionVectorsListOut(BaseModel):
+    total: int
+    samples: list[ProductionVectorOut]
+
+
+# ---------------------------------------------------------------------------
 # Version history + diff
 # ---------------------------------------------------------------------------
 class RecipeVersionOut(BaseModel):
@@ -999,6 +1040,11 @@ __all__ = [
     "ProcessMeasuredIn",
     "ProcessParamsIn",
     "ProcessParamsOut",
+    "ProductionVectorIngestItem",
+    "ProductionVectorIngestOut",
+    "ProductionVectorIngestRequest",
+    "ProductionVectorOut",
+    "ProductionVectorsListOut",
     "PropertyPredictionOut",
     "PropertyTargetIn",
     "RecipeAssessmentOut",

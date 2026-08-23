@@ -1,6 +1,6 @@
 [project]
 name = "formulation-workbench"
-version = "1.13.0"
+version = "1.14.0"
 description = "Verified formulation database and API for paints, coatings, adhesives, sealants and construction chemicals."
 readme = "README.md"
 requires-python = ">=3.10"

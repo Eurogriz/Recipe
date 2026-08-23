@@ -88,6 +88,10 @@ from .schemas import (
     PredictionsOut,
     ProcessMeasuredIn,
     ProcessParamsOut,
+    ProductionVectorIngestOut,
+    ProductionVectorIngestRequest,
+    ProductionVectorOut,
+    ProductionVectorsListOut,
     PropertyPredictionOut,
     RecipeAssessmentOut,
     RecipeCostOut,
@@ -1745,7 +1749,7 @@ async def drift_full(
     dependencies=[Depends(require_reader)],
     summary=(
         "Per-feature drift comparing the model's training snapshot against "
-        "the composition-feature vectors of the current recipes in the catalog"
+        "current catalog or logged production feature vectors"
     ),
     responses={**_UNAUTHORIZED, **_NOT_FOUND},
 )
@@ -1756,19 +1760,26 @@ async def drift_from_catalog(
         default=100,
         ge=5,
         le=1000,
-        description="How many catalog recipes to sample for the current distribution.",
+        description="How many samples to pull for the current distribution.",
     ),
     category: str | None = Query(
         default=None,
-        description="Restrict the sample to recipes in this category (optional).",
+        description="Restrict the catalog sample to recipes in this category.",
+    ),
+    source: str = Query(
+        default="catalog",
+        description=(
+            "Where to pull the 'current' distribution from: 'catalog' (recipe "
+            "compositions) or 'production' (ingested production_feature_vector rows)."
+        ),
     ),
 ) -> DriftFullOut:
     """Convenience endpoint: no client-side feature engineering needed.
 
-    Callers just pick a property_code, we do everything else — pull the
-    reference snapshot the model was fitted on, pull the current
-    catalog rows, extract the same 37-column feature vector we use
-    everywhere, and hand back a per-feature PSI + KS report.
+    ``source='catalog'`` — the historical behaviour; extracts feature
+    vectors from the current recipes in the catalog.  ``source='production'``
+    reads from ``production_feature_vector`` — the operational
+    monitoring path (needs prior ``POST /ml/production-vectors``).
     """
     from ...infrastructure.ml.drift import (
         DriftLevel,
@@ -1783,17 +1794,41 @@ async def drift_from_catalog(
             f"No training snapshot for property_code={property_code!r}",
         )
 
-    catalog = await container.recipe_repository.find_by_criteria(
-        category=category,
-        limit=limit,
-        offset=0,
-    )
-    if not catalog:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            "No recipes in the catalog to compare against.",
+    if source == "production":
+        samples = await container.production_vector_repository.list_recent(limit=limit)
+        if not samples:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                "No production feature vectors ingested yet — POST /ml/production-vectors first.",
+            )
+        # Reject rows with a wrong feature width rather than silently truncating.
+        for s in samples:
+            if len(s.features) != len(FEATURE_NAMES):
+                raise HTTPException(
+                    status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    (
+                        f"production sample {s.id} has {len(s.features)} features, "
+                        f"expected {len(FEATURE_NAMES)}"
+                    ),
+                )
+        current_vectors = [s.features for s in samples]
+    elif source == "catalog":
+        catalog = await container.recipe_repository.find_by_criteria(
+            category=category,
+            limit=limit,
+            offset=0,
         )
-    current_vectors = [to_vector(r) for r in catalog]
+        if not catalog:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                "No recipes in the catalog to compare against.",
+            )
+        current_vectors = [to_vector(r) for r in catalog]
+    else:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"unknown source={source!r}; use 'catalog' or 'production'",
+        )
 
     reports = compare_feature_matrices(
         reference, current_vectors, feature_names=list(FEATURE_NAMES)
@@ -1823,6 +1858,98 @@ async def drift_from_catalog(
             for r in reports
         ],
         worst_level=worst.value,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Production feature-vector telemetry (drift monitoring input)
+# ---------------------------------------------------------------------------
+@router.post(
+    "/ml/production-vectors",
+    response_model=ProductionVectorIngestOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["ml"],
+    dependencies=[Depends(require_writer)],
+    summary=(
+        "Ingest one or more production feature vectors (used by "
+        "drift-from-catalog?source=production)"
+    ),
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_VALIDATION},
+)
+async def ingest_production_vectors(
+    payload: ProductionVectorIngestRequest,
+    container: Annotated[Container, Depends(get_container)],
+) -> ProductionVectorIngestOut:
+    """Two modes per item, chosen by whether ``features`` is provided:
+
+    - ``features`` present → the caller has already computed the
+      37-column vector (e.g. an integration reading composition from
+      SAP); we store it verbatim.
+    - ``features`` omitted → we fetch the current recipe for the
+      supplied ``recipe_id`` and extract the vector server-side.  This
+      keeps a plant IT team out of feature-engineering business.
+    """
+    from ...infrastructure.ml.features import FEATURE_NAMES, to_vector
+
+    rows: list[tuple[str, list[float], str, str]] = []
+    skipped: dict[str, str] = {}
+    for i, item in enumerate(payload.items):
+        if item.features is not None:
+            if len(item.features) != len(FEATURE_NAMES):
+                skipped[f"item#{i}"] = (
+                    f"features has length {len(item.features)}, expected {len(FEATURE_NAMES)}"
+                )
+                continue
+            rows.append((item.recipe_id, list(item.features), item.source, item.notes))
+            continue
+
+        recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=item.recipe_id))
+        if recipe is None:
+            skipped[f"item#{i}"] = f"recipe not found: {item.recipe_id}"
+            continue
+        rows.append((item.recipe_id, to_vector(recipe), item.source, item.notes))
+
+    if not rows:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"no valid items to ingest (skipped: {skipped})",
+        )
+
+    ids = await container.production_vector_repository.add_many(rows)
+    return ProductionVectorIngestOut(accepted=len(ids), ids=ids, skipped=skipped)
+
+
+@router.get(
+    "/ml/production-vectors",
+    response_model=ProductionVectorsListOut,
+    tags=["ml"],
+    dependencies=[Depends(require_reader)],
+    summary="List the most recently ingested production feature vectors",
+    responses={**_UNAUTHORIZED},
+)
+async def list_production_vectors(
+    container: Annotated[Container, Depends(get_container)],
+    recipe_id: str | None = Query(default=None),
+    source: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+) -> ProductionVectorsListOut:
+    total = await container.production_vector_repository.count()
+    samples = await container.production_vector_repository.list_recent(
+        recipe_id=recipe_id, source=source, limit=limit
+    )
+    return ProductionVectorsListOut(
+        total=total,
+        samples=[
+            ProductionVectorOut(
+                id=s.id,
+                recipe_id=s.recipe_id,
+                recorded_at=s.recorded_at.isoformat(),
+                source=s.source,
+                features=s.features,
+                notes=s.notes,
+            )
+            for s in samples
+        ],
     )
 
 

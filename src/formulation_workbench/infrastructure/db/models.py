@@ -369,3 +369,29 @@ class MeasuredValueModel(Base):
     __table_args__ = (
         UniqueConstraint("run_id", "property_code", name="uq_measured_value_run_property"),
     )
+
+
+# ==============================================================================
+# Production feature vectors (drift monitoring telemetry)
+# ==============================================================================
+class ProductionFeatureVectorModel(Base):
+    """One 37-column composition-feature vector from a live production lot.
+
+    Deliberately decoupled from the ``recipe`` table (no FK) so ingestion
+    survives even when the referenced recipe has been superseded or
+    archived; the id is stored as free text and looked up logically at
+    read time.  The vector itself is stored as JSON — feature names are
+    declarative on :data:`FEATURE_NAMES` and a schema change there
+    should be a deliberate migration.
+    """
+
+    __tablename__ = "production_feature_vector"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid_str)
+    recipe_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_utc_now, index=True
+    )
+    source: Mapped[str] = mapped_column(String(64), nullable=False, default="lab")
+    features_json: Mapped[str] = mapped_column(Text, nullable=False)
+    notes: Mapped[str] = mapped_column(Text, nullable=False, default="")

@@ -16,7 +16,7 @@ import { useT } from "@/i18n/I18nProvider";
 
 const FEATURE_COUNT = 37; // matches formulation_workbench.infrastructure.ml.features.FEATURE_NAMES
 
-type Source = "current" | "random";
+type Source = "current" | "production" | "random";
 
 export default function DriftPage() {
   const t = useT();
@@ -27,6 +27,10 @@ export default function DriftPage() {
   const [busy, setBusy] = useState<boolean>(false);
   const [err, setErr] = useState<string | null>(null);
   const [report, setReport] = useState<DriftFullOut | null>(null);
+  const [productionCount, setProductionCount] = useState<number>(0);
+  const [ingestMsg, setIngestMsg] = useState<string | null>(null);
+  const [ingesting, setIngesting] = useState<boolean>(false);
+  const [catalogSize, setCatalogSize] = useState<number>(0);
 
   useEffect(() => {
     api
@@ -36,6 +40,14 @@ export default function DriftPage() {
         if (ms.length > 0 && !selectedCode) setSelectedCode(ms[0].property_code);
       })
       .catch(() => setModels([]));
+    api
+      .listProductionVectors({ limit: 1 })
+      .then((p) => setProductionCount(p.total))
+      .catch(() => setProductionCount(0));
+    api
+      .catalogStats()
+      .then((s) => setCatalogSize(s.total))
+      .catch(() => setCatalogSize(0));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,15 +59,17 @@ export default function DriftPage() {
     try {
       let r: DriftFullOut;
       if (source === "current") {
-        // Backend endpoint pulls real recipes from the DB and extracts
-        // the same 37-column feature vector we use everywhere.  No
-        // client-side feature engineering required.
-        r = await api.driftFromCatalog(selectedCode, { limit: nCurrent });
+        r = await api.driftFromCatalogSource(selectedCode, {
+          source: "catalog",
+          limit: nCurrent,
+        });
+      } else if (source === "production") {
+        r = await api.driftFromCatalogSource(selectedCode, {
+          source: "production",
+          limit: nCurrent,
+        });
       } else {
-        // Deterministic-ish random vectors for a smoke test: uniform
-        // noise in [0, 30] on each of the 37 dimensions.  This will
-        // usually trigger severe drift on almost every feature — that's
-        // the point: it verifies the pipeline works end-to-end.
+        // Deterministic-ish random vectors for a smoke test.
         const vectors = Array.from({ length: nCurrent }, () =>
           Array.from({ length: FEATURE_COUNT }, () => Math.random() * 30)
         );
@@ -66,6 +80,31 @@ export default function DriftPage() {
       setErr(t("drift.failed", { msg: e.message ?? String(e) }));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const ingestFromCatalog = async () => {
+    setIngesting(true);
+    setIngestMsg(null);
+    try {
+      // Pull the first N recipes from the catalog and push them into
+      // production_feature_vector as a demo ingestion.  In a real
+      // deployment this would be replaced by an integration reading
+      // live production lots.
+      const listed = await api.listRecipes({ limit: Math.min(nCurrent, 200) });
+      const items = listed.items.map((r) => ({
+        recipe_id: r.id,
+        source: "production",
+        notes: "seeded from catalog",
+      }));
+      const out = await api.ingestProductionVectors(items);
+      setIngestMsg(t("drift.production.ingest_ok", { n: out.accepted }));
+      const fresh = await api.listProductionVectors({ limit: 1 });
+      setProductionCount(fresh.total);
+    } catch (e: any) {
+      setIngestMsg(t("drift.production.ingest_failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setIngesting(false);
     }
   };
 
@@ -119,6 +158,9 @@ export default function DriftPage() {
                   onChange={(e) => setSource(e.target.value as Source)}
                 >
                   <option value="current">{t("drift.source.current_recipes")}</option>
+                  <option value="production">
+                    {t("drift.source.production")} ({productionCount})
+                  </option>
                   <option value="random">{t("drift.source.random")}</option>
                 </select>
               </div>
@@ -146,6 +188,27 @@ export default function DriftPage() {
           )}
           {err && <div className="text-sm text-red-700 mt-3">{err}</div>}
           <p className="text-xs text-muted-foreground mt-3">{t("drift.hint")}</p>
+
+          {source === "production" && (
+            <div className="mt-3 rounded-md border border-border bg-muted/40 px-4 py-3 space-y-2">
+              <div className="text-xs text-muted-foreground">
+                {t("drift.production.count", { n: productionCount })}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={ingestFromCatalog}
+                  disabled={ingesting || catalogSize === 0}
+                >
+                  {t("drift.production.ingest_from_current", { n: catalogSize })}
+                </Button>
+                {ingestMsg && (
+                  <span className="text-xs text-muted-foreground">{ingestMsg}</span>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
