@@ -83,6 +83,54 @@ class SimilarRecipesOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Version history + diff
+# ---------------------------------------------------------------------------
+class RecipeVersionOut(BaseModel):
+    """One entry in the version history of a recipe.
+
+    Ordered by :attr:`version` descending in the parent list.
+    """
+
+    id: str
+    version: int
+    status: str
+    verification_count: int
+    verification_required: int
+    created_at: str  # ISO-8601, best-effort
+    created_by: str
+
+
+class RecipeVersionsOut(BaseModel):
+    recipe_id: str
+    versions: list[RecipeVersionOut]
+
+
+class RecipeDiffComponentChange(BaseModel):
+    stage_number: int
+    component_name: str
+    kind: str = Field(examples=["added", "removed", "mass_changed", "function_changed"])
+    from_value: str | float | None = None
+    to_value: str | float | None = None
+
+
+class RecipeDiffMetadataChange(BaseModel):
+    field: str = Field(examples=["binder_type", "finish", "color", "subcategory"])
+    from_value: str | None = None
+    to_value: str | None = None
+
+
+class RecipeDiffOut(BaseModel):
+    """Structured diff between two versions of the same recipe id."""
+
+    recipe_id: str
+    left_version: int
+    right_version: int
+    metadata_changes: list[RecipeDiffMetadataChange] = Field(default_factory=list)
+    component_changes: list[RecipeDiffComponentChange] = Field(default_factory=list)
+    identical: bool = False
+
+
+# ---------------------------------------------------------------------------
 # Sensitivity analysis
 # ---------------------------------------------------------------------------
 class SensitivityRequest(BaseModel):
@@ -359,6 +407,21 @@ class SubmitReviewRequest(BaseModel):
 class RejectRequest(BaseModel):
     actor: str = Field(min_length=1, examples=["auditor-1"])
     reason: str = Field(min_length=1, examples=["Sum of pigment volumes exceeds CPVC."])
+
+
+class CreateNewVersionRequest(BaseModel):
+    """Payload for ``POST /recipes/{id}/new-version``.
+
+    Only allowed on Verified recipes — the old version stays immutable
+    (verified) and a new Draft version is created with
+    ``previous_version_id`` set to the current one.
+    """
+
+    actor: str = Field(default="", examples=["formulator-42"])
+    change_summary: str = Field(
+        default="",
+        examples=["Reduced TiO2 by 2 %, added second defoamer."],
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -903,6 +966,7 @@ __all__ = [
     "CompositionStageOut",
     "CostLineOut",
     "CostRequest",
+    "CreateNewVersionRequest",
     "CreateRecipeRequest",
     "DeviationOut",
     "DriftAlertOut",
@@ -939,8 +1003,13 @@ __all__ = [
     "PropertyTargetIn",
     "RecipeAssessmentOut",
     "RecipeCostOut",
+    "RecipeDiffComponentChange",
+    "RecipeDiffMetadataChange",
+    "RecipeDiffOut",
     "RecipeFullOut",
     "RecipeSummary",
+    "RecipeVersionOut",
+    "RecipeVersionsOut",
     "RegulatoryFindingOut",
     "RejectRequest",
     "RuleFindingOut",

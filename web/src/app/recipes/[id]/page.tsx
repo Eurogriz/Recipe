@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -9,6 +9,8 @@ import {
   ClipboardCheck,
   DollarSign,
   Download,
+  GitBranch,
+  History,
   LineChart,
   Network,
   Plus,
@@ -26,7 +28,9 @@ import {
   type PredictionsOut,
   type PropertyTarget,
   type RecipeCost,
+  type RecipeDiffOut,
   type RecipeFull,
+  type RecipeVersionsOut,
   type SensitivityResult,
   type SimilarRecipesOut,
 } from "@/lib/api";
@@ -44,7 +48,8 @@ type Tab =
   | "cost"
   | "optimise"
   | "similar"
-  | "sensitivity";
+  | "sensitivity"
+  | "versions";
 
 export default function RecipeDetailPage() {
   const t = useT();
@@ -185,6 +190,14 @@ export default function RecipeDetailPage() {
         >
           {t("recipe.tab.sensitivity")}
         </TabButton>
+        <TabButton
+          current={tab}
+          v="versions"
+          onClick={setTab}
+          icon={<History className="h-4 w-4" />}
+        >
+          {t("recipe.tab.versions")}
+        </TabButton>
       </div>
 
       {tab === "composition" && <CompositionTab recipe={recipe} />}
@@ -194,6 +207,7 @@ export default function RecipeDetailPage() {
       {tab === "optimise" && <OptimiseTab id={id} />}
       {tab === "similar" && <SimilarTab id={id} />}
       {tab === "sensitivity" && <SensitivityTab recipe={recipe} />}
+      {tab === "versions" && <VersionsTab recipe={recipe} />}
     </div>
   );
 }
@@ -2011,6 +2025,291 @@ function HeatmapPlot({ result }: { result: HeatmapResult }) {
         <p className="text-xs text-muted-foreground mt-2">{t("heatmap.hint")}</p>
       </CardContent>
     </Card>
+  );
+}
+
+/* ------------------------------------------------------------- Versions + diff */
+function VersionsTab({ recipe }: { recipe: RecipeFull }) {
+  const t = useT();
+  const router = useRouter();
+  const [data, setData] = useState<RecipeVersionsOut | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [left, setLeft] = useState<number | null>(null);
+  const [right, setRight] = useState<number | null>(null);
+  const [diff, setDiff] = useState<RecipeDiffOut | null>(null);
+  const [diffErr, setDiffErr] = useState<string | null>(null);
+  const [forkBusy, setForkBusy] = useState<boolean>(false);
+
+  const load = () => {
+    api
+      .recipeVersions(recipe.id)
+      .then((r) => {
+        setData(r);
+        if (r.versions.length >= 2) {
+          setLeft(r.versions[r.versions.length - 1].version);
+          setRight(r.versions[0].version);
+        } else if (r.versions.length === 1) {
+          setLeft(r.versions[0].version);
+          setRight(r.versions[0].version);
+        }
+      })
+      .catch((e) => setErr(t("versions.failed", { msg: e.message ?? String(e) })));
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(load, [recipe.id]);
+
+  const runDiff = () => {
+    if (left === null || right === null) return;
+    setDiffErr(null);
+    setDiff(null);
+    api
+      .recipeDiff(recipe.id, left, right)
+      .then(setDiff)
+      .catch((e) => setDiffErr(t("versions.failed", { msg: e.message ?? String(e) })));
+  };
+
+  const createNew = async () => {
+    if (recipe.status !== "Verified") return;
+    if (typeof window !== "undefined") {
+      const ok = window.confirm(t("versions.new.confirm"));
+      if (!ok) return;
+    }
+    setForkBusy(true);
+    try {
+      const summary =
+        (typeof window !== "undefined"
+          ? window.prompt(t("versions.new.change_summary"), "")
+          : "") ?? "";
+      const created = await api.createNewVersion(recipe.id, {
+        change_summary: summary,
+      });
+      // Navigate to the freshly created version so the user can edit it.
+      router.push(`/recipes/${encodeURIComponent(created.id)}`);
+    } catch (e: any) {
+      setErr(t("versions.failed", { msg: e.message ?? String(e) }));
+    } finally {
+      setForkBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between gap-3 flex-wrap">
+            <span>{t("versions.title")}</span>
+            <Button
+              variant={recipe.status === "Verified" ? "primary" : "outline"}
+              size="sm"
+              onClick={createNew}
+              disabled={recipe.status !== "Verified" || forkBusy}
+              title={
+                recipe.status !== "Verified" ? t("versions.new.disabled") : undefined
+              }
+            >
+              <GitBranch className="h-4 w-4" /> {t("versions.new")}
+            </Button>
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">{t("versions.subtitle")}</p>
+        </CardHeader>
+        <CardContent>
+          {err && <div className="text-sm text-red-700 mb-3">{err}</div>}
+          {!data ? (
+            <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
+          ) : (
+            <Table>
+              <THead>
+                <TR>
+                  <TH className="text-right">{t("versions.col.version")}</TH>
+                  <TH>{t("versions.col.status")}</TH>
+                  <TH>{t("versions.col.verifications")}</TH>
+                  <TH>{t("versions.col.created_at")}</TH>
+                  <TH>{t("versions.col.created_by")}</TH>
+                </TR>
+              </THead>
+              <TBody>
+                {data.versions.map((v) => (
+                  <TR key={v.id} className="cursor-pointer">
+                    <TD className="text-right font-mono">
+                      <Link
+                        href={`/recipes/${encodeURIComponent(v.id)}`}
+                        className={`text-primary hover:underline ${
+                          v.id === recipe.id ? "font-semibold" : ""
+                        }`}
+                      >
+                        v{v.version}
+                        {v.id === recipe.id && " ←"}
+                      </Link>
+                    </TD>
+                    <TD>
+                      <Badge
+                        variant={
+                          v.status === "Verified"
+                            ? "success"
+                            : v.status === "Rejected"
+                              ? "destructive"
+                              : v.status === "PendingReview"
+                                ? "warning"
+                                : "outline"
+                        }
+                      >
+                        {v.status}
+                      </Badge>
+                    </TD>
+                    <TD className="text-xs">
+                      {v.verification_count}/{v.verification_required}
+                    </TD>
+                    <TD className="text-xs">{v.created_at || "—"}</TD>
+                    <TD className="text-xs">{v.created_by || "—"}</TD>
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {data && data.versions.length >= 2 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("versions.diff.title")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+              <VersionPicker
+                label={t("versions.diff.left")}
+                options={data.versions}
+                value={left}
+                onChange={setLeft}
+              />
+              <VersionPicker
+                label={t("versions.diff.right")}
+                options={data.versions}
+                value={right}
+                onChange={setRight}
+              />
+              <Button onClick={runDiff}>
+                <History className="h-4 w-4" /> {t("versions.diff.run")}
+              </Button>
+            </div>
+
+            {diffErr && <div className="text-sm text-red-700">{diffErr}</div>}
+            {diff && <DiffView diff={diff} />}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function VersionPicker({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { version: number; status: string }[];
+  value: number | null;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <label className="text-xs text-muted-foreground block mb-1">{label}</label>
+      <select
+        className="w-full h-9 rounded-md border border-input px-2 text-sm bg-white"
+        value={value ?? ""}
+        onChange={(e) => onChange(Number(e.target.value))}
+      >
+        {options.map((o) => (
+          <option key={o.version} value={o.version}>
+            v{o.version} ({o.status})
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function DiffView({ diff }: { diff: RecipeDiffOut }) {
+  const t = useT();
+  if (diff.identical) {
+    return (
+      <div className="rounded-md border border-green-300 bg-green-50 text-green-900 px-4 py-3 text-sm">
+        {t("versions.diff.identical")}
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-4">
+      {diff.metadata_changes.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">{t("versions.diff.metadata")}</h4>
+          <Table>
+            <THead>
+              <TR>
+                <TH>{t("versions.diff.col.field")}</TH>
+                <TH>{t("versions.diff.col.from")}</TH>
+                <TH>{t("versions.diff.col.to")}</TH>
+              </TR>
+            </THead>
+            <TBody>
+              {diff.metadata_changes.map((c, i) => (
+                <TR key={i}>
+                  <TD className="font-mono text-xs">{c.field}</TD>
+                  <TD className="text-red-700">{c.from_value ?? "—"}</TD>
+                  <TD className="text-green-700">{c.to_value ?? "—"}</TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </div>
+      )}
+
+      {diff.component_changes.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">{t("versions.diff.components")}</h4>
+          <Table>
+            <THead>
+              <TR>
+                <TH className="text-right">{t("versions.diff.col.stage")}</TH>
+                <TH>{t("versions.diff.col.component")}</TH>
+                <TH>{t("versions.diff.col.change")}</TH>
+                <TH className="text-right">{t("versions.diff.col.from")}</TH>
+                <TH className="text-right">{t("versions.diff.col.to")}</TH>
+              </TR>
+            </THead>
+            <TBody>
+              {diff.component_changes.map((c, i) => (
+                <TR key={i}>
+                  <TD className="text-right font-mono">{c.stage_number}</TD>
+                  <TD className="font-medium">{c.component_name}</TD>
+                  <TD>
+                    <Badge
+                      variant={
+                        c.kind === "added"
+                          ? "success"
+                          : c.kind === "removed"
+                            ? "destructive"
+                            : "warning"
+                      }
+                    >
+                      {t(`versions.diff.kind.${c.kind}` as any) || c.kind}
+                    </Badge>
+                  </TD>
+                  <TD className="text-right font-mono text-red-700">
+                    {c.from_value ?? "—"}
+                  </TD>
+                  <TD className="text-right font-mono text-green-700">
+                    {c.to_value ?? "—"}
+                  </TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </div>
+      )}
+    </div>
   );
 }
 

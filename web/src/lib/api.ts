@@ -124,6 +124,24 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  // versions + diff
+  recipeVersions: (id: string) =>
+    request<RecipeVersionsOut>(`/recipes/${id}/versions`),
+  recipeDiff: (id: string, left: number, right: number) =>
+    request<RecipeDiffOut>(`/recipes/${id}/diff?left=${left}&right=${right}`),
+
+  // write
+  createRecipe: (body: CreateRecipeBody) =>
+    request<RecipeSummary>(`/recipes`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  createNewVersion: (id: string, body: { actor?: string; change_summary?: string }) =>
+    request<RecipeSummary>(`/recipes/${id}/new-version`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   // similar recipes
   similarRecipes: (
     id: string,
@@ -486,6 +504,94 @@ export interface SimilarRecipe {
   binder_type: string;
   product_class: string;
   similarity: number;
+}
+
+// ---- Versions + diff -------------------------------------------------------
+export interface RecipeVersion {
+  id: string;
+  version: number;
+  status: string;
+  verification_count: number;
+  verification_required: number;
+  created_at: string;
+  created_by: string;
+}
+
+export interface RecipeVersionsOut {
+  recipe_id: string;
+  versions: RecipeVersion[];
+}
+
+export interface RecipeDiffMetadataChange {
+  field: string;
+  from_value: string | null;
+  to_value: string | null;
+}
+
+export interface RecipeDiffComponentChange {
+  stage_number: number;
+  component_name: string;
+  kind: "added" | "removed" | "mass_changed" | "function_changed" | string;
+  from_value: string | number | null;
+  to_value: string | number | null;
+}
+
+export interface RecipeDiffOut {
+  recipe_id: string;
+  left_version: number;
+  right_version: number;
+  metadata_changes: RecipeDiffMetadataChange[];
+  component_changes: RecipeDiffComponentChange[];
+  identical: boolean;
+}
+
+// ---- Recipe create/edit payloads (subset mirrored from schemas.py) ---------
+export interface ComponentIn {
+  name: string;
+  cas_number: string;
+  function: string;
+  mass_percent: number;
+  tolerance_percent?: number;
+  manufacturer_reference?: string;
+}
+
+export interface StageIn {
+  stage_number: number;
+  name: string;
+  description?: string;
+  components: ComponentIn[];
+  process?: {
+    equipment: string;
+    rotational_speed_rpm?: number | null;
+    temperature_c?: number | null;
+    duration_min?: number | null;
+  } | null;
+}
+
+export interface CitationInBody {
+  authors: string;
+  title: string;
+  year: number;
+  publisher: string;
+  isbn?: string | null;
+  doi?: string | null;
+  url?: string | null;
+  page_or_formula?: string;
+}
+
+export interface CreateRecipeBody {
+  id?: string | null;
+  category: string;
+  subcategory: string;
+  binder_type: string;
+  product_class: string;
+  intended_use: string;
+  finish?: string;
+  color?: string;
+  tags?: string[];
+  stages: StageIn[];
+  primary_source: CitationInBody;
+  cross_references?: CitationInBody[];
 }
 
 export interface SimilarRecipesOut {

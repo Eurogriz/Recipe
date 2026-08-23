@@ -19,13 +19,14 @@ from ...application.dto.recipe_dto import RecipeSummaryDto
 from ...application.use_cases.assess_recipe import AssessRecipeQuery
 from ...application.use_cases.create_recipe import CreateRecipeCommand
 from ...application.use_cases.delete_recipe import DeleteRecipeCommand
-from ...application.use_cases.get_recipe import GetRecipeByIdQuery
+from ...application.use_cases.get_recipe import GetAllVersionsQuery, GetRecipeByIdQuery
 from ...application.use_cases.search_recipes import (
     GetCatalogStatisticsQuery,
     SearchFilter,
 )
 from ...application.use_cases.update_recipe import UpdateRecipeCommand
 from ...application.use_cases.verification_workflow import (
+    CreateNewVersionCommand,
     RejectRecipeCommand,
     SubmitRecipeForReviewCommand,
     VerifyRecipeCommand,
@@ -57,6 +58,7 @@ from .schemas import (
     CompositionStageOut,
     CostLineOut,
     CostRequest,
+    CreateNewVersionRequest,
     CreateRecipeRequest,
     DeviationOut,
     DriftAlertOut,
@@ -89,8 +91,13 @@ from .schemas import (
     PropertyPredictionOut,
     RecipeAssessmentOut,
     RecipeCostOut,
+    RecipeDiffComponentChange,
+    RecipeDiffMetadataChange,
+    RecipeDiffOut,
     RecipeFullOut,
     RecipeSummary,
+    RecipeVersionOut,
+    RecipeVersionsOut,
     RegulatoryFindingOut,
     RejectRequest,
     RuleFindingOut,
@@ -357,6 +364,172 @@ async def get_similar_recipes(
             for m in matches
         ],
     )
+
+
+# ---------------------------------------------------------------------------
+# Version history + structured diff
+# ---------------------------------------------------------------------------
+@router.get(
+    "/recipes/{recipe_id}/versions",
+    response_model=RecipeVersionsOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Version history for a recipe (latest version first)",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_recipe_versions(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeVersionsOut:
+    versions = await container.get_recipe_versions.execute(GetAllVersionsQuery(recipe_id=recipe_id))
+    if not versions:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+    return RecipeVersionsOut(
+        recipe_id=recipe_id,
+        versions=[
+            RecipeVersionOut(
+                id=r.id,
+                version=r.version,
+                status=r.status.state.value,
+                verification_count=r.status.verification_count,
+                verification_required=r.status.required_verifications,
+                created_at=(r.created_at.isoformat() if r.created_at else ""),
+                created_by=r.created_by or "",
+            )
+            for r in versions
+        ],
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/diff",
+    response_model=RecipeDiffOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Structured diff between two versions of the same recipe",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND, **_VALIDATION},
+)
+async def diff_recipe_versions(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+    left: int = Query(
+        ...,
+        ge=1,
+        description="Left-hand version number (the 'from' side of the diff).",
+    ),
+    right: int = Query(
+        ...,
+        ge=1,
+        description="Right-hand version number (the 'to' side of the diff).",
+    ),
+) -> RecipeDiffOut:
+    if left == right:
+        return RecipeDiffOut(
+            recipe_id=recipe_id,
+            left_version=left,
+            right_version=right,
+            identical=True,
+        )
+
+    versions = await container.get_recipe_versions.execute(GetAllVersionsQuery(recipe_id=recipe_id))
+    if not versions:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    by_version = {r.version: r for r in versions}
+    if left not in by_version:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Version {left} not found (available: {sorted(by_version)})",
+        )
+    if right not in by_version:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Version {right} not found (available: {sorted(by_version)})",
+        )
+
+    lhs = by_version[left]
+    rhs = by_version[right]
+
+    metadata_changes: list[RecipeDiffMetadataChange] = []
+    for field in ("subcategory", "binder_type", "product_class", "intended_use", "finish", "color"):
+        lv = _pluck_meta(lhs, field)
+        rv = _pluck_meta(rhs, field)
+        if lv != rv:
+            metadata_changes.append(
+                RecipeDiffMetadataChange(field=field, from_value=lv, to_value=rv)
+            )
+
+    # Component-level: index by (stage_number, component_name).
+    def _index(recipe: Any) -> dict[tuple[int, str], Any]:
+        return {(s.stage_number, c.name): c for s in recipe.stages for c in s.components}
+
+    left_idx = _index(lhs)
+    right_idx = _index(rhs)
+    keys = sorted(set(left_idx) | set(right_idx))
+    component_changes: list[RecipeDiffComponentChange] = []
+    for stage_no, name in keys:
+        lc = left_idx.get((stage_no, name))
+        rc = right_idx.get((stage_no, name))
+        if lc is None and rc is not None:
+            component_changes.append(
+                RecipeDiffComponentChange(
+                    stage_number=stage_no,
+                    component_name=name,
+                    kind="added",
+                    from_value=None,
+                    to_value=round(rc.mass_percent, 4),
+                )
+            )
+        elif rc is None and lc is not None:
+            component_changes.append(
+                RecipeDiffComponentChange(
+                    stage_number=stage_no,
+                    component_name=name,
+                    kind="removed",
+                    from_value=round(lc.mass_percent, 4),
+                    to_value=None,
+                )
+            )
+        else:
+            assert lc is not None
+            assert rc is not None
+            if abs(lc.mass_percent - rc.mass_percent) > 1e-6:
+                component_changes.append(
+                    RecipeDiffComponentChange(
+                        stage_number=stage_no,
+                        component_name=name,
+                        kind="mass_changed",
+                        from_value=round(lc.mass_percent, 4),
+                        to_value=round(rc.mass_percent, 4),
+                    )
+                )
+            if lc.function != rc.function:
+                component_changes.append(
+                    RecipeDiffComponentChange(
+                        stage_number=stage_no,
+                        component_name=name,
+                        kind="function_changed",
+                        from_value=str(lc.function),
+                        to_value=str(rc.function),
+                    )
+                )
+
+    return RecipeDiffOut(
+        recipe_id=recipe_id,
+        left_version=left,
+        right_version=right,
+        metadata_changes=metadata_changes,
+        component_changes=component_changes,
+        identical=(not metadata_changes and not component_changes),
+    )
+
+
+def _pluck_meta(recipe: Any, field: str) -> str:
+    """Read one metadata field as a string, coping with enum-valued cols."""
+    value = getattr(recipe, field, "")
+    if hasattr(value, "value"):
+        value = value.value
+    return "" if value is None else str(value)
 
 
 # ---------------------------------------------------------------------------
@@ -833,6 +1006,35 @@ async def reject_recipe(
         )
     except ValueError as exc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+    return _recipe_summary(result)
+
+
+@router.post(
+    "/recipes/{recipe_id}/new-version",
+    response_model=RecipeSummary,
+    status_code=status.HTTP_201_CREATED,
+    tags=["recipes", "workflow"],
+    summary=("Fork a new Draft version from a Verified recipe (old version stays immutable)"),
+    responses={**_UNAUTHORIZED, **_FORBIDDEN, **_NOT_FOUND, **_CONFLICT},
+)
+async def create_new_recipe_version(
+    recipe_id: str,
+    payload: CreateNewVersionRequest,
+    container: Annotated[Container, Depends(get_container)],
+    principal: Annotated[Principal, Depends(require_writer)],
+) -> RecipeSummary:
+    try:
+        result = await container.create_new_version.execute(
+            CreateNewVersionCommand(
+                recipe_id=recipe_id,
+                actor=payload.actor or principal.subject,
+                change_summary=payload.change_summary,
+            )
+        )
+    except ValueError as exc:
+        if "not found" in str(exc).lower():
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
     return _recipe_summary(result)
 
 

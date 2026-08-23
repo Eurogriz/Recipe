@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Filter, Download } from "lucide-react";
+import { Search, Filter, Download, Plus } from "lucide-react";
 import { api, type RecipeSummary, type SearchResponse } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,13 +52,21 @@ export default function RecipesPage() {
             {t("recipes.subtitle", { n: total })}
           </p>
         </div>
-        <a
-          href={api.catalogCsvUrl()}
-          download
-          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-        >
-          <Download className="h-4 w-4" /> {t("recipes.export.csv")}
-        </a>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/recipes/new"
+            className="inline-flex items-center gap-1 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" /> {t("recipes.new")}
+          </Link>
+          <a
+            href={api.catalogCsvUrl()}
+            download
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            <Download className="h-4 w-4" /> {t("recipes.export.csv")}
+          </a>
+        </div>
       </header>
 
       <Card>

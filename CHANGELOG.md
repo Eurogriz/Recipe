@@ -7,6 +7,100 @@
 
 ---
 
+## [1.13.0] — Мастер создания рецепта + история версий и diff (2026-08-23)
+
+Закрываем полный жизненный цикл рецепта в UI: раньше можно было
+создать рецепт только через API/seed. Теперь есть форма-мастер + виден
+весь version-workflow.
+
+### Added — Мастер создания рецепта
+
+- Новая страница **/recipes/new** — форма из трёх секций:
+  1. **Основное** — категория, подкатегория, связующее, класс, назначение,
+     покрытие, цвет, теги.
+  2. **Первоисточник** — обязательные поля цитаты (авторы, название, год,
+     издатель) + опциональные ISBN, страница.
+  3. **Состав** — редактируемая таблица компонентов с колонками
+     name/CAS/function/mass %/± %; кнопки «добавить»/«удалить»,
+     живой итоговый счётчик с бейджем **green ✓ / warning ⚠**
+     в зависимости от того, попадает ли сумма в 100 ± 0.5 %.
+- Submit заблокирован пока: (а) обязательные поля не заполнены,
+  (б) сумма mass % не в допуске.
+- Умная обработка ошибок: FastAPI validation `detail` разворачивается
+  в человеко-читаемое сообщение над формой.
+- Кнопка **«Новый рецепт»** в шапке `/recipes`.
+
+### Added — История версий + структурный diff
+
+- Новые endpoints:
+  - `GET  /recipes/{id}/versions` — список версий (от последней к
+    первой), идёт по цепочке `previous_version_id`.
+  - `GET  /recipes/{id}/diff?left=N&right=M` — структурный diff:
+    - `metadata_changes` — изменения полей subcategory, binder_type,
+      product_class, intended_use, finish, color;
+    - `component_changes` — added / removed / mass_changed /
+      function_changed по (stage_number, component_name).
+  - `POST /recipes/{id}/new-version` — форкает новую Draft-версию
+    от Verified рецепта (старая остаётся неизменяемой).
+- В UI: новый таб **«Версии»** в карточке рецепта:
+  - Таблица версий с бейджем-статусом и стрелкой ← у текущей.
+  - Кнопка **«Новая версия»** (активна только для Verified).
+  - Блок «Сравнить версии» с двумя dropdown'ами и цветным diff-view
+    (красный = было, зелёный = стало) для metadata и component
+    changes.
+
+### Endpoints
+
+**44 REST endpoint** (+3 к v1.12.0):
+- `GET  /recipes/{id}/versions`
+- `GET  /recipes/{id}/diff`
+- `POST /recipes/{id}/new-version`
+
+### i18n
+
++69 новых ключей (wizard-форма + versions/diff блок). **Итого 333
+переведённых строки, паритет RU/EN 100 %.**
+
+### Tests
+
+- 7 integration-тестов для `/versions` и `/diff`:
+  - list versions (latest first, включая forked draft);
+  - 404 на unknown recipe;
+  - identical diff при left == right;
+  - `mass_changed` detection;
+  - `metadata_changed` detection (binder_type);
+  - 422 на unknown version;
+  - 404 на unknown recipe в diff.
+- Хелпер `_verify_thrice_and_fork()` внутри тестов — прогоняет
+  полный workflow: create → submit → verify × 3 → new-version.
+- **Итого: 475 passed, 0 failed** (+7 к v1.12.0).
+
+### Metrics
+
+| | v1.12.0 | v1.13.0 |
+|---|---|---|
+| Тесты | 468 | **475** (+7) |
+| REST endpoints | 41 | **44** (+3) |
+| i18n ключей | 264 | **333** (+69) |
+| Табов в Recipe | 7 | **8** (+ Versions) |
+| Страниц UI | 5 | **6** (+ /recipes/new) |
+| Source files | 108 | 108 |
+| ruff / mypy / bandit | clean | clean |
+
+### Files
+
+- src/formulation_workbench/presentation/api/routes.py                     (+3 endpoints, CreateNewVersionCommand import)
+- src/formulation_workbench/presentation/api/schemas.py                    (+5 DTOs: RecipeVersionOut, RecipeVersionsOut, RecipeDiffOut, RecipeDiffMetadataChange, RecipeDiffComponentChange, CreateNewVersionRequest)
+- tests/integration/test_api_versions_diff.py                              (new, 7 tests)
+- web/src/app/recipes/new/page.tsx                                         (new, wizard page)
+- web/src/app/recipes/[id]/page.tsx                                        (VersionsTab + DiffView + PDF/CSV кнопки не тронуты)
+- web/src/app/recipes/page.tsx                                             ("Новый рецепт" кнопка)
+- web/src/lib/api.ts                                                       (RecipeVersionsOut, RecipeDiffOut, CreateRecipeBody, StageIn, ComponentIn, CitationInBody, api.createRecipe/createNewVersion/recipeVersions/recipeDiff)
+- web/src/i18n/dictionaries/{ru,en}.ts                                     (+69 keys)
+- CHANGELOG.md, pyproject.toml, __init__.py, AppShell.tsx                  (v1.13.0)
+
+---
+
 ## [1.12.0] — PDF-экспорт + двумерная тепловая карта чувствительности (2026-08-23)
 
 Продолжение отложенного плана: два новых способа посмотреть/поделиться
