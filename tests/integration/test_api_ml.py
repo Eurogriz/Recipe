@@ -134,7 +134,10 @@ async def test_train_and_predict_flow(api: AsyncClient) -> None:
     assert trained_codes == {"gloss_60", "viscosity_mid_shear"}
     for meta in body["trained"]:
         assert meta["n_samples"] == 15
-        assert meta["algorithm"] == "RandomForestRegressor"
+        # v1.8.0 upgraded from plain RandomForest to a stacked
+        # (RF + HistGradientBoosting → Ridge) ensemble.  Legacy models
+        # persisted under the old algorithm name are still readable.
+        assert "RandomForest" in meta["algorithm"] or "Stacking" in meta["algorithm"]
         assert meta["fingerprint"]
 
     # 2. List models.

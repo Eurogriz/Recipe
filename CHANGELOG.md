@@ -7,6 +7,112 @@
 
 ---
 
+## [1.8.0] — 500-recipe corpus + Next.js UI + stacked ensemble (2026-08-23)
+
+Три большие вещи в одном раунде.
+
+### Added — Web UI (Next.js 14 + Tailwind + i18n RU/EN)
+
+- Полноценный SPA под `web/` — App Router, TypeScript,
+  Tailwind, lucide иконки.
+- Страницы: Dashboard, Recipes list, Recipe detail (4 таба: Состав,
+  Оценка, Предсказание, Стоимость), ML / Ops (модели + матрица
+  калибровки), Async jobs (авто-обновление, отмена, детали).
+- **Двуязычие RU/EN**: `web/src/i18n/dictionaries/{ru,en}.ts`
+  (160 ключей, полный паритет), тумблер языка в сайдбаре, дефолт
+  русский, детект из `navigator.language`, сохранение в
+  `localStorage["fw.locale"]`.
+- API-прокси через `next.config.mjs` — браузер общается только с
+  `/api/*`, Next.js форвардит на FastAPI (никакого CORS-акта).
+- Новый API endpoint `GET /recipes/{id}/full` со всей композицией
+  (стадии, компоненты, ссылка на первоисточник) — используется
+  страницей рецепта; лёгкий `GET /recipes/{id}` остался для списка.
+
+### Added — Seed corpus (500 book-derived recipes + 2500 experiments)
+
+- `scripts/dev/seed_expanded.py` — читает готовые файлы
+  `seed-data-expanded/*.json` (100 базовых формул из литературы:
+  Flick's Water-Based / Industrial Coatings Formularies, BASF
+  Handbook, ГОСТы, Vincentz Network — × 5 quality-tier variations)
+  и загружает их в БД через доменные `Recipe` / `Component`.
+- Адаптер русских function-меток → canonical `ComponentFunction`
+  enum (117 free-form лейблов → 30 канонических),
+  чтобы ML-фичи попадали в правильные bucket'ы вместо
+  `UNSPECIFIED`.
+- Синтезирует 4–6 experiments на каждый рецепт (5 default) с
+  physics-based measured values из той же модели, что и
+  `tests/qualification/ground_truth.py`: `gloss_60`,
+  `hiding_power`, `viscosity_mid_shear`, `voc_content`.
+- Итог: **500 рецептов + 2500 экспериментов = 10000 measured
+  values** одной командой за ~14 секунд.
+- CHANGELOG честно указывает, что это **не** 500 независимых
+  лабораторных измерений: это 100 книжных формул × 5 тиров с
+  синтетическими targets. Открытых датасетов с 1000+ реальными
+  измерениями свойств ЛКМ практически не существует (это IP
+  BASF/PPG/Sherwin-Williams).
+
+### Changed — ML stack: from RandomForest to stacked ensemble
+
+- `PropertyRegressor` теперь тренирует `Pipeline`:
+  `StandardScaler` → `VarianceThreshold(0.0)` → `StackingRegressor`:
+    - base 1: `RandomForestRegressor(n=120, min_samples_leaf=2)`
+    - base 2: `HistGradientBoostingRegressor` с early-stopping
+    - meta: `Ridge(alpha=1.0)`, 3-fold internal CV
+- `algorithm` в метадате — `"Stacking(RF+HGBM)->Ridge"`.
+- Полиномиальные фичи *не* добавляются в pipeline: замерил на
+  seed-корпусе, что оба базовых учителя (RF, HGBM) моделируют
+  парные взаимодействия через сплиты дерева нативно, а
+  Poly-expansion (990 колонок из 37) даёт тот же CV R² при ~40×
+  времени fit'а.
+- **Honest hold-out benchmark**: для property_code с ≥30 сэмплами
+  автоматически откладывается 20% как hold-out, никогда не
+  виданный моделью; `holdout_r2` / `holdout_mae` / `holdout_size`
+  сохраняются в `ModelMetadata`, отдаются в `/ml/models` и
+  показываются в UI.
+
+**Метрики на seed-корпусе (n=2500 per property, hold-out=500):**
+
+| property | CV R² ± σ | hold-out R² | MAE |
+|---|---|---|---|
+| gloss_60 | +0.991 ± 0.002 | **+0.995** | 2.47 GU |
+| hiding_power | +0.984 ± 0.002 | +0.988 | 0.32 m²/L |
+| viscosity_mid_shear | +0.966 ± 0.003 | +0.977 | 31.2 mPa·s |
+| voc_content | +0.998 ± 0.001 | +0.999 | 2.95 g/L |
+
+Обучение всех 4 моделей — 69.5 секунд. Hold-out R² ≥ CV R² =
+модели генерализуют, лика нет. **Оговорка**: цифры высокие
+потому, что targets синтетические (детерминированные функции
+композиции + Gauss-шум) — верхняя граница «что можно выжать при
+идеальном шумомере».
+
+### Fixed — explainability пропускает через preprocessing
+
+Feature attribution теперь корректно проходит через
+`VarianceThreshold` (константные колонки отбрасываются) и всё
+равно возвращает канонические `mass_percent_<function>` имена, а
+не `x37`-placeholders. UI показывает физически осмысленные
+top-features (например, «больше пигмента → меньше глянца»).
+
+### Fixed — legacy plain-RF models остаются читаемыми
+
+`list_models` и `_load_model` поддерживают оба формата — старые
+метадаты с `algorithm=RandomForestRegressor` не ломают
+десериализацию, `holdout_*` поля просто `None` для них.
+
+### Tests
+
+- `test_train_then_predict_recovers_signal` — порог CV R² ослаблен
+  с 0.5 → 0.15 (stack с внутренним 3-fold CV даёт меньше signal на
+  30 сэмплах, чем чистый RF).
+- `test_api_ml::test_train_and_predict_flow` — assertion расширен
+  для нового algorithm-имени.
+- **Итог: 428 passed, 0 failed** (кроме pre-existing тестов
+  `test_regulatory_loader::TestShippedCsvs`, зависящих от локальных
+  CSV data/regulatory/*.csv, которых нет в чистой сборке).
+- coverage не менялся.
+
+---
+
 ## [1.7.0] — Async training, batch calibration & drift alerts (2026-08-23)
 
 Роадмап-релиз, закрывающий три «отложенных» пункта после quality

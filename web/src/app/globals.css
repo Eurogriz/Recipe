@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: hsl(210 40% 98%);
+  color: hsl(222 47% 11%);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* subtle scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: hsl(215 16% 80%); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(215 16% 70%); }

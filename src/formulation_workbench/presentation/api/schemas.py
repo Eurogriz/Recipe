@@ -73,6 +73,68 @@ class CatalogStats(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Full recipe read model — includes the composition tree, used by the UI.
+# ---------------------------------------------------------------------------
+class ComponentOut(BaseModel):
+    name: str
+    cas_number: str
+    function: str
+    mass_percent: float
+    tolerance_percent: float = 0.0
+    inci_name: str = ""
+    manufacturer_reference: str = ""
+    notes: str = ""
+
+
+class ProcessParamsOut(BaseModel):
+    equipment: str
+    rotational_speed_rpm: float | None = None
+    peripheral_speed_m_per_s: float | None = None
+    temperature_c: float | None = None
+    duration_min: int | None = None
+
+
+class CompositionStageOut(BaseModel):
+    stage_number: int
+    name: str
+    description: str = ""
+    components: list[ComponentOut]
+    process: ProcessParamsOut | None = None
+
+
+class CitationOut(BaseModel):
+    authors: str
+    title: str
+    year: int
+    publisher: str
+    isbn: str | None = None
+    doi: str | None = None
+    url: str = ""
+    page_or_formula: str = ""
+
+
+class RecipeFullOut(BaseModel):
+    """Complete recipe payload used by the workbench UI."""
+
+    id: str
+    category: str
+    subcategory: str
+    binder_type: str
+    product_class: str
+    intended_use: str
+    finish: str = ""
+    color: str = ""
+    status: str
+    verification_count: int
+    verification_required: int
+    version: int
+    tags: list[str] = Field(default_factory=list)
+    stages: list[CompositionStageOut]
+    primary_source: CitationOut
+    cross_references: list[CitationOut] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
 # Recipes — write (POST / PATCH)
 # ---------------------------------------------------------------------------
 _COMPONENT_EXAMPLE: dict[str, Any] = {
@@ -408,6 +470,10 @@ class ModelMetadataOut(BaseModel):
     training_recipe_ids: list[str] = Field(default_factory=list)
     algorithm: str
     fingerprint: str
+    # Honest held-out metrics (populated when n_samples ≥ 30).
+    holdout_r2: float | None = Field(default=None, examples=[0.91])
+    holdout_mae: float | None = Field(default=None, examples=[1.7])
+    holdout_size: int | None = Field(default=None, examples=[100])
 
 
 class TrainingResultOut(BaseModel):
@@ -747,9 +813,12 @@ __all__ = [
     "CalibrationSample",
     "CatalogStats",
     "CitationIn",
+    "CitationOut",
     "ComponentBoundsIn",
     "ComponentIn",
+    "ComponentOut",
     "CompositionStageIn",
+    "CompositionStageOut",
     "CostLineOut",
     "CostRequest",
     "CreateRecipeRequest",
@@ -781,10 +850,12 @@ __all__ = [
     "PriceIn",
     "ProcessMeasuredIn",
     "ProcessParamsIn",
+    "ProcessParamsOut",
     "PropertyPredictionOut",
     "PropertyTargetIn",
     "RecipeAssessmentOut",
     "RecipeCostOut",
+    "RecipeFullOut",
     "RecipeSummary",
     "RegulatoryFindingOut",
     "RejectRequest",

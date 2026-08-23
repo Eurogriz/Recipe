@@ -51,6 +51,9 @@ from .schemas import (
     CalibrationOut,
     CalibrationRequest,
     CatalogStats,
+    CitationOut,
+    ComponentOut,
+    CompositionStageOut,
     CostLineOut,
     CostRequest,
     CreateRecipeRequest,
@@ -79,9 +82,11 @@ from .schemas import (
     ParetoResultOut,
     PredictionsOut,
     ProcessMeasuredIn,
+    ProcessParamsOut,
     PropertyPredictionOut,
     RecipeAssessmentOut,
     RecipeCostOut,
+    RecipeFullOut,
     RecipeSummary,
     RegulatoryFindingOut,
     RejectRequest,
@@ -218,6 +223,88 @@ async def get_recipe(
     if recipe is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
     return RecipeSummary.model_validate(asdict(RecipeSummaryDto.from_recipe(recipe)))
+
+
+def _citation_to_out(citation: Any) -> CitationOut:
+    return CitationOut(
+        authors=citation.authors,
+        title=citation.title,
+        year=citation.year,
+        publisher=citation.publisher,
+        isbn=(str(citation.isbn) if citation.isbn else None),
+        doi=(str(citation.doi) if citation.doi else None),
+        url=getattr(citation, "url", "") or "",
+        page_or_formula=getattr(citation, "page_or_formula", "") or "",
+    )
+
+
+@router.get(
+    "/recipes/{recipe_id}/full",
+    response_model=RecipeFullOut,
+    tags=["recipes"],
+    dependencies=[Depends(require_reader)],
+    summary="Full recipe payload including composition tree — used by the UI",
+    responses={**_UNAUTHORIZED, **_NOT_FOUND},
+)
+async def get_recipe_full(
+    recipe_id: str,
+    container: Annotated[Container, Depends(get_container)],
+) -> RecipeFullOut:
+    recipe = await container.get_recipe.execute(GetRecipeByIdQuery(recipe_id=recipe_id))
+    if recipe is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipe not found")
+
+    stages_out = [
+        CompositionStageOut(
+            stage_number=stage.stage_number,
+            name=stage.name,
+            description=stage.description,
+            components=[
+                ComponentOut(
+                    name=c.name,
+                    cas_number=c.cas_number,
+                    function=c.function,
+                    mass_percent=c.mass_percent,
+                    tolerance_percent=c.tolerance_percent,
+                    inci_name=c.inci_name,
+                    manufacturer_reference=c.manufacturer_reference,
+                    notes=c.notes,
+                )
+                for c in stage.components
+            ],
+            process=(
+                ProcessParamsOut(
+                    equipment=stage.process.equipment,
+                    rotational_speed_rpm=stage.process.rotational_speed_rpm,
+                    peripheral_speed_m_per_s=stage.process.peripheral_speed_m_per_s,
+                    temperature_c=stage.process.temperature_c,
+                    duration_min=stage.process.duration_min,
+                )
+                if stage.process is not None
+                else None
+            ),
+        )
+        for stage in recipe.stages
+    ]
+
+    return RecipeFullOut(
+        id=recipe.id,
+        category=recipe.category,
+        subcategory=recipe.subcategory,
+        binder_type=recipe.binder_type,
+        product_class=recipe.product_class.value,
+        intended_use=recipe.intended_use,
+        finish=recipe.finish,
+        color=recipe.color,
+        status=recipe.status.state.value,
+        verification_count=recipe.status.verification_count,
+        verification_required=recipe.status.required_verifications,
+        version=recipe.version,
+        tags=list(recipe.tags),
+        stages=stages_out,
+        primary_source=_citation_to_out(recipe.primary_source),
+        cross_references=[_citation_to_out(c) for c in recipe.cross_references],
+    )
 
 
 @router.get(
@@ -743,22 +830,27 @@ async def train_models(
     except Exception as exc:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
     return TrainingResultOut(
-        trained=[
-            ModelMetadataOut(
-                property_code=m.property_code,
-                version=m.version,
-                n_samples=m.n_samples,
-                n_features=m.n_features,
-                feature_names=list(m.feature_names),
-                cv_mean_r2=round(m.cv_mean_r2, 4),
-                cv_std_r2=round(m.cv_std_r2, 4),
-                training_recipe_ids=list(m.training_recipe_ids),
-                algorithm=m.algorithm,
-                fingerprint=m.fingerprint,
-            )
-            for m in result.trained
-        ],
+        trained=[_model_metadata_out(m) for m in result.trained],
         skipped=result.skipped,
+    )
+
+
+def _model_metadata_out(m: Any) -> ModelMetadataOut:
+    """Serialise a :class:`ModelMetadata` into the API DTO."""
+    return ModelMetadataOut(
+        property_code=m.property_code,
+        version=m.version,
+        n_samples=m.n_samples,
+        n_features=m.n_features,
+        feature_names=list(m.feature_names),
+        cv_mean_r2=round(m.cv_mean_r2, 4),
+        cv_std_r2=round(m.cv_std_r2, 4),
+        training_recipe_ids=list(m.training_recipe_ids),
+        algorithm=m.algorithm,
+        fingerprint=m.fingerprint,
+        holdout_r2=(round(m.holdout_r2, 4) if m.holdout_r2 is not None else None),
+        holdout_mae=(round(m.holdout_mae, 4) if m.holdout_mae is not None else None),
+        holdout_size=m.holdout_size,
     )
 
 
@@ -773,21 +865,7 @@ async def train_models(
 async def list_models(
     container: Annotated[Container, Depends(get_container)],
 ) -> list[ModelMetadataOut]:
-    return [
-        ModelMetadataOut(
-            property_code=m.property_code,
-            version=m.version,
-            n_samples=m.n_samples,
-            n_features=m.n_features,
-            feature_names=list(m.feature_names),
-            cv_mean_r2=round(m.cv_mean_r2, 4),
-            cv_std_r2=round(m.cv_std_r2, 4),
-            training_recipe_ids=list(m.training_recipe_ids),
-            algorithm=m.algorithm,
-            fingerprint=m.fingerprint,
-        )
-        for m in container.property_regressor.list_models()
-    ]
+    return [_model_metadata_out(m) for m in container.property_regressor.list_models()]
 
 
 @router.get(
